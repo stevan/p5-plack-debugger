@@ -1,4 +1,4 @@
-package Plack::Middleware::Debugger::Collector;
+package Plack::Middleware::Debugger;
 
 use strict;
 use warnings;
@@ -16,6 +16,7 @@ sub call {
 
     return $resp;
 }
+
 
 1;
 

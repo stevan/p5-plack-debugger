@@ -8,6 +8,7 @@ available during the normal request lifecycle.
 
 ## Basic structure
 
+
 First the Plack::Debugger is configured, this involves 
 registering a number of Debugger::Panel objects, providing a 
 temp directory to store serialized Debugger::Panel::Data 
