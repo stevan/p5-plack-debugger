@@ -8,16 +8,23 @@ use Test::More;
 use Plack::Test;    
 use HTTP::Request::Common qw[ GET ];
 use Path::Class           qw[ dir ];
+use JSON::XS;
 
 BEGIN {
     use_ok('Plack::Debugger');
 }
 
-my $DATA_DIR = dir('./t/tmp');
+my $FILE_ID  = 0;
+my $DATA_DIR = dir('./t/tmp/');
+
+# cleanup tmp dir
+{ -f $_ && $_->remove foreach $DATA_DIR->children }
 
 my $debugger = Plack::Debugger->new(
-    data_dir => $DATA_DIR,
-    panels   => [
+    data_dir     => $DATA_DIR,
+    serializer   => sub { JSON::XS->new->pretty->encode( shift ) },
+    filename_gen => sub { sprintf "test-%03d.json" => ++$FILE_ID },
+    panels       => [
         Plack::Debugger::Panel->new(
             title     => 'Tester',
             subtitle  => '... testing all the things',
@@ -50,8 +57,14 @@ test_psgi(
     sub {
         my $cb  = shift;
         {
+            my $data_file = $DATA_DIR->file('test-001.json');
+
+            ok(!-e $data_file, '... no data has been written yet');
+
             my $res = $cb->(GET '/test');  
             is($res->content, 'HELLO WORLD from /test', '... got the right content');
+
+            ok(-e $data_file, '... data has now been written');
 
             is_deeply(
                 [ map { $_->get_result } @{ $debugger->panels } ],
@@ -61,7 +74,18 @@ test_psgi(
                         'finished request with status 200'
                     ]
                 ],
-                '... got the expected collected data'
+                '... got the expected collected data in the Debugger panels'
+            );
+
+            is_deeply(
+                JSON::XS->new->decode( scalar $data_file->slurp( chomp => 1 ) ),
+                {
+                    'Tester' => [
+                        'started request at /test',
+                        'finished request with status 200'
+                    ]
+                },
+                '... got the expected collected data in the data-dir'
             );
         }
     }

@@ -16,6 +16,7 @@ sub call {
         $self->app->( $env ), 
         sub { 
             $self->debugger->run_after_phase( $env, @_ );
+            $self->debugger->store_results;
         }
     );
 }
