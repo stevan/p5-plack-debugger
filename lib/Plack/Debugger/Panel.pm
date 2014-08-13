@@ -30,14 +30,14 @@ sub new {
         'cleanup'  => $args{'cleanup'},
         # private data ...
         '_result'  => undef,
-        '_context' => undef
+        '_stash'   => undef
     } => $class;
 }
 
 sub stash {
     my $self = shift;
-    $self->{'_context'} = shift if @_;
-    $self->{'_context'};
+    $self->{'_stash'} = shift if @_;
+    $self->{'_stash'};
 }
 
 sub result {
