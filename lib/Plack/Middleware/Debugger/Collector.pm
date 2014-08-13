@@ -11,10 +11,13 @@ use Plack::Util::Accessor (
 
 sub call {
     my ($self, $env) = @_;
-
-    my $resp = $self->app->call( $env );
-
-    return $resp;
+    $self->debugger->run_before_phase( $env );
+    $self->response_cb(
+        $self->app->( $env ), 
+        sub { 
+            $self->debugger->run_after_phase( $env, @_ );
+        }
+    );
 }
 
 1;
