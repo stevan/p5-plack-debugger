@@ -34,6 +34,10 @@ sub new {
     } => $class;
 }
 
+# some useful predicates ...
+sub has_before   { !! (shift)->{'before'}   }
+sub has_after    { !! (shift)->{'after'}    }
+sub has_cleanup  { !! (shift)->{'cleanup'}  }
 sub stash {
     my $self = shift;
     $self->{'_stash'} = shift if @_;
