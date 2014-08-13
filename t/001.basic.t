@@ -5,19 +5,30 @@ use warnings;
 
 use Test::More;
 
-use Plack::Builder;
-use Plack::Debugger;
+use Plack::Test;    
+use HTTP::Request::Common qw[ GET ];
+use Path::Class           qw[ dir ];
+
+BEGIN {
+    use_ok('Plack::Debugger');
+}
+
+my $DATA_DIR = dir('./t/tmp');
 
 my $debugger = Plack::Debugger->new(
-    data_dir => './share',
+    data_dir => $DATA_DIR,
     panels   => [
         Plack::Debugger::Panel->new(
-            title     => 'Timer',
-            subtitle  => '',
-            before    => sub { (shift)->context( time ) },
+            title     => 'Tester',
+            subtitle  => '... testing all the things',
+            before    => sub { 
+                my ($self, $env) = @_;
+                $self->stash([ 'started request at ' . $env->{'PATH_INFO'} ]); 
+            },
             after     => sub { 
-                my $self = shift;
-                $self->result( time - $self->context ); 
+                my ($self, $env, $resp) = @_;
+                push @{ $self->stash } => 'finished request with status ' . $resp->[0];
+                $self->set_result( $self->stash ); 
             },
         )
     ]
@@ -25,33 +36,36 @@ my $debugger = Plack::Debugger->new(
 
 
 my $app = sub {
-    [ 200, [], [ 'HELLO WORLD' ]]
+    my $env = shift;
+    [ 200, [], [ 'HELLO WORLD from ' . $env->{'PATH_INFO'} ]]
 };
 
+test_psgi(
+    Plack::Middleware::Debugger::Collector->wrap( 
+        $app,
+        ( 
+            debugger => $debugger 
+        )
+    ),
+    sub {
+        my $cb  = shift;
+        {
+            my $res = $cb->(GET '/test');  
+            is($res->content, 'HELLO WORLD from /test', '... got the right content');
 
-builder {
-    mount '/debugger' => Plack::App::Debugger->new( debugger => $debugger )->to_app;
-
-    mount '/' => sub {
-        enable 'Plack::Middleware::Debugger::Collector' => ( debugger => $debugger );
-        enable 'Plack::Middleware::Debugger::Injector'  => ( debugger => $debugger );
-        $app;
-    };
-};
-
-## OR ...
-
-builder {
-    mount '/debugger' => $debugger->application->to_app;
-
-    mount '/' => sub {
-        enable $debugger->collector->to_app;
-        enable $debugger->injector->to_app;
-        $app;
-    };
-};
-
-pass('... just checking');
+            is_deeply(
+                [ map { $_->get_result } @{ $debugger->panels } ],
+                [
+                    [
+                        'started request at /test',
+                        'finished request with status 200'
+                    ]
+                ],
+                '... got the expected collected data'
+            );
+        }
+    }
+);
 
 done_testing;
 
