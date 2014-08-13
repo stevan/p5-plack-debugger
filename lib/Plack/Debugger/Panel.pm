@@ -38,16 +38,30 @@ sub new {
 sub has_before   { !! (shift)->{'before'}   }
 sub has_after    { !! (shift)->{'after'}    }
 sub has_cleanup  { !! (shift)->{'cleanup'}  }
+
+# stash ...
+
 sub stash {
     my $self = shift;
     $self->{'_stash'} = shift if @_;
     $self->{'_stash'};
 }
 
-sub result {
-    my $self = shift;
-    $self->{'_result'} = shift if @_;
-    $self->{'_result'};
+sub flush_stash { 
+    my $self  = shift;
+    my $stash = $self->{'_stash'};
+    undef $self->{'_stash'};
+    $stash;
+}
+
+# final result ...
+
+sub get_result { (shift)->{'_result'} }
+sub set_result {
+    my $self   = shift;
+    my $result = shift || die 'You must provide a result';
+    
+    $self->{'_result'} = $result;
 }
 
 1;
