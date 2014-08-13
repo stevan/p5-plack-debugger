@@ -42,6 +42,20 @@ sub application { Plack::App::Debugger->new( debugger => @_ )         }
 sub collector   { Plack::Middleware::Collector->new( debugger => @_ ) }
 sub injector    { Plack::Middleware::Injector->new( debugger => @_ )  }
 
+sub run_before_phase {
+    my ($self, $env) = @_;
+    foreach my $panel ( @{ $self->{'panels'} } ) {
+        $panel->before->( $panel, $env ) if $panel->has_before;
+    }
+}
+
+sub run_after_phase {
+    my ($self, $env, $resp) = @_;
+    foreach my $panel ( @{ $self->{'panels'} } ) {
+        $panel->after->( $panel, $env, $resp ) if $panel->has_after;
+    }
+}
+
 1;
 
 __END__
