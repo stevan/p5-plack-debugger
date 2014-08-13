@@ -8,6 +8,7 @@ use POSIX qw[ strftime ];
 
 use Plack::App::Debugger;
 
+# consider Plack::Util::load_class ...
 use Plack::Middleware::Debugger::Collector;
 use Plack::Middleware::Debugger::Injector;
 
@@ -52,7 +53,7 @@ sub new {
         data_dir     => $args{'data_dir'},
         serializer   => $args{'serializer'},
         filename_gen => $args{'filename_gen'},
-        panels       => $args{'panels'}       || []
+        panels       => $args{'panels'} || []
     } => $class;
 }
 
