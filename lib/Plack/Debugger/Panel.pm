@@ -3,6 +3,8 @@ package Plack::Debugger::Panel;
 use strict;
 use warnings;
 
+use Scalar::Util qw[ refaddr ];
+
 use Plack::Util::Accessor (
     'title',    # the main title to display for this debug panel
     'subtitle', # the sub-title to display for this debug panel    
@@ -22,8 +24,8 @@ sub new {
         }
     }
 
-    bless {
-        'title'    => $args{'title'}    || ((split /\:\:/ => $class)[-1]),
+    my $self = bless {
+        'title'    => $args{'title'},
         'subtitle' => $args{'subtitle'} || '',
         'before'   => $args{'before'},
         'after'    => $args{'after'},
@@ -32,6 +34,11 @@ sub new {
         '_result'  => undef,
         '_stash'   => undef
     } => $class;
+
+    $self->{'title'} = (split /\:\:/ => $class)[-1] . '<' . refaddr($self) . '>'
+        unless defined $self->{'title'};
+
+    $self;
 }
 
 # some useful predicates ...
