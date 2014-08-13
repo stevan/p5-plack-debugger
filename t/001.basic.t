@@ -18,7 +18,7 @@ my $FILE_ID  = 0;
 my $DATA_DIR = dir('./t/tmp/');
 
 # cleanup tmp dir
-{ -f $_ && $_->remove foreach $DATA_DIR->children }
+{ -f $_ && $_->remove foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 my $debugger = Plack::Debugger->new(
     data_dir     => $DATA_DIR,
