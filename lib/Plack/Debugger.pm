@@ -25,6 +25,13 @@ sub new {
     die "You must specify a valid & writable data directory"
         unless -d $args{'data_dir'} && -w $args{'data_dir'};
 
+    if (exists $args{'panels'}) {
+        foreach my $panel (@{$args{'panels'}}) {
+            die "Panel object must be a subclass of Plack::Debugger::Panel"
+                unless $panel->isa('Plack::Debugger::Panel');
+        }
+    }
+
     bless {
         data_dir => $args{'data_dir'},
         panels   => $args{'panels'} || []
