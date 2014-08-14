@@ -87,7 +87,8 @@ sub store_results {
 
     my %results;
     foreach my $panel ( @{ $self->{'panels'} } ) {
-        $results{ $panel->title }  = $panel->get_result;
+        $results{ $panel->title } = $panel->get_result;
+        $panel->reset;
     }
     
     my $file = File::Spec->catfile( $self->{'data_dir'}, $self->{'filename_gen'}->() );

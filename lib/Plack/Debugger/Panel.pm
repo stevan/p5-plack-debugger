@@ -54,13 +54,6 @@ sub stash {
     $self->{'_stash'};
 }
 
-sub flush_stash { 
-    my $self  = shift;
-    my $stash = $self->{'_stash'};
-    undef $self->{'_stash'};
-    $stash;
-}
-
 # final result ...
 
 sub get_result { (shift)->{'_result'} }
@@ -69,6 +62,14 @@ sub set_result {
     my $result = shift || die 'You must provide a result';
     
     $self->{'_result'} = $result;
+}
+
+# reset ...
+
+sub reset {
+    my $self = shift;
+    undef $self->{'_stash'};
+    undef $self->{'_result'};
 }
 
 1;
