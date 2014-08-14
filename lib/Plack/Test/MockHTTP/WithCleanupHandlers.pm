@@ -37,10 +37,10 @@ sub request {
     #   array reference by the servers. 
     # so we do it here.
     $env->{'psgix.cleanup.handlers'} = [];
- 
+
     # Start Copy/Paste from Plack::Test::MockHTTP (again)
     my $resp = try {
-        HTTP::Response->from_psgi( $self->{app}->( $env ) );
+        HTTP::Response->from_psgi( $self->{'app'}->( $env ) );
     } catch {
         HTTP::Response->from_psgi( [ 500, [ 'Content-Type' => 'text/plain' ], [ $_ ] ] );
     };

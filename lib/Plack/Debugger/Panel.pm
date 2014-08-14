@@ -25,14 +25,14 @@ sub new {
     }
 
     my $self = bless {
-        'title'    => $args{'title'},
-        'subtitle' => $args{'subtitle'} || '',
-        'before'   => $args{'before'},
-        'after'    => $args{'after'},
-        'cleanup'  => $args{'cleanup'},
+        title    => $args{'title'},
+        subtitle => $args{'subtitle'} || '',
+        before   => $args{'before'},
+        after    => $args{'after'},
+        cleanup  => $args{'cleanup'},
         # private data ...
-        '_result'  => undef,
-        '_stash'   => undef
+        _result  => undef,
+        _stash   => undef
     } => $class;
 
     $self->{'title'} = (split /\:\:/ => $class)[-1] . '<' . refaddr($self) . '>'
@@ -42,9 +42,9 @@ sub new {
 }
 
 # some useful predicates ...
-sub has_before   { !! (shift)->{'before'}   }
-sub has_after    { !! (shift)->{'after'}    }
-sub has_cleanup  { !! (shift)->{'cleanup'}  }
+sub has_before   { !! (shift)->before  }
+sub has_after    { !! (shift)->after   }
+sub has_cleanup  { !! (shift)->cleanup }
 
 # stash ...
 

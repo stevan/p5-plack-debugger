@@ -26,7 +26,8 @@ sub call {
     $self->response_cb(
         $self->app->( $env ), 
         sub { 
-            $self->debugger->run_after_phase( $env, @_ );
+            my $resp = shift;
+            $self->debugger->run_after_phase( $env, $resp );
 
             # if cleanup is not supported 
             # then our best bet is to try 
