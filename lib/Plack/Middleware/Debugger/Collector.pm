@@ -11,12 +11,29 @@ use Plack::Util::Accessor (
 
 sub call {
     my ($self, $env) = @_;
+
+    my $has_cleanup = $env->{'psgix.cleanup'};
+
     $self->debugger->run_before_phase( $env );
+
+    if ( $has_cleanup ) {
+        push @{ $env->{'psgix.cleanup.handlers'} } => (
+            sub { $self->debugger->run_cleanup_phase( $env ) },
+            sub { $self->debugger->store_results }
+        );
+    }
+
     $self->response_cb(
         $self->app->( $env ), 
         sub { 
             $self->debugger->run_after_phase( $env, @_ );
-            $self->debugger->store_results;
+
+            # if cleanup is not supported 
+            # then our best bet is to try 
+            # to store results here.
+            if ( !$has_cleanup ) {
+                $self->debugger->store_results;
+            }
         }
     );
 }

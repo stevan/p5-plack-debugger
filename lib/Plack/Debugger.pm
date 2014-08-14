@@ -75,6 +75,13 @@ sub run_after_phase {
     }
 }
 
+sub run_cleanup_phase {
+    my ($self, $env) = @_;
+    foreach my $panel ( @{ $self->{'panels'} } ) {
+        $panel->cleanup->( $panel, $env ) if $panel->has_cleanup;
+    }
+}
+
 sub store_results {
     my $self = shift;
 

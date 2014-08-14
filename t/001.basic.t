@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More;
 
-use Plack::Test;    
+use Plack::Test::Debugger;    
 use HTTP::Request::Common qw[ GET ];
 use Path::Class           qw[ dir ];
 use JSON::XS;
@@ -35,8 +35,12 @@ my $debugger = Plack::Debugger->new(
             after     => sub { 
                 my ($self, $env, $resp) = @_;
                 push @{ $self->stash } => 'finished request with status ' . $resp->[0];
-                $self->set_result( $self->stash ); 
             },
+            cleanup   => sub {
+                my ($self, $env) = @_;
+                push @{ $self->stash } => 'cleaning up request';
+                $self->set_result( $self->stash ); 
+            }
         )
     ]
 );
@@ -50,9 +54,7 @@ my $app = sub {
 test_psgi(
     Plack::Middleware::Debugger::Collector->wrap( 
         $app,
-        ( 
-            debugger => $debugger 
-        )
+        ( debugger => $debugger )
     ),
     sub {
         my $cb  = shift;
@@ -67,22 +69,12 @@ test_psgi(
             ok(-e $data_file, '... data has now been written');
 
             is_deeply(
-                [ map { $_->get_result } @{ $debugger->panels } ],
-                [
-                    [
-                        'started request at /test',
-                        'finished request with status 200'
-                    ]
-                ],
-                '... got the expected collected data in the Debugger panels'
-            );
-
-            is_deeply(
                 JSON::XS->new->decode( scalar $data_file->slurp( chomp => 1 ) ),
                 {
                     'Tester' => [
                         'started request at /test',
-                        'finished request with status 200'
+                        'finished request with status 200',
+                        'cleaning up request'
                     ]
                 },
                 '... got the expected collected data in the data-dir'
