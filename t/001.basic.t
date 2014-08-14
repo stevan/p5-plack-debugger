@@ -5,6 +5,8 @@ use warnings;
 
 use Test::More;
 
+use Plack::Builder;
+
 use Plack::Test::Debugger;    
 use HTTP::Request::Common qw[ GET ];
 use Path::Class           qw[ dir ];
@@ -13,6 +15,11 @@ use JSON::XS;
 BEGIN {
     use_ok('Plack::Debugger');
     use_ok('Plack::Debugger::Storage');
+
+    use_ok('Plack::App::Debugger');
+
+    use_ok('Plack::Middleware::Debugger::Collector');
+    use_ok('Plack::Middleware::Debugger::Injector');
 }
 
 my $FILE_ID  = 0;
@@ -51,33 +58,52 @@ my $debugger = Plack::Debugger->new(
 );
 
 
-my $app = sub {
-    my $env = shift;
-    [ 200, [], [ 'HELLO WORLD from ' . $env->{'PATH_INFO'} ]]
+my $INJECTED = q[<script src="/debugger/debugger.js"></script>];
+
+my $app = builder {
+
+    mount '/debugger' => Plack::App::Debugger->new( debugger => $debugger )->to_app;
+
+    mount '/' => builder {
+        enable 'Plack::Middleware::Debugger::Injector'  => ( debugger => $debugger, content => $INJECTED );
+        enable 'Plack::Middleware::Debugger::Collector' => ( debugger => $debugger );
+        sub {
+            my $env = shift;
+            [ 
+                200, 
+                [ 
+                    'Content-Type'   => 'text/html',
+                    'Content-Length' => 37
+                ], 
+                [ '<html><body>HELLO WORLD</body></html>' ]
+            ]
+        }
+    }
 };
 
-test_psgi(
-    Plack::Middleware::Debugger::Collector->wrap( 
-        $app,
-        ( debugger => $debugger )
-    ),
-    sub {
+test_psgi($app, sub {
         my $cb  = shift;
         {
             my $data_file = $DATA_DIR->file('test-001.json');
 
             ok(!-e $data_file, '... no data has been written yet');
 
-            my $res = $cb->(GET '/test');  
-            is($res->content, 'HELLO WORLD from /test', '... got the right content');
+            my $resp = $cb->(GET '/');  
+
+            is($resp->headers->header('Content-Length'), 37 + length($INJECTED), '... got the expected expanded Content-Length');
+            is(
+                $resp->content, 
+                '<html><body>HELLO WORLD' . $INJECTED . '</body></html>', 
+                '... got the right content'
+            );
 
             ok(-e $data_file, '... data has now been written');
 
             is_deeply(
-                JSON::XS->new->decode( scalar $data_file->slurp( chomp => 1 ) ),
+                $debugger->storage->load( $data_file->basename ),
                 {
                     'Tester' => [
-                        'started request at /test',
+                        'started request at /',
                         'finished request with status 200',
                         'cleaning up request'
                     ]
