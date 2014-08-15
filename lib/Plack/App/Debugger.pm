@@ -3,7 +3,10 @@ package Plack::App::Debugger;
 use strict;
 use warnings;
 
+use Try::Tiny;
+use File::ShareDir;
 use Scalar::Util qw[ blessed ];
+
 use parent 'Plack::Component';
 
 sub new {
@@ -17,10 +20,15 @@ sub new {
     $class->SUPER::new( %args );
 }
 
-sub prepare_app {}
 # accessors ...
 
 sub debugger { (shift)->{'debugger'} } # a reference to the Plack::Debugger
+
+sub prepare_app {
+    my $self = shift;
+    $self->{'_share_dir'} = try { File::ShareDir::dist_dir('Plack-Debugger') } || 'share';
+    $self->SUPER::prepare_app( @_ );
+}
 
 sub call {
     my ($self, $env) = @_;
