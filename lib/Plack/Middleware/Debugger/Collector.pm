@@ -27,17 +27,17 @@ sub debugger { (shift)->{'debugger'} } # a reference to the Plack::Debugger
 sub call {
     my ($self, $env) = @_;
 
-    my $has_cleanup = $env->{'psgix.cleanup'};
-
     $self->debugger->initialize_request( $env );
     $self->debugger->run_before_phase( $env );
 
-    if ( $has_cleanup ) {
-        push @{ $env->{'psgix.cleanup.handlers'} } => (
-            sub { $self->debugger->run_cleanup_phase( $env ) },
-            sub { $self->debugger->finalize_request( $env )  },
-        );
-    }
+    # if we have cleanup capabilities
+    # then we should register that phase
+    # and a callback to finalize the 
+    # request as well
+    push @{ $env->{'psgix.cleanup.handlers'} } => (
+        sub { $self->debugger->run_cleanup_phase( $env ) },
+        sub { $self->debugger->finalize_request( $env )  },
+    ) if $env->{'psgix.cleanup'};
 
     $self->response_cb(
         $self->app->( $env ), 
@@ -46,11 +46,10 @@ sub call {
             $self->debugger->run_after_phase( $env, $resp );
 
             # if cleanup is not supported 
-            # then our best bet is to try 
-            # to store results here.
-            if ( !$has_cleanup ) {
-                $self->debugger->finalize_request( $env );
-            }
+            # then it is best to finalize
+            # at this point
+            $self->debugger->finalize_request( $env )
+                unless $env->{'psgix.cleanup'};
         }
     );
 }
