@@ -34,9 +34,6 @@ sub new {
     } => $class;
 }
 
-sub application { Plack::App::Debugger->new( debugger => @_ )         }
-sub collector   { Plack::Middleware::Collector->new( debugger => @_ ) }
-sub injector    { Plack::Middleware::Injector->new( debugger => @_ )  }
 sub storage       { (shift)->{'storage'}       } # a Plack::Debugger::Storage instance (required)
 sub panels        { (shift)->{'panels'}        } # array ref of Plack::Debugger::Panel objects (optional)
 
