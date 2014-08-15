@@ -29,12 +29,13 @@ sub call {
 
     my $has_cleanup = $env->{'psgix.cleanup'};
 
+    $self->debugger->initialize_request( $env );
     $self->debugger->run_before_phase( $env );
 
     if ( $has_cleanup ) {
         push @{ $env->{'psgix.cleanup.handlers'} } => (
             sub { $self->debugger->run_cleanup_phase( $env ) },
-            sub { $self->debugger->store_results }
+            sub { $self->debugger->finalize_request( $env )  },
         );
     }
 
@@ -48,7 +49,7 @@ sub call {
             # then our best bet is to try 
             # to store results here.
             if ( !$has_cleanup ) {
-                $self->debugger->store_results;
+                $self->debugger->finalize_request( $env );
             }
         }
     );
