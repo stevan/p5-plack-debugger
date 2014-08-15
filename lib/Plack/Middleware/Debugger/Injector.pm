@@ -3,14 +3,36 @@ package Plack::Middleware::Debugger::Injector;
 use strict;
 use warnings;
 
+use Scalar::Util qw[ blessed ];
+
 use parent 'Plack::Middleware';
 
-use Plack::Util::Accessor (
-    'debugger', # a reference to the Plack::Debugger
-    'content',  # the content to be injected, this is
-                # either a string or a CODE ref which
-                # takes the $env as an argument
-);
+sub new {
+    my $class = shift;
+    my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
+
+    die "You must pass a reference to a 'Plack::Debugger' instance"
+        unless blessed $args{'debugger'} 
+            && $args{'debugger'}->isa('Plack::Debugger');
+
+    die "You must pass the content to be injected"
+        unless defined $args{'content'};
+
+    die "The content to be injected must be either a string or a CODE reference"
+        if !$args{'content'} 
+        || (ref $args{'content'} && $args{'content'} ne 'CODE');
+
+    $class->SUPER::new( %args );
+}
+
+# accessors ...
+
+sub debugger { (shift)->{'debugger'} } # a reference to the Plack::Debugger
+sub content  { (shift)->{'content'}  } # the content to be injected, this is
+                                       # either a string or a CODE ref which
+                                       # takes the $env as an argument 
+
+# ...
 
 sub call {
     my ($self, $env) = @_;

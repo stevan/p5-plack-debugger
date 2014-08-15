@@ -5,22 +5,15 @@ use warnings;
 
 use Scalar::Util qw[ refaddr ];
 
-use Plack::Util::Accessor (
-    'title',    # the main title to display for this debug panel
-    'subtitle', # the sub-title to display for this debug panel    
-    'before',   # code ref to be run before the request   - args: ($self, $env)
-    'after',    # code ref to be run after the request    - args: ($self, $env, $response)
-    'cleanup',  # code ref to be run in the cleanup phase - args: ($self, $env, $response)    
-);
-
 sub new {
     my $class = shift;
     my %args  = @_;
 
     foreach my $phase (qw( before after cleanup )) {
-        if (exists $args{$phase}) {
+        if (defined $args{$phase}) {
             die "The '$phase' argument must be a CODE ref, not a " . ref($args{$phase}) . " ref"
-                if ref($args{$phase}) ne 'CODE'; 
+                unless ref $args{$phase} 
+                    && ref $args{$phase} eq 'CODE'; 
         }
     }
 
@@ -35,13 +28,23 @@ sub new {
         _stash   => undef
     } => $class;
 
+    # ... title if one is not provided
     $self->{'title'} = (split /\:\:/ => $class)[-1] . '<' . refaddr($self) . '>'
         unless defined $self->{'title'};
 
     $self;
 }
 
+# accessors 
+
+sub title    { (shift)->{'title'}    } # the main title to display for this debug panel (optional, but recommended)
+sub subtitle { (shift)->{'subtitle'} } # the sub-title to display for this debug panel (optional)   
+sub before   { (shift)->{'before'}   } # code ref to be run before the request   - args: ($self, $env)
+sub after    { (shift)->{'after'}    } # code ref to be run after the request    - args: ($self, $env, $response)
+sub cleanup  { (shift)->{'cleanup'}  } # code ref to be run in the cleanup phase - args: ($self, $env, $response)    
+
 # some useful predicates ...
+
 sub has_before   { !! (shift)->before  }
 sub has_after    { !! (shift)->after   }
 sub has_cleanup  { !! (shift)->cleanup }
