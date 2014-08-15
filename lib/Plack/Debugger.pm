@@ -7,10 +7,6 @@ use Scalar::Util qw[ blessed ];
 
 use Plack::Debugger::Panel;
 
-use Plack::Util::Accessor (
-    'storage', # a Plack::Debugger::Storage instance 
-    'panels',  # array ref of Plack::Debugger::Panel objects 
-);
 
 sub new {
     my $class = shift;
@@ -41,6 +37,8 @@ sub new {
 sub application { Plack::App::Debugger->new( debugger => @_ )         }
 sub collector   { Plack::Middleware::Collector->new( debugger => @_ ) }
 sub injector    { Plack::Middleware::Injector->new( debugger => @_ )  }
+sub storage       { (shift)->{'storage'}       } # a Plack::Debugger::Storage instance (required)
+sub panels        { (shift)->{'panels'}        } # array ref of Plack::Debugger::Panel objects (optional)
 
 sub run_before_phase {
     my ($self, $env) = @_;
