@@ -10,6 +10,7 @@ use Plack::Builder;
 use Plack::Test::Debugger;    
 use HTTP::Request::Common qw[ GET ];
 use Path::Class           qw[ dir ];
+use UUID::Tiny            qw[ create_uuid_as_string UUID_V4 ];
 use JSON::XS;
 
 BEGIN {
@@ -22,6 +23,7 @@ BEGIN {
     use_ok('Plack::Middleware::Debugger::Injector');
 }
 
+my @UUIDS;
 my $FILE_ID  = 0;
 my $DATA_DIR = dir('./t/tmp/');
 my $JSON     = JSON::XS->new->utf8->pretty;
@@ -30,13 +32,18 @@ my $JSON     = JSON::XS->new->utf8->pretty;
 { -f $_ && $_->remove foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 my $debugger = Plack::Debugger->new(
+    base_url      => '/debugger',
+    uid_generator => sub { 
+        push @UUIDS => create_uuid_as_string(UUID_V4);
+        $UUIDS[-1];
+    },
     storage => Plack::Debugger::Storage->new(
         data_dir     => $DATA_DIR,
         serializer   => sub { $JSON->encode( shift ) },
         deserializer => sub { $JSON->decode( shift ) },
-        filename_gen => sub { sprintf "test-%03d.json" => ++$FILE_ID },
+        filename_fmt => "%s.json",
     ),
-    panels  => [
+    panels => [
         Plack::Debugger::Panel->new(
             title     => 'Tester',
             subtitle  => '... testing all the things',
@@ -58,11 +65,11 @@ my $debugger = Plack::Debugger->new(
 );
 
 
-my $INJECTED = q[<script src="/debugger/debugger.js"></script>];
+my $INJECTED = q[<script src="] . $debugger->base_url . q[/debugger.js"></script>];
 
 my $app = builder {
 
-    mount '/debugger' => Plack::App::Debugger->new( debugger => $debugger )->to_app;
+    mount $debugger->base_url => Plack::App::Debugger->new( debugger => $debugger )->to_app;
 
     mount '/' => builder {
         enable 'Plack::Middleware::Debugger::Injector'  => ( debugger => $debugger, content => $INJECTED );
@@ -84,9 +91,8 @@ my $app = builder {
 test_psgi($app, sub {
         my $cb  = shift;
         {
-            my $data_file = $DATA_DIR->file('test-001.json');
 
-            ok(!-e $data_file, '... no data has been written yet');
+            is((scalar grep { /.*\.json$/ } $DATA_DIR->children), 0, '... no data has been written yet');
 
             my $resp = $cb->(GET '/');  
 
@@ -97,10 +103,12 @@ test_psgi($app, sub {
                 '... got the right content'
             );
 
+            my $data_file = $DATA_DIR->file( sprintf "%s.json" => $UUIDS[-1] );
+
             ok(-e $data_file, '... data has now been written');
 
             is_deeply(
-                $debugger->storage->load( $data_file->basename ),
+                $debugger->load_results( $UUIDS[-1] ),
                 {
                     'Tester' => [
                         'started request at /',
