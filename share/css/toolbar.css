@@ -1,0 +1,97 @@
+/* Plack-Debugger CSS Reset, adapted from Eric Meyer's CSS Reset */
+#plack-debugger {
+    color      : #000000;
+    background : #ffffff;
+}
+#plack-debugger, 
+#plack-debugger div, 
+#plack-debugger span, 
+#plack-debugger applet, 
+#plack-debugger object, 
+#plack-debugger iframe,
+#plack-debugger h1, 
+#plack-debugger h2, 
+#plack-debugger h3, 
+#plack-debugger h4, 
+#plack-debugger h5, 
+#plack-debugger h6, 
+#plack-debugger p, 
+#plack-debugger blockquote, 
+#plack-debugger pre,
+#plack-debugger a, 
+#plack-debugger abbr, 
+#plack-debugger acronym, 
+#plack-debugger address, 
+#plack-debugger big, 
+#plack-debugger cite, 
+#plack-debugger code,
+#plack-debugger del, 
+#plack-debugger dfn, 
+#plack-debugger em, 
+#plack-debugger font, 
+#plack-debugger img, 
+#plack-debugger ins, 
+#plack-debugger kbd, 
+#plack-debugger q, 
+#plack-debugger s, 
+#plack-debugger samp,
+#plack-debugger small, 
+#plack-debugger strike, 
+#plack-debugger strong, 
+#plack-debugger sub, 
+#plack-debugger sup, 
+#plack-debugger tt, 
+#plack-debugger var,
+#plack-debugger b, 
+#plack-debugger u, 
+#plack-debugger i, 
+#plack-debugger center,
+#plack-debugger dl, 
+#plack-debugger dt, 
+#plack-debugger dd, 
+#plack-debugger ol, 
+#plack-debugger ul, 
+#plack-debugger li,
+#plack-debugger fieldset, 
+#plack-debugger form, 
+#plack-debugger label, 
+#plack-debugger legend,
+#plack-debugger table, 
+#plack-debugger caption, 
+#plack-debugger tbody, 
+#plack-debugger tfoot, 
+#plack-debugger thead, 
+#plack-debugger tr, 
+#plack-debugger th, 
+#plack-debugger td {
+    margin         : 0;
+    padding        : 0;
+    border         : 0;
+    outline        : 0;
+    font-size      : 12px;
+    line-height    : 1.5em;
+    color          : #000000;
+    vertical-align : baseline;
+    background     : transparent;
+    font-family    : sans-serif;
+    text-align     : left;
+}
+
+#plack-debugger #plack-debugger-toolbar {
+    background    : #cccccc;
+    width         : 100%;
+    height        : 20px;
+    z-index       : 100000000;
+    position      : fixed;
+    top           : 0;
+    left          : 0;
+    border-bottom : 1px solid #000000;
+    padding       : 5px;
+}
+
+#plack-debugger #plack-debugger-toolbar .seperator {
+    padding-left  : 10px;
+    padding-right : 10px;
+}
+
+

@@ -69,36 +69,42 @@ var plack_debugger = new Plack.Debugger();
 plack_debugger.ready(function ($) {
 
     $(document.body).append(
-        '<div id="plack-debugger" style="padding: 5px; border: 1px #333 solid; background: #ccc">' 
-        + '<h3>Debugger</h3>'
-        + '<hr/>'
-        + '<p>Your request id is: ' + this.request_uid + '.</p>'
-        + '<div id="plack-debugger-content" style="padding: 2px; border: 1px #333 solid;">' 
-        + '</div>'
+        '<style type="text/css">' 
+            + '@import url(' + this.config.static_url + '/css/toolbar.css);'
+        + '</style>'
+        + '<div id="plack-debugger">' 
+            + '<div id="plack-debugger-toolbar">'
+                + '<span><strong>Plack::Debugger</strong></span>'
+                + '<span class="seperator">|</span>'
+                + '<span>request uid: ' + this.request_uid + '</span>'
+                + '<span class="seperator">|</span>'
+            + '</div>'
+            + '<div id="plack-debugger-content"></div>'
         + '</div>'
     );
 
     $.getJSON(
         this.config["root_url"] + '/' + this.request_uid
     ).then(function (data) {
+        var $toolbar = $("#plack-debugger-toolbar");
         var $content = $("#plack-debugger-content");
+
         $.each( data.results, function (k, v) {
-            $content.append("<h3>" + k + "</h3>");
+            $toolbar.append('<span>' + k + '</span><span class="seperator">|</span>');
 
-            console.log( typeof v );
-            console.log( v );
-
-            if ( typeof v == 'string' || typeof v == 'number' ) {
-                $content.append("<p>" + v + "</p>");
-            } 
-            else if ( typeof v == 'object' ) {
-                $content.append("<table>");
-                $.each(v, function (k, v) {
-                    $content.append("<tr><td>" + k + "</td><td>" + v + "</td></tr>");
-                });
-                $content.append("</table>");
-            }
-            $content.append("<hr/>");
+            // console.log( typeof v );
+            // console.log( v );
+            // if ( typeof v == 'string' || typeof v == 'number' ) {
+            //     $content.append("<p>" + v + "</p>");
+            // } 
+            // else if ( typeof v == 'object' ) {
+            //     $content.append("<table>");
+            //     $.each(v, function (k, v) {
+            //         $content.append("<tr><td>" + k + "</td><td>" + v + "</td></tr>");
+            //     });
+            //     $content.append("</table>");
+            // }
+            // $content.append("<hr/>");
         });
     });
 
