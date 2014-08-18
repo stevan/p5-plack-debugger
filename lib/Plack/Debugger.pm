@@ -75,6 +75,10 @@ sub initialize_request {
 
     # stash the request UID
     $env->{'plack.debugger.request_uid'} = $self->uid_generator->();
+
+    # stash the parent request UID (if available)
+    $env->{'plack.debugger.parent_request_uid'} = $env->{'HTTP_X_PLACK_DEBUGGER_PARENT_REQUEST_UID'}
+        if exists $env->{'HTTP_X_PLACK_DEBUGGER_PARENT_REQUEST_UID'};    
 }
 
 sub run_before_phase {

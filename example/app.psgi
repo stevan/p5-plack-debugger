@@ -80,22 +80,46 @@ builder {
 
         sub {
             my $r = Plack::Request->new( shift );
-            [ 
-                200, 
-                [ 'Content-Type' => 'text/html' ], 
-                [q[
-                    <html>
-                    <head>
-                        <title>Plack::Debugger - Test</title>
-                    </head>
-                    <body>
-                        <h1>Plack::Debugger Test</h1>
-                        <hr/>
-                        <p>This is a test of the Plack-Debugger</p>
-                    </body>
-                    </html>
-                ]]
-            ]
+
+            if ( $r->path_info eq '/api' ) {
+                return [ 
+                    200, 
+                    [ 'Content-Type' => 'application/json' ], 
+                    [ q[{"test":[1,2,3]}] ]
+                ]
+            }
+            else {
+                return [ 
+                    200, 
+                    [ 'Content-Type' => 'text/html' ], 
+                    [q[
+                        <html>
+                        <head>
+                            <title>Plack::Debugger - Test</title>
+                            <script type="text/javascript" src="/debugger/static/js/jquery.js"></script>
+                            <script type="text/javascript">
+                                $(document).ready(function () {
+                                    $("#ajax-test").click(function () {
+                                        $.getJSON("/api").then(function (data) {
+                                            console.log(data);
+                                        });
+                                    });
+                                });
+                            </script>
+                        </head>
+                        <body>
+                            <h1>Plack::Debugger Test</h1>
+                            <hr/>
+                            <p>This is a test of the Plack-Debugger</p>
+                            <input id="ajax-test" type="button" value="TEST ME!" />
+                            <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+                            <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+                            <hr/>
+                        </body>
+                        </html>
+                    ]]
+                ]
+            }
         }
     }
 };

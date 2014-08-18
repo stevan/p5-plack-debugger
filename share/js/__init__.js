@@ -72,6 +72,10 @@ var plack_debugger = new Plack.Debugger();
 
 plack_debugger.ready(function ($) {
 
+    $(document).ajaxSend(function (e, xhr, options) {
+        xhr.setRequestHeader('X-Plack-Debugger-Parent-Request-UID', plack_debugger.request_uid);
+    });
+
     $(document.body).append(
         '<style type="text/css">' 
             + '@import url(' + this.config.static_url + '/css/toolbar.css);'
