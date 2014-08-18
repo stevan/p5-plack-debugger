@@ -18,8 +18,6 @@ BEGIN {
     use_ok('Plack::Debugger::Storage');
 
     use_ok('Plack::App::Debugger');
-
-    use_ok('Plack::Middleware::Debugger::Injector');
 }
 
 # testing stuff ...
@@ -28,8 +26,8 @@ my $FILE_ID  = 0;
 my $JSON     = JSON::XS->new->utf8->pretty;
 
 # data the Debugger needs
-my $DATA_DIR = dir('./t/tmp/');
-my $BASE_URL = '/debugger';
+my $DATA_DIR     = dir('./t/tmp/');
+my $DEBUGGER_URL = '/debugger';
 
 # cleanup tmp dir
 { -f $_ && $_->remove foreach $DATA_DIR->children( no_hidden => 1 ) }
@@ -66,15 +64,19 @@ my $debugger = Plack::Debugger->new(
     ]
 );
 
-
-my $INJECTED = q[<script src="] . $BASE_URL . q[/debugger.js"></script>];
+my $debugger_application = Plack::App::Debugger->new( 
+    debugger    => $debugger,
+    base_url    => $DEBUGGER_URL, 
+    static_url  => '/static',
+    js_init_url => '/js/__init__.js',
+);
 
 my $app = builder {
 
-    mount $BASE_URL => Plack::App::Debugger->new( debugger => $debugger )->to_app;
+    mount $DEBUGGER_URL => $debugger_application->to_app;
 
     mount '/' => builder {
-        enable 'Plack::Middleware::Debugger::Injector'  => ( content => $INJECTED );
+        enable $debugger_application->make_injector_middleware;
         enable $debugger->make_collector_middleware;
         sub {
             my $env = shift;
@@ -98,10 +100,10 @@ test_psgi($app, sub {
 
             my $resp = $cb->(GET '/');  
 
-            is($resp->headers->header('Content-Length'), 37 + length($INJECTED), '... got the expected expanded Content-Length');
-            is(
+            isnt($resp->headers->header('Content-Length'), 37, '... got the expected expanded Content-Length');
+            like(
                 $resp->content, 
-                '<html><body>HELLO WORLD' . $INJECTED . '</body></html>', 
+                qr!^<html><body>HELLO WORLD(.*)</body></html>$!, 
                 '... got the right content'
             );
 
