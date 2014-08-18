@@ -14,10 +14,6 @@ sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    die "You must specify a base_url for the debugger application"
-        unless defined $args{'base_url'} 
-            && $args{'base_url'}; 
-
     die "You must provide a storage backend and it must be a subclass of 'Plack::Debugger::Storage'"
         unless blessed $args{'storage'} 
             && $args{'storage'}->isa('Plack::Debugger::Storage');
@@ -47,7 +43,6 @@ sub new {
     }
 
     bless {
-        base_url      => $args{'base_url'},
         storage       => $args{'storage'},
         uid_generator => $args{'uid_generator'},       
         panels        => $args{'panels'},
@@ -61,7 +56,6 @@ sub new {
 sub storage       { (shift)->{'storage'}       } # a Plack::Debugger::Storage instance (required)
 sub panels        { (shift)->{'panels'}        } # array ref of Plack::Debugger::Panel objects (optional)
 sub uid_generator { (shift)->{'uid_generator'} } # a code ref for generating unique IDs (optional)
-sub base_url      { (shift)->{'base_url'}      } # the base URL for the debugger application (required)
 
 # request lifecycle ...
 

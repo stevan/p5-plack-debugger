@@ -23,16 +23,19 @@ BEGIN {
     use_ok('Plack::Middleware::Debugger::Injector');
 }
 
+# testing stuff ...
 my @UUIDS;
 my $FILE_ID  = 0;
-my $DATA_DIR = dir('./t/tmp/');
 my $JSON     = JSON::XS->new->utf8->pretty;
+
+# data the Debugger needs
+my $DATA_DIR = dir('./t/tmp/');
+my $BASE_URL = '/debugger';
 
 # cleanup tmp dir
 { -f $_ && $_->remove foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 my $debugger = Plack::Debugger->new(
-    base_url      => '/debugger',
     uid_generator => sub { 
         push @UUIDS => create_uuid_as_string(UUID_V4);
         $UUIDS[-1];
@@ -65,11 +68,11 @@ my $debugger = Plack::Debugger->new(
 );
 
 
-my $INJECTED = q[<script src="] . $debugger->base_url . q[/debugger.js"></script>];
+my $INJECTED = q[<script src="] . $BASE_URL . q[/debugger.js"></script>];
 
 my $app = builder {
 
-    mount $debugger->base_url => Plack::App::Debugger->new( debugger => $debugger )->to_app;
+    mount $BASE_URL => Plack::App::Debugger->new( debugger => $debugger )->to_app;
 
     mount '/' => builder {
         enable 'Plack::Middleware::Debugger::Injector'  => ( debugger => $debugger, content => $INJECTED );
