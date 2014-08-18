@@ -3,45 +3,40 @@ package Plack::Middleware::Debugger::Injector;
 use strict;
 use warnings;
 
-use Scalar::Util qw[ blessed ];
-
 use parent 'Plack::Middleware';
 
 sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    die "You must pass a reference to a 'Plack::Debugger' instance"
-        unless blessed $args{'debugger'} 
-            && $args{'debugger'}->isa('Plack::Debugger');
-
     die "You must pass the content to be injected"
-        unless defined $args{'content'};
+        unless $args{'content'};
 
     die "The content to be injected must be either a string or a CODE reference"
-        if !$args{'content'} 
-        || (ref $args{'content'} && $args{'content'} ne 'CODE');
+        if !$args{'content'}
+        || ref $args{'content'} && ref $args{'content'} ne 'CODE';
 
     $class->SUPER::new( %args );
 }
 
 # accessors ...
 
-sub debugger { (shift)->{'debugger'} } # a reference to the Plack::Debugger
-sub content  { (shift)->{'content'}  } # the content to be injected, this is
-                                       # either a string or a CODE ref which
-                                       # takes the $env as an argument 
+# the content to be injected, this is
+# either a string or a CODE ref which
+# takes the $env as an argument 
+sub get_content_to_insert { 
+    my ($self, $env) = @_;
+    my $content = $self->{'content'};
+    if ( ref $content && ref $content eq 'CODE' ) {
+        $content = $content->( $env );
+    }
+    return $content;
+} 
 
 # ...
 
 sub call {
     my ($self, $env) = @_;
-
-    # content to be inserted ...
-    my $content = $self->content;
-    if ( ref $content && ref $content eq 'CODE' ) {
-        $content = $content->( $env );
-    }
 
     $self->response_cb(
         $self->app->( $env ), 
@@ -59,6 +54,9 @@ sub call {
                 die "No content type specified in the request, I cannot tell what to do!";
             }
             elsif ( $content_type =~ m!^(?:text/html|application/xhtml\+xml)! ) {
+
+                # content to be inserted ...
+                my $content = $self->get_content_to_insert( $env );
                 
                 # if the response is not a streaming one ...
                 if ( (scalar @$resp) == 3 && ref $resp->[2] eq 'ARRAY' ) {
