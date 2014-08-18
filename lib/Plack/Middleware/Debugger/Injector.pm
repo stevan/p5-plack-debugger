@@ -53,6 +53,11 @@ sub call {
                 # ...???
                 die "No content type specified in the request, I cannot tell what to do!";
             }
+            elsif ( $content_type =~ m!^(?:application/json)! ) {
+                # application/json responses can't get 
+                # injected into so we ignore it
+                return $resp;
+            }
             elsif ( $content_type =~ m!^(?:text/html|application/xhtml\+xml)! ) {
 
                 # content to be inserted ...
