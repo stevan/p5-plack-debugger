@@ -7,10 +7,9 @@ use Plack::Builder;
 use Plack::Request; 
 
 use JSON::XS;
-use Scalar::Util qw[ blessed ];
-use Path::Class  qw[ dir ];
-use UUID::Tiny   qw[ create_uuid_as_string UUID_V4 ];
-use Time::HiRes  qw[ gettimeofday tv_interval ];
+use Path::Class qw[ dir ];
+use UUID::Tiny  qw[ create_uuid_as_string UUID_V4 ];
+use Time::HiRes qw[ gettimeofday tv_interval ];
 
 use Plack::Debugger;
 use Plack::Debugger::Storage;
@@ -21,7 +20,11 @@ my $JSON         = JSON::XS->new->utf8->pretty;
 my $DATA_DIR     = dir('/tmp/debugger_panel');
 my $DEBUGGER_URL = Plack::App::Debugger->DEFAULT_BASE_URL;
 
+# create tmp dir if needed
 mkdir $DATA_DIR unless -e $DATA_DIR;
+
+# cleanup tmp dir
+{ -f $_ && $_->remove foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 my $debugger = Plack::Debugger->new(
     uid_generator => sub { create_uuid_as_string(UUID_V4) },
