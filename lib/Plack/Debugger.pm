@@ -57,6 +57,14 @@ sub storage       { (shift)->{'storage'}       } # a Plack::Debugger::Storage in
 sub panels        { (shift)->{'panels'}        } # array ref of Plack::Debugger::Panel objects (optional)
 sub uid_generator { (shift)->{'uid_generator'} } # a code ref for generating unique IDs (optional)
 
+# create a collector middleware for this debugger
+
+sub make_collector_middleware {
+    my $self      = shift;
+    my $middlware = Plack::Util::load_class('Plack::Middleware::Debugger::Collector');
+    return sub { $middlware->new( debugger => $self )->wrap( @_ ) }
+}
+
 # request lifecycle ...
 
 sub initialize_request {

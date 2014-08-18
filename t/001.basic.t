@@ -19,7 +19,6 @@ BEGIN {
 
     use_ok('Plack::App::Debugger');
 
-    use_ok('Plack::Middleware::Debugger::Collector');
     use_ok('Plack::Middleware::Debugger::Injector');
 }
 
@@ -76,7 +75,7 @@ my $app = builder {
 
     mount '/' => builder {
         enable 'Plack::Middleware::Debugger::Injector'  => ( debugger => $debugger, content => $INJECTED );
-        enable 'Plack::Middleware::Debugger::Collector' => ( debugger => $debugger );
+        enable $debugger->make_collector_middleware;
         sub {
             my $env = shift;
             [ 
