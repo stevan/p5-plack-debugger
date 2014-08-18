@@ -7,9 +7,10 @@ use Plack::Builder;
 use Plack::Request; 
 
 use JSON::XS;
-use Path::Class qw[ dir ];
-use UUID::Tiny  qw[ create_uuid_as_string UUID_V4 ];
-use Time::HiRes qw[ gettimeofday tv_interval ];
+use Scalar::Util qw[ blessed ];
+use Path::Class  qw[ dir ];
+use UUID::Tiny   qw[ create_uuid_as_string UUID_V4 ];
+use Time::HiRes  qw[ gettimeofday tv_interval ];
 
 use Plack::Debugger;
 use Plack::Debugger::Storage;
@@ -50,6 +51,14 @@ my $debugger = Plack::Debugger->new(
                 my ($self, $env) = @_;
                 $self->set_result({ %ENV }); 
             }
+        ),
+        Plack::Debugger::Panel->new(
+            title     => 'Plack Env',
+            subtitle  => '... capturing the Plack env',
+            before    => sub { 
+                my ($self, $env) = @_;
+                $self->set_result({ map { ($_ => (''.$env->{ $_ })) } keys %$env }); 
+            }
         )
     ]
 );
@@ -58,6 +67,8 @@ my $debugger_application = Plack::App::Debugger->new( debugger => $debugger );
 
 builder {
 
+    mount '/favicon.ico' => sub { [200,[],[]] };
+ 
     mount $DEBUGGER_URL => $debugger_application->to_app;
 
     mount '/' => builder {
