@@ -74,7 +74,7 @@ my $app = builder {
     mount $BASE_URL => Plack::App::Debugger->new( debugger => $debugger )->to_app;
 
     mount '/' => builder {
-        enable 'Plack::Middleware::Debugger::Injector'  => ( debugger => $debugger, content => $INJECTED );
+        enable 'Plack::Middleware::Debugger::Injector'  => ( content => $INJECTED );
         enable $debugger->make_collector_middleware;
         sub {
             my $env = shift;
