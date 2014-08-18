@@ -32,14 +32,18 @@ Plack.Debugger.prototype._init = function () {
 
 Plack.Debugger.prototype.ready = function (callback) {
     var self = this;
-    self._load_static_js( "/jquery.js", function () { 
-
-        // TODO - setup global AJAX handlers here ...
-
-        jQuery(document).ready(function () { 
+    if ( typeof jQuery == 'undefined' ) {
+        self._load_static_js( "/jquery.js", function () { 
+            jQuery(document).ready(function () { 
+                callback.apply(self, [ jQuery ]) 
+            }) 
+        });
+    }
+    else {
+        jQuery(document).ready(function () {
             callback.apply(self, [ jQuery ]) 
-        }) 
-    });
+        });
+    }
 };
 
 // private utilities ...
