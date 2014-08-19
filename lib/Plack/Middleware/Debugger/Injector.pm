@@ -33,6 +33,94 @@ sub get_content_to_insert {
     return $content;
 } 
 
+# predicates to check
+
+sub has_no_body {
+    my ($self, $env, $resp) = @_;
+    # if no body, there is nothing to inject ...
+    Plack::Util::status_with_no_entity_body( $resp->[0] )
+}
+
+sub has_parent_request_uid {
+    my ($self, $env, $resp) = @_;
+    # NOTE:
+    # if this is a request with a parent request id
+    # then it is a sub-request and therefore not 
+    # something we probably need to inject into,
+    # however there could be cases where this is 
+    # reasonable, so might make this optional later
+    # if the need arises.
+    # - SL
+    exists $env->{'HTTP_X_PLACK_DEBUGGER_PARENT_REQUEST_UID'} 
+        || 
+    exists $env->{'plack.debugger.parent_request_uid'}    
+}
+
+# handlers to override
+
+sub handle_no_content_type {
+    my ($self, $env, $resp) = @_;
+    # XXX - ... is this reasonable ???
+    die "No content type specified in the request, I cannot tell what to do!";
+}
+
+sub handle_json_content_type {
+    my ($self, $env, $resp) = @_;
+    # application/json responses really 
+    # can't get injected into so we 
+    # just ignore it for now
+    return $resp;
+}
+
+sub handle_html_content_type {
+    my ($self, $env, $resp) = @_;
+    # content to be inserted ...
+    my $content = $self->get_content_to_insert( $env );
+    
+    # if the response is not a streaming one ...
+    if ( (scalar @$resp) == 3 && ref $resp->[2] eq 'ARRAY' ) {
+
+        # adjust Content-Length if we have it ...
+        if ( my $content_length = Plack::Util::header_get( $resp->[1], 'Content-Length' ) ) {
+            Plack::Util::header_set( $resp->[1], 'Content-Length', $content_length + length($content) );
+        }
+
+        # now inject our content before the closing
+        # body tag, makes the most sense to process
+        # the body in reverse since it will most 
+        # likely be at the end ...
+        foreach my $chunk ( reverse @{ $resp->[2] } ) {
+            # skip if we don't have it
+            next unless $chunk =~ m!(?=</body>)!i; 
+            # if we do have it, substitute and ...
+            $chunk =~ s!(?=</body>)!$content!i;
+            # break out of the loop, we are done 
+            last;
+        }
+
+        return $resp;
+    }
+    # if we have streaming response, just do what is sensible
+    else {
+        # NOTE:
+        # Plack will remove the Content-Length header
+        # if it has a streaming response, so there is
+        # no need to worry about that at all.
+        # - SL
+        return sub {
+            my $chunk = shift;
+            return unless defined $chunk;
+            $chunk =~ s!(?=</body>)!$content!i;
+            return $chunk;
+        };
+    }
+}
+
+sub handle_unknown_content_type {
+    my ($self, $env, $resp) = @_;
+    die "I have no idea what to do with this body type";
+}
+
 # ...
 
 sub call {
@@ -43,66 +131,24 @@ sub call {
         sub { 
             my $resp = shift;
 
-            # if no body, there is nothing to inject ...
-            return if Plack::Util::status_with_no_entity_body( $resp->[0] );
+            # check some basic predicates 
+            return $resp if $self->has_no_body( $env, $resp );
+            return $resp if $self->has_parent_request_uid( $env, $resp );
 
-            # check headers ...
+            # now check the content-type headers ...
             my $content_type = Plack::Util::header_get( $resp->[1], 'Content-Type' );
 
             if ( !$content_type ) {
-                # ...???
-                die "No content type specified in the request, I cannot tell what to do!";
+                return $self->handle_no_content_type( $env, $resp );
             }
             elsif ( $content_type =~ m!^(?:application/json)! ) {
-                # application/json responses can't get 
-                # injected into so we ignore it
-                return $resp;
+                return $self->handle_json_content_type( $env, $resp );
             }
             elsif ( $content_type =~ m!^(?:text/html|application/xhtml\+xml)! ) {
-
-                # content to be inserted ...
-                my $content = $self->get_content_to_insert( $env );
-                
-                # if the response is not a streaming one ...
-                if ( (scalar @$resp) == 3 && ref $resp->[2] eq 'ARRAY' ) {
-
-                    # adjust Content-Length if we have it ...
-                    if ( my $content_length = Plack::Util::header_get( $resp->[1], 'Content-Length' ) ) {
-                        Plack::Util::header_set( $resp->[1], 'Content-Length', $content_length + length($content) );
-                    }
-
-                    # now inject our content before the closing
-                    # body tag, makes the most sense to process
-                    # the body in reverse since it will most 
-                    # likely be at the end ...
-                    foreach my $chunk ( reverse @{ $resp->[2] } ) {
-                        # skip if we don't have it
-                        next unless $chunk =~ m!(?=</body>)!i; 
-                        # if we do have it, substitute and ...
-                        $chunk =~ s!(?=</body>)!$content!i;
-                        # break out of the loop, we are done 
-                        last;
-                    }
-
-                    return $resp ;
-                }
-                # if we have streaming response, just do what is sensible
-                else {
-                    # NOTE:
-                    # Plack will remove the Content-Length header
-                    # if it has a streaming response, so there is
-                    # no need to worry about that at all.
-                    # - SL
-                    return sub {
-                        my $chunk = shift;
-                        return unless defined $chunk;
-                        $chunk =~ s!(?=</body>)!$content!i;
-                        return $chunk;
-                    };
-                }
+                return $self->handle_html_content_type( $env, $resp );
             }   
             else {
-                die "I have no idea what to do with this body type";
+                return $self->handle_unknown_content_type( $env, $resp );
             }
 
         }
