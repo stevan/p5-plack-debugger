@@ -77,92 +77,99 @@ sub call {
     else {
 
         # this only supports GET requests
-        return [ 405, [ 'Content-Type' => 'text/plain', 'Content-Length' => 18 ], [ 'Method Not Allowed' ] ]
+        return $self->_create_error_response( 405 => 'Method Not Allowed' )
             if $r->method ne 'GET';
 
         my ($request_uid, $get_subrequests, $get_specific_subrequest) = grep { $_ } split '/' => $r->path_info;
 
         # need a page-id
-        return [ 400, [ 'Content-Type' => 'text/plain', 'Content-Length' => 11 ], [ 'Bad Request' ] ]
+        return $self->_create_error_response( 400 => 'Bad Request' )
             unless $request_uid;
 
         if ( !$get_subrequests ) {
-            return [
-                200,
-                [ 'Content-Type' => 'application/json' ],
-                [ 
-                    $self->{'_JSON'}->encode({
-                        data  => $self->debugger->load_request_results( $request_uid ),
-                        links => [
-                            { 
-                                rel => 'self', 
-                                url => (join '/' => $self->base_url, $request_uid)
-                            },
-                            { 
-                                rel => 'subrequest.all', 
-                                url => (join '/' => $self->base_url, $request_uid, 'subrequest')
-                            }
-                        ]
-                    })
-                ]
-            ];
+            return $self->_create_JSON_response(
+                200 => {
+                    data  => $self->debugger->load_request_results( $request_uid ),
+                    links => [
+                        { 
+                            rel => 'self', 
+                            url => $self->_create_link_url( $request_uid )
+                        },
+                        { 
+                            rel => 'subrequest.all', 
+                            url => $self->_create_link_url( $request_uid, '/subrequest' )
+                        }
+                    ]
+                }
+            );
         }
         elsif ( !$get_specific_subrequest ) {
             my $all_subrequests = $self->debugger->load_all_subrequest_results( $request_uid );
-            return [
-                200,
-                [ 'Content-Type' => 'application/json' ],
-                [ 
-                    $self->{'_JSON'}->encode({
-                        data  => $all_subrequests,
-                        links => [
-                            { 
-                                rel => 'self', 
-                                url => (join '/' => $self->base_url, $request_uid, 'subrequest')
-                            },
-                            { 
-                                rel => 'request.parent', 
-                                url => (join '/' => $self->base_url, $request_uid)
-                            },
-                            map {
-                                {
-                                    rel => 'subrequest',
-                                    url => (join '/' => $self->base_url, $request_uid, 'subrequest', $_->{'request_uid'})
-                                }
-                            } @$all_subrequests
-                        ]
-                    })
-                ]
-            ];
+            return $self->_create_JSON_response(
+                200 => {
+                    data  => $all_subrequests,
+                    links => [
+                        { 
+                            rel => 'self', 
+                            url => $self->_create_link_url( $request_uid, '/subrequest' )
+                        },
+                        { 
+                            rel => 'request.parent', 
+                            url => $self->_create_link_url( $request_uid )
+                        },
+                        map {
+                            {
+                                rel => 'subrequest',
+                                url => $self->_create_link_url( $request_uid, '/subrequest', $_->{'request_uid'} )
+                            }
+                        } @$all_subrequests
+                    ]
+                }
+            );
         }
         else {
-            return [
-                200,
-                [ 'Content-Type' => 'application/json' ],
-                [ 
-                    $self->{'_JSON'}->encode({
-                        data  => $self->debugger->load_subrequest_results( $request_uid, $get_specific_subrequest ),
-                        links => [
-                            { 
-                                rel => 'self', 
-                                url => (join '/' => $self->base_url, $request_uid, 'subrequest', $get_specific_subrequest)
-                            },
-                            { 
-                                rel => 'request.parent', 
-                                url => (join '/' => $self->base_url, $request_uid)
-                            },
-                            { 
-                                rel => 'subrequest.siblings', 
-                                url => (join '/' => $self->base_url, $request_uid, 'subrequest')
-                            }
-                        ]
-                    })
-                ]
-            ];
+            return $self->_create_JSON_response(
+                200 => {
+                    data  => $self->debugger->load_subrequest_results( $request_uid, $get_specific_subrequest ),
+                    links => [
+                        { 
+                            rel => 'self', 
+                            url => $self->_create_link_url( $request_uid, '/subrequest', $get_specific_subrequest )
+                        },
+                        { 
+                            rel => 'request.parent', 
+                            url => $self->_create_link_url( $request_uid )
+                        },
+                        { 
+                            rel => 'subrequest.siblings', 
+                            url => $self->_create_link_url( $request_uid, '/subrequest' )
+                        }
+                    ]
+                }
+            );
         }
         
     }
 }
+
+# ...
+
+sub _create_error_response {
+    my ($self, $status, $body) = @_;
+    return [ $status, [ 'Content-Type' => 'text/plain', 'Content-Length' => length $body ], [ $body ] ]
+}
+
+sub _create_JSON_response {
+    my ($self, $status, $data) = @_;
+    my $json = $self->{'_JSON'}->encode( $data );
+    return [ $status, [ 'Content-Type' => 'application/json', 'Content-Length' => length $json ], [ $json ] ]
+}
+
+sub _create_link_url {
+    my ($self, @parts) = @_;
+    return File::Spec::Unix->canonpath( join '/' => $self->base_url, @parts )
+}
+
 
 1;
 
