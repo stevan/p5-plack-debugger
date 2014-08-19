@@ -24,7 +24,7 @@ sub new {
         after    => $args{'after'},
         cleanup  => $args{'cleanup'},
         # private data ...
-        _results => undef,
+        _result  => undef,
         _stash   => undef
     } => $class;
 
@@ -59,12 +59,12 @@ sub stash {
 
 # final result ...
 
-sub get_results { (shift)->{'_results'} }
-sub set_results {
+sub get_result { (shift)->{'_result'} }
+sub set_result {
     my $self    = shift;
     my $results = shift || die 'You must provide a results';
     
-    $self->{'_results'} = $results;
+    $self->{'_result'} = $results;
 }
 
 # reset ...
@@ -72,7 +72,7 @@ sub set_results {
 sub reset {
     my $self = shift;
     undef $self->{'_stash'};
-    undef $self->{'_results'};
+    undef $self->{'_result'};
 }
 
 1;
