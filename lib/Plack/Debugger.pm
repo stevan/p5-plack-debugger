@@ -46,8 +46,6 @@ sub new {
         storage       => $args{'storage'},
         uid_generator => $args{'uid_generator'},       
         panels        => $args{'panels'},
-        # private data ...
-        _application  => undef,
     } => $class;
 }
 
