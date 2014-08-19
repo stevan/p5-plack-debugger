@@ -103,22 +103,26 @@ sub run_cleanup_phase {
 sub finalize_request {
     my ($self, $env) = @_;
 
-    my %results;
+    my @results;
     foreach my $panel ( @{ $self->panels } ) {
-        $results{ $panel->title } = $panel->get_results;
+        push @results => { 
+            title    => $panel->title,
+            subtitle => $panel->subtitle,
+            result   => $panel->get_result
+        };
     }
 
     if ( exists $env->{'plack.debugger.parent_request_uid'} ) {
         $self->store_subrequest_results( 
             $env->{'plack.debugger.parent_request_uid'}, 
             $env->{'plack.debugger.request_uid'}, 
-            \%results 
+            \@results 
         );
     }
     else {
         $self->store_request_results( 
             $env->{'plack.debugger.request_uid'}, 
-            \%results 
+            \@results 
         );
     }
 
