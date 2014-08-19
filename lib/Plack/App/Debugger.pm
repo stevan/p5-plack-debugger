@@ -91,14 +91,8 @@ sub call {
                 200 => {
                     data  => $self->debugger->load_request_results( $request_uid ),
                     links => [
-                        { 
-                            rel => 'self', 
-                            url => $self->_create_link_url( $request_uid )
-                        },
-                        { 
-                            rel => 'subrequest.all', 
-                            url => $self->_create_link_url( $request_uid, '/subrequest' )
-                        }
+                        $self->_create_link( 'self'           => [ $request_uid ] ),
+                        $self->_create_link( 'subrequest.all' => [ $request_uid, '/subrequest' ] ),
                     ]
                 }
             );
@@ -109,19 +103,10 @@ sub call {
                 200 => {
                     data  => $all_subrequests,
                     links => [
-                        { 
-                            rel => 'self', 
-                            url => $self->_create_link_url( $request_uid, '/subrequest' )
-                        },
-                        { 
-                            rel => 'request.parent', 
-                            url => $self->_create_link_url( $request_uid )
-                        },
+                        $self->_create_link( 'self'           => [ $request_uid, '/subrequest' ] ),
+                        $self->_create_link( 'request.parent' => [ $request_uid ] ),
                         map {
-                            {
-                                rel => 'subrequest',
-                                url => $self->_create_link_url( $request_uid, '/subrequest', $_->{'request_uid'} )
-                            }
+                            $self->_create_link( 'subrequest' => [ $request_uid, '/subrequest', $_->{'request_uid'} ] ),
                         } @$all_subrequests
                     ]
                 }
@@ -132,18 +117,9 @@ sub call {
                 200 => {
                     data  => $self->debugger->load_subrequest_results( $request_uid, $get_specific_subrequest ),
                     links => [
-                        { 
-                            rel => 'self', 
-                            url => $self->_create_link_url( $request_uid, '/subrequest', $get_specific_subrequest )
-                        },
-                        { 
-                            rel => 'request.parent', 
-                            url => $self->_create_link_url( $request_uid )
-                        },
-                        { 
-                            rel => 'subrequest.siblings', 
-                            url => $self->_create_link_url( $request_uid, '/subrequest' )
-                        }
+                        $self->_create_link( 'self'                => [ $request_uid, '/subrequest', $get_specific_subrequest ] ),
+                        $self->_create_link( 'request.parent'      => [ $request_uid ] ),
+                        $self->_create_link( 'subrequest.siblings' => [ $request_uid, '/subrequest' ] ),
                     ]
                 }
             );
@@ -165,9 +141,12 @@ sub _create_JSON_response {
     return [ $status, [ 'Content-Type' => 'application/json', 'Content-Length' => length $json ], [ $json ] ]
 }
 
-sub _create_link_url {
-    my ($self, @parts) = @_;
-    return File::Spec::Unix->canonpath( join '/' => $self->base_url, @parts )
+sub _create_link {
+    my ($self, $rel, $parts) = @_;
+    return { 
+        rel => $rel, 
+        url => File::Spec::Unix->canonpath( join '/' => $self->base_url, @$parts )
+    }
 }
 
 
