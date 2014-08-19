@@ -72,47 +72,118 @@ var plack_debugger = new Plack.Debugger();
 
 plack_debugger.ready(function ($) {
 
+    var self = this;
+
+    // Global AJAX request setup ...
     $(document).ajaxSend(function (e, xhr, options) {
-        xhr.setRequestHeader('X-Plack-Debugger-Parent-Request-UID', plack_debugger.request_uid);
+        xhr.setRequestHeader('X-Plack-Debugger-Parent-Request-UID', self.request_uid);
     });
 
+    // setup the debugger UI
     $(document.body).append(
         '<style type="text/css">' 
-            + '@import url(' + this.config.static_url + '/css/toolbar.css);'
+            + '@import url(' + self.config.static_url + '/css/toolbar.css);'
         + '</style>'
         + '<div id="plack-debugger">' 
-            + '<div id="plack-debugger-toolbar">'
-                + '<span><strong>Plack::Debugger</strong></span>'
-                + '<span class="seperator">|</span>'
-                + '<span>request uid: ' + this.request_uid + '</span>'
-                + '<span class="seperator">|</span>'
+            + '<div class="collapsed">' 
+                + '<div class="open-button">&lArr; Open</a></div>'
             + '</div>'
-            + '<div id="plack-debugger-content"></div>'
+            + '<div class="toolbar">' 
+                + '<div class="header">'
+                    + '<div class="close-button">&rArr; Hide</a></div>'
+                    + '<div class="data">' 
+                        + '<strong>uid</strong>' 
+                        + ' : ' 
+                        + '<a>' + self.request_uid + '</a>' 
+                    + '</div>'
+                + '</div>'
+                + '<div class="panels"></div>'
+            + '</div>'
+            + '<div class="panel-content"></div>'
         + '</div>'
     );
 
+    // debugger UI events ...
+
+    var $toolbar   = $("#plack-debugger .toolbar");
+    var $collapsed = $("#plack-debugger .collapsed");
+    var $content   = $("#plack-debugger .panel-content");
+
+    $collapsed.find(".open-button").click(function () {
+        $content.show();
+        $toolbar.show();
+        $collapsed.hide();
+    });
+
+    $toolbar.find(".close-button").click(function () {
+        $content.hide();
+        $toolbar.hide();
+        $collapsed.show();
+    });
+
+    $toolbar.find(".header .data a").click(function () {
+        window.open( self.config["root_url"] + '/' + $(this).text() )
+    });
+
+    // load and draw panel information 
+
+    var generate_data_for_panel = function (data) {
+        switch ( typeof data ) {
+            case 'string':
+            case 'number':
+                return data;
+            case 'object':
+                var out = '<table>';
+                for (key in data) {
+                    out += '<tr><td>' + key + '</td><td>' + data[key] + '</td></tr>';
+                }
+                return out + '</table>';
+            case 'array':
+                var out = '<ul>';
+                for (var i = 0; i < data.length; i++) {
+                    out += '<li>' + data[i] + '</li>';
+                }
+                return out + '</ul>';  
+            default:
+                return "NO IDEA WHAT THIS IS! " + (typeof data);          
+        }
+    };
+
     $.getJSON(
-        this.config["root_url"] + '/' + this.request_uid
+        self.config["root_url"] + '/' + self.request_uid
     ).then(function (res) {
-        var $toolbar = $("#plack-debugger-toolbar");
-        var $content = $("#plack-debugger-content");
+        
+        var $toolbar_panels = $toolbar.find(".panels");
 
-        $.each( res.data.results, function (k, v) {
-            $toolbar.append('<span>' + k + '</span><span class="seperator">|</span>');
+        $.each( 
+            res.data.results, 
+            function (i, e) {
+                $toolbar_panels.append(
+                    '<div class="panel">'
+                        + '<span class="idx">' + i + "</span>"
+                        + '<div class="title">' + e['title'] + '</div>'
+                        + ((e['subtitle'] != undefined) ? '<div class="subtitle">' + e['subtitle'] + '</div>' : '')
+                    + '</div>'
+                );
 
-            // console.log( typeof v );
-            // console.log( v );
-            // if ( typeof v == 'string' || typeof v == 'number' ) {
-            //     $content.append("<p>" + v + "</p>");
-            // } 
-            // else if ( typeof v == 'object' ) {
-            //     $content.append("<table>");
-            //     $.each(v, function (k, v) {
-            //         $content.append("<tr><td>" + k + "</td><td>" + v + "</td></tr>");
-            //     });
-            //     $content.append("</table>");
-            // }
-            // $content.append("<hr/>");
+                $content.append(
+                    '<div id="plack-debugger-panel-content-' + i + '" class="panel">'
+                        + '<div class="header">'
+                            + '<div class="title">' + e['title'] + '</div>'
+                            + ((e['subtitle'] != undefined) ? '<div class="subtitle">' + e['subtitle'] + '</div>' : '')
+                        + '</div>'
+                        + '<div class="content">'
+                            + generate_data_for_panel( e['result'] )
+                        + '</div>'
+                    + '</div>'
+                );
+            }
+        );
+
+        $toolbar_panels.find(".panel").click(function () {
+            // TODO - highlight the toolbar panel when active
+            $content.find('.panel').hide();
+            $("#plack-debugger-panel-content-" + $(this).find(".idx").text()).show();
         });
     });
 

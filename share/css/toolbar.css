@@ -77,21 +77,150 @@
     text-align     : left;
 }
 
-#plack-debugger #plack-debugger-toolbar {
+/* Collapsed Toolbar */
+
+#plack-debugger .collapsed {
     background    : #cccccc;
-    width         : 100%;
-    height        : 20px;
+    width         : 70px;
     z-index       : 100000000;
     position      : fixed;
     top           : 0;
-    left          : 0;
-    border-bottom : 1px solid #000000;
-    padding       : 5px;
+    right         : 0;
+    display       : none;
 }
 
-#plack-debugger #plack-debugger-toolbar .seperator {
-    padding-left  : 10px;
-    padding-right : 10px;
+#plack-debugger .collapsed .open-button {
+    padding    : 5px 10px;
+    background : #aaaaaa;
 }
 
+#plack-debugger .collapsed .open-button:hover {
+    text-decoration : underline;
+    font-weight     : bold;
+    cursor          : pointer;
+}
+
+/* Toolbar */
+
+#plack-debugger .toolbar {
+    background    : #cccccc;
+    width         : 300px;
+    z-index       : 100000000;
+    position      : fixed;
+    top           : 0;
+    bottom        : 0;
+    right         : 0;
+    border-left   : 3px ridge;
+    border-color  : #111111 #dddddd;
+}
+
+#plack-debugger .toolbar .header {
+    border-bottom : 2px groove;
+    border-color  : #dddddd #111111;
+}
+
+#plack-debugger .toolbar .header .close-button {
+    padding    : 5px 10px;
+    background : #aaaaaa;
+}
+
+#plack-debugger .toolbar .header .close-button:hover {
+    text-decoration : underline;
+    font-weight     : bold;
+    cursor          : pointer;
+}
+
+#plack-debugger .toolbar .panels .panel {
+    border-bottom : 2px groove;
+    border-color  : #dddddd #111111;
+}
+
+#plack-debugger .toolbar .panels .panel:hover {
+    background : #cceeee;
+    cursor     : pointer;
+}
+
+/* Collapsed Toolbar */
+
+#plack-debugger .panel-content {
+    z-index  : 99999999;
+    position : fixed;
+    top      : 0;
+    left     : 0;
+    right    : 300px;
+    height   : 100%;
+}
+
+/* panel content */
+
+#plack-debugger .panel-content .panel {
+    background : #cccccc;
+    height     : 100%;
+    display    : none; 
+    overflow   : auto;
+}
+
+#plack-debugger .panel-content .panel .header {
+    background : #aaaaaa;
+    position   : fixed;
+    top        : 0;
+    left       : 0;   
+    right      : 300px; 
+    height     : 70px;
+}
+
+#plack-debugger .panel-content .panel .header .title {
+    font-size : 2.5em;
+}
+
+#plack-debugger .panel-content .panel .header .subtitle {
+    font-size : 1em;
+}
+
+#plack-debugger .panel-content .panel .content {
+    padding-left   : 20px;
+    padding-bottom : 20px;
+    padding-right  : 20px;
+    padding-top    : 90px;
+}
+
+#plack-debugger .panel-content .panel .content table {
+    border : 1px solid #999999;
+}
+
+#plack-debugger .panel-content .panel .content table td {
+    border : 1px solid #999999;
+}
+
+#plack-debugger .panel-content .panel .content table td {
+    padding : 5px;
+}
+
+/* generic */
+
+#plack-debugger .idx {
+    display : none;
+}
+
+#plack-debugger .data {
+    padding : 10px;
+}
+
+#plack-debugger .data a:hover {
+    text-decoration : underline;
+    font-weight     : bold;
+    cursor          : pointer;
+}
+
+#plack-debugger .title {
+    font-size    : 1.5em;
+    padding-left : 10px;
+    padding-top  : 2px;
+}
+
+#plack-debugger .subtitle {
+    font-size    : 0.9em;
+    font-style   : oblique;
+    padding-left : 20px;
+}
 
