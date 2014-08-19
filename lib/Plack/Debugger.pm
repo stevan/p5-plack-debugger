@@ -105,7 +105,7 @@ sub finalize_request {
 
     my %results;
     foreach my $panel ( @{ $self->panels } ) {
-        $results{ $panel->title } = $panel->get_result;
+        $results{ $panel->title } = $panel->get_results;
     }
 
     $self->store_results( $env->{'plack.debugger.request_uid'}, \%results );

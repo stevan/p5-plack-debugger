@@ -58,7 +58,7 @@ my $debugger = Plack::Debugger->new(
             cleanup   => sub {
                 my ($self, $env) = @_;
                 push @{ $self->stash } => 'cleaning up request';
-                $self->set_result( $self->stash ); 
+                $self->set_results( $self->stash ); 
             }
         )
     ]

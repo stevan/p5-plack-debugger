@@ -44,7 +44,7 @@ my $debugger = Plack::Debugger->new(
             },
             after     => sub { 
                 my ($self, $env, $resp) = @_;
-                $self->set_result( tv_interval( $self->stash, [ gettimeofday ]) );
+                $self->set_results( tv_interval( $self->stash, [ gettimeofday ]) );
             }
         ),
         Plack::Debugger::Panel->new(
@@ -52,7 +52,7 @@ my $debugger = Plack::Debugger->new(
             subtitle  => '... capturing the execution env',
             before    => sub { 
                 my ($self, $env) = @_;
-                $self->set_result({ %ENV }); 
+                $self->set_results({ %ENV }); 
             }
         ),
         Plack::Debugger::Panel->new(
@@ -60,7 +60,7 @@ my $debugger = Plack::Debugger->new(
             subtitle  => '... capturing the Plack env',
             before    => sub { 
                 my ($self, $env) = @_;
-                $self->set_result({ map { ($_ => (''.$env->{ $_ })) } keys %$env }); 
+                $self->set_results({ map { ($_ => (''.$env->{ $_ })) } keys %$env }); 
             }
         )
     ]
