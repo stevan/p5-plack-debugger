@@ -80,7 +80,7 @@ sub call {
         return [ 405, [ 'Content-Type' => 'text/plain', 'Content-Length' => 18 ], [ 'Method Not Allowed' ] ]
             if $r->method ne 'GET';
 
-        my ($request_uid, $get_subrequests) = grep { $_ } split '/' => $r->path_info;
+        my ($request_uid, $get_subrequests, $get_specific_subrequest) = grep { $_ } split '/' => $r->path_info;
 
         # need a page-id
         return [ 400, [ 'Content-Type' => 'text/plain', 'Content-Length' => 11 ], [ 'Bad Request' ] ]
@@ -92,20 +92,73 @@ sub call {
                 [ 'Content-Type' => 'application/json' ],
                 [ 
                     $self->{'_JSON'}->encode({
-                        request_uid => $request_uid,
-                        results     => $self->debugger->load_results( $request_uid ),
-                        links       => [
+                        data  => $self->debugger->load_request_results( $request_uid ),
+                        links => [
                             { 
-                                rel => 'subrequests', 
-                                url => join "/" => $request_uid, 'subrequests'
+                                rel => 'self', 
+                                url => (join '/' => $self->base_url, $request_uid)
+                            },
+                            { 
+                                rel => 'subrequest.all', 
+                                url => (join '/' => $self->base_url, $request_uid, 'subrequest')
                             }
                         ]
                     })
                 ]
             ];
         }
+        elsif ( !$get_specific_subrequest ) {
+            my $all_subrequests = $self->debugger->load_all_subrequest_results( $request_uid );
+            return [
+                200,
+                [ 'Content-Type' => 'application/json' ],
+                [ 
+                    $self->{'_JSON'}->encode({
+                        data  => $all_subrequests,
+                        links => [
+                            { 
+                                rel => 'self', 
+                                url => (join '/' => $self->base_url, $request_uid, 'subrequest')
+                            },
+                            { 
+                                rel => 'request.parent', 
+                                url => (join '/' => $self->base_url, $request_uid)
+                            },
+                            map {
+                                {
+                                    rel => 'subrequest',
+                                    url => (join '/' => $self->base_url, $request_uid, 'subrequest', $_->{'request_uid'})
+                                }
+                            } @$all_subrequests
+                        ]
+                    })
+                ]
+            ];
+        }
         else {
-            return [ 500, [], ['Not Implemented Yet']];
+            return [
+                200,
+                [ 'Content-Type' => 'application/json' ],
+                [ 
+                    $self->{'_JSON'}->encode({
+                        data  => $self->debugger->load_subrequest_results( $request_uid, $get_specific_subrequest ),
+                        links => [
+                            { 
+                                rel => 'self', 
+                                url => (join '/' => $self->base_url, $request_uid, 'subrequest', $get_specific_subrequest)
+                            },
+                            { 
+                                rel => 'request.parent', 
+                                url => (join '/' => $self->base_url, $request_uid)
+                            },
+                            { 
+                                rel => 'subrequest.siblings', 
+                                url => (join '/' => $self->base_url, $request_uid, 'subrequest')
+                            }
+                        ]
+                    })
+                ]
+            ];
         }
         
     }
