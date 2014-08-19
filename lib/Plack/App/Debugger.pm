@@ -67,14 +67,14 @@ sub call {
 
     my $static_url = $self->static_url;
 
-    ## Get static resources ...
     if ( $r->path_info =~ m!^$static_url! ) {
-        # clean off the path ...
+        # clean off the path and 
+        # serve the static resources
         $r->env->{'PATH_INFO'} =~ s!^$static_url!!;
-        # serve static stuff ...
         return $self->{'_static_app'}->( $r->env );
     } 
     else {
+        # now handle the requests for results ...
 
         # this only supports GET requests
         return $self->_create_error_response( 405 => 'Method Not Allowed' )
@@ -82,10 +82,11 @@ sub call {
 
         my ($request_uid, $get_subrequests, $get_specific_subrequest) = grep { $_ } split '/' => $r->path_info;
 
-        # need a page-id
+        # we need to have a request-id at a minimum
         return $self->_create_error_response( 400 => 'Bad Request' )
             unless $request_uid;
 
+        # if no subrequests requested, get the base request
         if ( !$get_subrequests ) {
             return $self->_create_JSON_response(
                 200 => {
@@ -97,6 +98,7 @@ sub call {
                 }
             );
         }
+        # if no specific subrequest is requested, get all the subrequests for a specific request
         elsif ( !$get_specific_subrequest ) {
             my $all_subrequests = $self->debugger->load_all_subrequest_results( $request_uid );
             return $self->_create_JSON_response(
@@ -112,6 +114,7 @@ sub call {
                 }
             );
         }
+        # if a specific subrequest is requested, return that 
         else {
             return $self->_create_JSON_response(
                 200 => {
