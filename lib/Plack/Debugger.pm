@@ -108,22 +108,63 @@ sub finalize_request {
         $results{ $panel->title } = $panel->get_results;
     }
 
-    $self->store_results( $env->{'plack.debugger.request_uid'}, \%results );
+    if ( exists $env->{'plack.debugger.parent_request_uid'} ) {
+        $self->store_subrequest_results( 
+            $env->{'plack.debugger.parent_request_uid'}, 
+            $env->{'plack.debugger.request_uid'}, 
+            \%results 
+        );
+    }
+    else {
+        $self->store_request_results( 
+            $env->{'plack.debugger.request_uid'}, 
+            \%results 
+        );
+    }
 
     # always good to reset here too ...
     $_->reset foreach @{ $self->panels };
 }
 
-# ...
+# ... delegate to the underlying storage
 
-sub store_results {
-    my ($self, $request_id, $results) = @_;
-    $self->storage->store( $request_id, $results );
+sub store_request_results {
+    my ($self, $request_uid, $results) = @_;
+    $self->storage->store_request_results( 
+        $request_uid, 
+        {
+            'request_uid' => $request_uid,
+            'results'     => $results 
+        }
+    );
 }
 
-sub load_results {
+sub store_subrequest_results {
+    my ($self, $request_uid, $subrequest_uid, $results) = @_;
+    $self->storage->store_subrequest_results( 
+        $request_uid, 
+        $subrequest_uid, 
+        {
+            'parent_request_uid' => $request_uid,
+            'request_uid'        => $subrequest_uid,
+            'results'            => $results 
+        }
+    );
+}
+
+sub load_request_results {
     my ($self, $request_uid) = @_;
-    $self->storage->load( $request_uid );
+    $self->storage->load_request_results( $request_uid );
+}
+
+sub load_subrequest_results {
+    my ($self, $request_uid, $subrequest_uid) = @_;
+    $self->storage->load_subrequest_results( $request_uid, $subrequest_uid );
+}
+
+sub load_all_subrequest_results {
+    my ($self, $request_uid) = @_;
+    $self->storage->load_all_subrequest_results( $request_uid );
 }
 
 1;

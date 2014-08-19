@@ -112,13 +112,16 @@ test_psgi($app, sub {
             ok(-e $data_file, '... data has now been written');
 
             is_deeply(
-                $debugger->load_results( $UUIDS[-1] ),
+                $debugger->load_request_results( $UUIDS[-1] ),
                 {
-                    'Tester' => [
-                        'started request at /',
-                        'finished request with status 200',
-                        'cleaning up request'
-                    ]
+                    'request_uid' => $UUIDS[-1],
+                    'results' => {
+                        'Tester'      => [
+                            'started request at /',
+                            'finished request with status 200',
+                            'cleaning up request'
+                        ]
+                    }
                 },
                 '... got the expected collected data in the data-dir'
             );

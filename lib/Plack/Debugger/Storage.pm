@@ -41,22 +41,61 @@ sub filename_fmt { (shift)->{'filename_fmt'} } # format string for filename, tak
 
 # ...
 
-sub store {
+sub store_request_results {
     my ($self, $request_uid, $results) = @_;
-    my $file = File::Spec->catfile( $self->data_dir, sprintf $self->filename_fmt => $request_uid );
+    $self->_store_results( $self->data_dir, (sprintf $self->filename_fmt => $request_uid), $results );
+}
+
+sub store_subrequest_results {
+    my ($self, $request_uid, $subrequest_uid, $results) = @_;
+    my $dir = File::Spec->catfile( $self->data_dir, $request_uid );
+    mkdir $dir or die "Could not create $dir because $!"
+        unless -e $dir;
+    $self->_store_results( $dir, (sprintf $self->filename_fmt => $subrequest_uid), $results );
+}
+
+sub load_request_results {
+    my ($self, $request_uid) = @_;
+    return $self->_load_results( $self->data_dir, (sprintf $self->filename_fmt => $request_uid) );
+}
+
+sub load_subrequest_results {
+    my ($self, $request_uid, $subrequest_uid) = @_;
+    my $dir = File::Spec->catfile( $self->data_dir, $request_uid );
+    die "Could not find $dir" unless -e $dir;
+    return $self->_load_results( $dir, (sprintf $self->filename_fmt => $subrequest_uid) );
+}
+
+sub load_all_subrequest_results {
+    my ($self, $request_uid) = @_;
+    my $dir = File::Spec->catfile( $self->data_dir, $request_uid );
+    return [] unless -e $dir;
+    return [
+        map {
+            $self->_load_results( $dir, (File::Spec->splitpath($_))[2] )
+        } glob( File::Spec->catfile( $dir, sprintf $self->filename_fmt => '*' ) )
+    ];
+}
+
+# private utils ...
+
+sub _store_results {
+    my ($self, $dir, $filename, $results) = @_;
+    my $file = File::Spec->catfile( $dir, $filename );
     my $fh   = IO::File->new( $file, '>' ) or die "Could not open file($file) for writing because: $!";
     $fh->print( $self->serializer->( $results ) );
     $fh->close;
 }
 
-sub load {
-    my ($self, $request_uid) = @_;
-    my $file = File::Spec->catfile( $self->data_dir, sprintf $self->filename_fmt => $request_uid );
+sub _load_results {
+    my ($self, $dir, $filename) = @_;
+    my $file = File::Spec->catfile( $dir, $filename );
     my $fh   = IO::File->new( $file, '<' ) or die "Could not open file($file) for reading because: $!";
     my $results = $self->deserializer->( join '' => <$fh> ) ;
     $fh->close;
     $results;
 }
+
 
 1;
 
