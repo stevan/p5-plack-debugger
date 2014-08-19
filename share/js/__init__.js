@@ -93,11 +93,11 @@ plack_debugger.ready(function ($) {
 
     $.getJSON(
         this.config["root_url"] + '/' + this.request_uid
-    ).then(function (data) {
+    ).then(function (res) {
         var $toolbar = $("#plack-debugger-toolbar");
         var $content = $("#plack-debugger-content");
 
-        $.each( data.results, function (k, v) {
+        $.each( res.data.results, function (k, v) {
             $toolbar.append('<span>' + k + '</span><span class="seperator">|</span>');
 
             // console.log( typeof v );
