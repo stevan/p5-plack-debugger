@@ -139,6 +139,7 @@
 #plack-debugger .toolbar .panels .panel {
     border-bottom : 2px groove;
     border-color  : #aaaaaa #111111;
+    min-height    : 35px;
 }
 
 #plack-debugger .toolbar .panels .panel:hover {
@@ -153,7 +154,7 @@
 #plack-debugger .toolbar .panels .panel .notifications .badge {
     float         : right;    
     font-weight   : bold;
-    margin-top    : 10px;
+    margin-top    : 5px;
     margin-left   : 5px;
     padding       : 2px 5px;
     border-radius : 10px;
@@ -249,6 +250,10 @@
     text-decoration : underline;
     font-weight     : bold;
     cursor          : pointer;
+}
+
+#plack-debugger .badge span {
+    color : inherit;
 }
 
 #plack-debugger .error {

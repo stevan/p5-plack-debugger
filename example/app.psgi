@@ -65,7 +65,6 @@ my $debugger = Plack::Debugger->new(
         ),
         Plack::Debugger::Panel->new(
             title      => 'Warnings',
-            subtitle   => '... capturing the Plack env',
             before     => sub { 
                 my ($self, $env) = @_;
                 $self->stash([]);
@@ -79,6 +78,18 @@ my $debugger = Plack::Debugger->new(
                 my ($self, $env) = @_;
                 $SIG{'__WARN__'} = 'DEFAULT';  
                 $self->set_result( $self->stash );
+            }            
+        ),
+        Plack::Debugger::Panel->new(
+            title => 'Pass/Fail',
+            after => sub { 
+                my ($self, $env, $resp) = @_;
+                if ($resp->[0] >= 500) {
+                    $self->notify('error');
+                } 
+                else {
+                    $self->notify('success');
+                }
             }            
         )
     ]
@@ -102,14 +113,19 @@ builder {
             warn "Starting request";
 
             if ( $r->path_info eq '/api' ) {
+                warn "Sending AJAX JSON response";
                 return [ 
                     200, 
                     [ 'Content-Type' => 'application/json' ], 
                     [ q[{"test":[1,2,3]}] ]
                 ]
             }
+            elsif ( $r->path_info eq '/api/v2' ) {
+                warn "Sending AJAX JSON error response";
+                return [ 500, [], [] ];
+            }
             else {
-                warn "Sending HTML request";
+                warn "Sending HTML response";
                 return [ 
                     200, 
                     [ 'Content-Type' => 'text/html' ], 
@@ -125,6 +141,12 @@ builder {
                                             console.log(data);
                                         });
                                     });
+
+                                    $("#ajax-test-2").click(function () {
+                                        $.getJSON("/api/v2").then(function (data) {
+                                            console.log(data);
+                                        });
+                                    });
                                 });
                             </script>
                         </head>
@@ -133,6 +155,8 @@ builder {
                             <hr/>
                             <p>This is a test of the Plack-Debugger</p>
                             <input id="ajax-test" type="button" value="TEST ME!" />
+                            <br/>
+                            <input id="ajax-test-2" type="button" value="BREAK ME!" />
                             <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
                             <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
                             <hr/>

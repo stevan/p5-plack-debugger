@@ -3,9 +3,12 @@
 if ( Plack == undefined ) var Plack = {};
 
 Plack.Debugger = function () {
-    this.request_uid = null;
-    this.config      = {};
-
+    this.config             = {};
+    this.request_uid        = null;
+    this.request_results    = null;
+    this.subrequest_panels  = { "toolbar" : null, "content" : null };
+    this.subrequest_results = [];
+    this.subrequest_count   = 0;
     this._init();    
 };
 
@@ -75,8 +78,65 @@ plack_debugger.ready(function ($) {
     var self = this;
 
     // Global AJAX request setup ...
+
     $(document).ajaxSend(function (e, xhr, options) {
-        xhr.setRequestHeader('X-Plack-Debugger-Parent-Request-UID', self.request_uid);
+        if ( self.config["root_url"] != undefined && options.url.indexOf( self.config["root_url"] ) == -1 ) {
+            xhr.setRequestHeader('X-Plack-Debugger-Parent-Request-UID', self.request_uid);
+            self.subrequest_count++;
+        }
+    });
+
+    $(document).ajaxComplete(function (e, xhr, options) {
+        if ( self.subrequest_count != self.subrequest_results.length ) {
+            $.ajax({
+                dataType : "json",
+                url      : self.request_results.links[1].url,
+                global   : false
+            }).then(function (res) {
+                self.subrequest_results = res;
+
+                var subrequest_notification_totals = { "success" : 0, "error" : 0, "warning" : 0 };
+
+                self.subrequest_panels["content"].find(".content").html('');
+
+                $.each( res.data, function (i, e) {
+
+                    self.subrequest_panels["content"].find(".content").append(
+                        '<h2>Subrequest UID: ' + e.request_uid + '</h2>'
+                    );
+
+                    $.each( e.results, function (j, f) {
+                        if ( f.notifications ) {
+                            subrequest_notification_totals.error   += f.notifications.error;
+                            subrequest_notification_totals.warning += f.notifications.warning;
+                            subrequest_notification_totals.success += f.notifications.success;
+                        }
+
+                        self.subrequest_panels["content"].find(".content").append(
+                            '<h3>' + f.title + '</h3>'
+                            + '<h4>' + f.subtitle + '</h4>'
+                            + '<div>' + generate_data_for_panel( f.result ) + '</div>'
+                        );
+                    });
+
+                    self.subrequest_panels["content"].find(".content").append(
+                        '<hr/>'
+                    );
+
+                    self.subrequest_panels["toolbar"].find(".notifications .error").text( subrequest_notification_totals.error );
+                    self.subrequest_panels["content"].find(".notifications .error > span").text( subrequest_notification_totals.error );
+
+                    self.subrequest_panels["toolbar"].find(".notifications .warning").text( subrequest_notification_totals.warning );
+                    self.subrequest_panels["content"].find(".notifications .warning > span").text( subrequest_notification_totals.warning );
+
+                    self.subrequest_panels["toolbar"].find(".notifications .success").text( subrequest_notification_totals.success );
+                    self.subrequest_panels["content"].find(".notifications .success > span").text( subrequest_notification_totals.success );
+
+                    self.subrequest_panels["content"].find(".notifications .info > span").text( res.data.length );                    
+                });
+
+            });
+        }
     });
 
     // setup the debugger UI
@@ -128,6 +188,7 @@ plack_debugger.ready(function ($) {
     // load and draw panel information 
 
     var generate_data_for_panel = function (data) {
+        if (!data) return "";
         switch ( data.constructor ) {
             case String:
             case Number:
@@ -149,23 +210,25 @@ plack_debugger.ready(function ($) {
         }
     };
 
-    $.getJSON(
-        self.config["root_url"] + '/' + self.request_uid
-    ).then(function (res) {
+    $.ajax({
+        dataType : "json",
+        url      : self.config["root_url"] + '/' + self.request_uid,
+        global   : false
+    }).then(function (res) {
         
         var $toolbar_panels = $toolbar.find(".panels");
 
         $.each( 
             res.data.results, 
             function (i, e) {
+
                 $toolbar_panels.append(
                     '<div class="panel">'
                         + '<div class="notifications">'
                             + ((e['notifications'] != undefined)
-                                ? (((e['notifications']['success'] > 0) ? '<div class="badge success">' + e['notifications']['success'] + '</div>' : '')
-                                    + ((e['notifications']['info']    > 0) ? '<div class="badge info">'    + e['notifications']['info']    + '</div>' : '')                       
-                                    + ((e['notifications']['warning'] > 0) ? '<div class="badge warning">' + e['notifications']['warning'] + '</div>' : '')
-                                    + ((e['notifications']['error']   > 0) ? '<div class="badge error">'   + e['notifications']['error']   + '</div>' : ''))
+                                ? (((e['notifications']['warning'] > 0) ? '<div class="badge warning">' + e['notifications']['warning'] + '</div>' : '')
+                                  +((e['notifications']['error']   > 0) ? '<div class="badge error">'   + e['notifications']['error']   + '</div>' : '')
+                                  +((e['notifications']['success'] > 0) ? '<div class="badge success">' + e['notifications']['success'] + '</div>' : ''))
                                 : '')
                         + '</div>'
                         + '<span class="idx">' + i + "</span>"
@@ -180,10 +243,9 @@ plack_debugger.ready(function ($) {
                             + '<div class="close-button">&#9746;</div>'
                             + '<div class="notifications">'
                                 + ((e['notifications'] != undefined)
-                                    ? (((e['notifications']['success'] > 0) ? '<div class="badge success">success ('     + e['notifications']['success'] + ')</div>' : '')
-                                        + ((e['notifications']['info']    > 0) ? '<div class="badge info">info ('        + e['notifications']['info']    + ')</div>' : '')                       
-                                        + ((e['notifications']['warning'] > 0) ? '<div class="badge warning">warnings (' + e['notifications']['warning'] + ')</div>' : '')
-                                        + ((e['notifications']['error']   > 0) ? '<div class="badge error">errors ('     + e['notifications']['error']   + ')</div>' : ''))
+                                    ? (((e['notifications']['warning'] > 0) ? '<div class="badge warning">warnings (' + e['notifications']['warning'] + ')</div>' : '')
+                                      +((e['notifications']['error']   > 0) ? '<div class="badge error">errors ('     + e['notifications']['error']   + ')</div>' : '')
+                                      +((e['notifications']['success'] > 0) ? '<div class="badge success">success ('  + e['notifications']['success'] + ')</div>' : ''))
                                     : '')
                             + '</div>'
                             + '<div class="title">' + e['title'] + '</div>'
@@ -197,6 +259,34 @@ plack_debugger.ready(function ($) {
             }
         );
 
+        $toolbar_panels.append(
+            '<div class="panel">'
+                + '<div class="notifications">'                   
+                    + '<div class="badge warning">0</div>'
+                    + '<div class="badge error">0</div>'
+                    + '<div class="badge success">0</div>'                    
+                + '</div>'
+                + '<span class="idx">' + res.data.results.length + "</span>"
+                + '<div class="title">AJAX Subrequests</div>'
+            + '</div>'
+        );
+
+        $content.append(
+            '<div id="plack-debugger-panel-content-' + res.data.results.length + '" class="panel">'
+                + '<div class="header">'
+                    + '<div class="close-button">&#9746;</div>'
+                    + '<div class="notifications">'                      
+                        + '<div class="badge warning">warnings (<span>0</span>)</div>'
+                        + '<div class="badge error">errors (<span>0</span>)</div>'
+                        + '<div class="badge success">success (<span>0</span>)</div>'                        
+                        + '<div class="badge info">num-requests (<span>0</span>)</div>'                                                
+                    + '</div>'
+                    + '<div class="title">AJAX Subrequests</div>'
+                + '</div>'
+                + '<div class="content"></div>'
+            + '</div>'
+        );
+
         $toolbar_panels.find(".panel").click(function () {
             $content.find('.panel').hide();
             $("#plack-debugger-panel-content-" + $(this).find(".idx").text()).show();
@@ -207,6 +297,10 @@ plack_debugger.ready(function ($) {
             $(this).parent().parent().hide();
             $content.hide();
         });
+
+        self.request_results              = res;
+        self.subrequest_panels["toolbar"] = $toolbar_panels.find(".panel").last();
+        self.subrequest_panels["content"] = $content.find(".panel").last();
 
     });
 
