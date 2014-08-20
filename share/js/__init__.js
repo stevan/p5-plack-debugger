@@ -200,10 +200,12 @@ plack_debugger.ready(function ($) {
         $toolbar_panels.find(".panel").click(function () {
             $content.find('.panel').hide();
             $("#plack-debugger-panel-content-" + $(this).find(".idx").text()).show();
+            $content.show();
         });
 
         $content.find(".panel > .header > .close-button").click(function () {
             $(this).parent().parent().hide();
+            $content.hide();
         });
 
     });
