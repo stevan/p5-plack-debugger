@@ -5,7 +5,7 @@ use warnings;
 
 use Scalar::Util qw[ refaddr ];
 
-use constant NOTIFICATION_LEVELS => [ qw[ error warning info success ] ];
+use constant NOTIFICATION_LEVELS => [ qw[ error warning success ] ];
 
 sub new {
     my $class = shift;
