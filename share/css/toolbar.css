@@ -147,7 +147,20 @@
     cursor     : pointer;
 }
 
-/* Collapsed Toolbar */
+#plack-debugger .toolbar .panels .panel .notifications {
+    margin-right  : 10px;
+}
+
+#plack-debugger .toolbar .panels .panel .notifications .badge {
+    float         : right;    
+    font-weight   : bold;
+    margin-top    : 10px;
+    margin-left   : 5px;
+    padding       : 2px 5px;
+    border-radius : 10px;
+}
+
+/* Panel Content */
 
 #plack-debugger .panel-content {
     z-index  : 99999999;
@@ -174,6 +187,18 @@
     left       : 0;   
     right      : 300px; 
     height     : 70px;
+}
+
+#plack-debugger .panel-content .panel .notifications {
+    margin-right  : 100px;
+}
+
+#plack-debugger .panel-content .panel .notifications .badge {
+    float         : right;    
+    margin-top    : 22px;
+    margin-left   : 5px;    
+    padding       : 2px 5px;
+    border-radius : 5px;
 }
 
 #plack-debugger .panel-content .panel .header .close-button {
@@ -226,6 +251,26 @@
     text-decoration : underline;
     font-weight     : bold;
     cursor          : pointer;
+}
+
+#plack-debugger .error {
+    background : #d9534f;
+    color      : #ffffff;
+}
+
+#plack-debugger .warning {
+    background : #f0ad4e;
+    color      : #ffffff;
+}
+
+#plack-debugger .info {
+    background : #5bc0de;
+    color      : #ffffff;
+}
+
+#plack-debugger .success {
+    background : #5cb85c;
+    color      : #ffffff;
 }
 
 #plack-debugger .title {

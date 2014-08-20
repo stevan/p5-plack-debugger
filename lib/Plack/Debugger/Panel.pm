@@ -5,6 +5,8 @@ use warnings;
 
 use Scalar::Util qw[ refaddr ];
 
+use constant NOTIFICATION_LEVELS => [ qw[ error warning info success ] ];
+
 sub new {
     my $class = shift;
     my %args  = @_;
@@ -24,8 +26,9 @@ sub new {
         after    => $args{'after'},
         cleanup  => $args{'cleanup'},
         # private data ...
-        _result  => undef,
-        _stash   => undef
+        _result        => undef,
+        _stash         => undef,
+        _notifications => { map { $_ => 0 } @{ NOTIFICATION_LEVELS() } },
     } => $class;
 
     # ... title if one is not provided
@@ -38,7 +41,10 @@ sub new {
 # accessors 
 
 sub title    { (shift)->{'title'}    } # the main title to display for this debug panel (optional, but recommended)
-sub subtitle { (shift)->{'subtitle'} } # the sub-title to display for this debug panel (optional)   
+sub subtitle { (shift)->{'subtitle'} } # the sub-title to display for this debug panel (optional)    
+
+# phase handlers
+
 sub before   { (shift)->{'before'}   } # code ref to be run before the request   - args: ($self, $env)
 sub after    { (shift)->{'after'}    } # code ref to be run after the request    - args: ($self, $env, $response)
 sub cleanup  { (shift)->{'cleanup'}  } # code ref to be run in the cleanup phase - args: ($self, $env, $response)    
@@ -48,6 +54,23 @@ sub cleanup  { (shift)->{'cleanup'}  } # code ref to be run in the cleanup phase
 sub has_before   { !! (shift)->before  }
 sub has_after    { !! (shift)->after   }
 sub has_cleanup  { !! (shift)->cleanup }
+
+# notification ...
+
+sub has_notifications {
+    my $self = shift;
+    !! scalar grep { $_ } values %{ $self->{'_notifications'} };
+}
+
+sub notifications { (shift)->{'_notifications'} }
+
+sub notify {
+    my ($self, $type, $inc) = @_;
+    $inc ||= 1;
+    die "Notification must be one of the following types (error, warning or info)"
+        unless scalar grep { $_ eq $type } @{ NOTIFICATION_LEVELS() };
+    $self->{'_notifications'}->{ $type } += $inc;
+}
 
 # stash ...
 
@@ -73,6 +96,7 @@ sub reset {
     my $self = shift;
     undef $self->{'_stash'};
     undef $self->{'_result'};
+    $self->{'_notifications'}->{ $_ } = 0 foreach @{ NOTIFICATION_LEVELS() };
 }
 
 1;

@@ -108,7 +108,10 @@ sub finalize_request {
         push @results => { 
             title    => $panel->title,
             subtitle => $panel->subtitle,
-            result   => $panel->get_result
+            result   => $panel->get_result,
+            ($panel->has_notifications 
+                ? (notifications => $panel->notifications) 
+                : ())
         };
     }
 

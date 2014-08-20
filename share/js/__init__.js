@@ -160,6 +160,14 @@ plack_debugger.ready(function ($) {
             function (i, e) {
                 $toolbar_panels.append(
                     '<div class="panel">'
+                        + '<div class="notifications">'
+                            + ((e['notifications'] != undefined)
+                                ? (((e['notifications']['success'] > 0) ? '<div class="badge success">' + e['notifications']['success'] + '</div>' : '')
+                                    + ((e['notifications']['info']    > 0) ? '<div class="badge info">'    + e['notifications']['info']    + '</div>' : '')                       
+                                    + ((e['notifications']['warning'] > 0) ? '<div class="badge warning">' + e['notifications']['warning'] + '</div>' : '')
+                                    + ((e['notifications']['error']   > 0) ? '<div class="badge error">'   + e['notifications']['error']   + '</div>' : ''))
+                                : '')
+                        + '</div>'
                         + '<span class="idx">' + i + "</span>"
                         + '<div class="title">' + e['title'] + '</div>'
                         + ((e['subtitle'] != undefined) ? '<div class="subtitle">' + e['subtitle'] + '</div>' : '')
@@ -170,6 +178,14 @@ plack_debugger.ready(function ($) {
                     '<div id="plack-debugger-panel-content-' + i + '" class="panel">'
                         + '<div class="header">'
                             + '<div class="close-button">&#9746;</div>'
+                            + '<div class="notifications">'
+                                + ((e['notifications'] != undefined)
+                                    ? (((e['notifications']['success'] > 0) ? '<div class="badge success">success ('     + e['notifications']['success'] + ')</div>' : '')
+                                        + ((e['notifications']['info']    > 0) ? '<div class="badge info">info ('        + e['notifications']['info']    + ')</div>' : '')                       
+                                        + ((e['notifications']['warning'] > 0) ? '<div class="badge warning">warnings (' + e['notifications']['warning'] + ')</div>' : '')
+                                        + ((e['notifications']['error']   > 0) ? '<div class="badge error">errors ('     + e['notifications']['error']   + ')</div>' : ''))
+                                    : '')
+                            + '</div>'
                             + '<div class="title">' + e['title'] + '</div>'
                             + ((e['subtitle'] != undefined) ? '<div class="subtitle">' + e['subtitle'] + '</div>' : '')
                         + '</div>'

@@ -62,6 +62,24 @@ my $debugger = Plack::Debugger->new(
                 my ($self, $env) = @_;
                 $self->set_result({ map { ($_ => (''.$env->{ $_ })) } keys %$env }); 
             }
+        ),
+        Plack::Debugger::Panel->new(
+            title      => 'Warnings',
+            subtitle   => '... capturing the Plack env',
+            before     => sub { 
+                my ($self, $env) = @_;
+                $self->stash([]);
+                $SIG{'__WARN__'} = sub { 
+                    push @{ $self->stash } => @_;
+                    $self->notify('warning');
+                    CORE::warn @_;
+                };
+            },
+            after    => sub { 
+                my ($self, $env) = @_;
+                $SIG{'__WARN__'} = 'DEFAULT';  
+                $self->set_result( $self->stash );
+            }            
         )
     ]
 );
@@ -81,6 +99,8 @@ builder {
         sub {
             my $r = Plack::Request->new( shift );
 
+            warn "Starting request";
+
             if ( $r->path_info eq '/api' ) {
                 return [ 
                     200, 
@@ -89,6 +109,7 @@ builder {
                 ]
             }
             else {
+                warn "Sending HTML request";
                 return [ 
                     200, 
                     [ 'Content-Type' => 'text/html' ], 
