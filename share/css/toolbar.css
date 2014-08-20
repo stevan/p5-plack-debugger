@@ -80,8 +80,7 @@
 /* Collapsed Toolbar */
 
 #plack-debugger .collapsed {
-    background    : #cccccc;
-    /*width         : 70px;*/
+    background    : #dddddd;
     z-index       : 100000000;
     position      : fixed;
     top           : 0;
@@ -89,7 +88,7 @@
     display       : none;
     border-left   : 3px ridge;
     border-bottom : 3px ridge;    
-    border-color  : #111111 #dddddd;    
+    border-color  : #bbbbbb #cccccc; 
 }
 
 #plack-debugger .collapsed .open-button {
@@ -108,7 +107,7 @@
 /* Toolbar */
 
 #plack-debugger .toolbar {
-    background    : #cccccc;    
+    background    : #dddddd;    
     width         : 300px;
     z-index       : 100000000;
     position      : fixed;
@@ -116,12 +115,12 @@
     bottom        : 0;
     right         : 0;
     border-left   : 3px ridge;
-    border-color  : #111111 #dddddd;
+    border-color  : #aaaaaa #cccccc;
 }
 
 #plack-debugger .toolbar .header {
     border-bottom : 2px groove;
-    border-color  : #dddddd #111111;
+    border-color  : #aaaaaa #111111;
 }
 
 #plack-debugger .toolbar .header .close-button {
@@ -139,11 +138,11 @@
 
 #plack-debugger .toolbar .panels .panel {
     border-bottom : 2px groove;
-    border-color  : #dddddd #111111;
+    border-color  : #aaaaaa #111111;
 }
 
 #plack-debugger .toolbar .panels .panel:hover {
-    background : #cceeee;
+    background : #eeeeee;
     cursor     : pointer;
 }
 
@@ -169,9 +168,8 @@
     left     : 0;
     right    : 300px;
     height   : 100%;
+    display  : none;
 }
-
-/* panel content */
 
 #plack-debugger .panel-content .panel {
     background : #cccccc;
