@@ -86,11 +86,11 @@ plack_debugger.ready(function ($) {
         + '</style>'
         + '<div id="plack-debugger">' 
             + '<div class="collapsed">' 
-                + '<div class="open-button">&lArr; Open</a></div>'
+                + '<div class="open-button">&#9756;</div>'
             + '</div>'
             + '<div class="toolbar">' 
                 + '<div class="header">'
-                    + '<div class="close-button">&rArr; Hide</a></div>'
+                    + '<div class="close-button">&#9758;</div>'
                     + '<div class="data">' 
                         + '<strong>uid</strong>' 
                         + ' : ' 
@@ -169,6 +169,7 @@ plack_debugger.ready(function ($) {
                 $content.append(
                     '<div id="plack-debugger-panel-content-' + i + '" class="panel">'
                         + '<div class="header">'
+                            + '<div class="close-button">&#9746;</div>'
                             + '<div class="title">' + e['title'] + '</div>'
                             + ((e['subtitle'] != undefined) ? '<div class="subtitle">' + e['subtitle'] + '</div>' : '')
                         + '</div>'
@@ -181,10 +182,14 @@ plack_debugger.ready(function ($) {
         );
 
         $toolbar_panels.find(".panel").click(function () {
-            // TODO - highlight the toolbar panel when active
             $content.find('.panel').hide();
             $("#plack-debugger-panel-content-" + $(this).find(".idx").text()).show();
         });
+
+        $content.find(".panel > .header > .close-button").click(function () {
+            $(this).parent().parent().hide();
+        });
+
     });
 
 });

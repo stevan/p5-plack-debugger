@@ -81,29 +81,34 @@
 
 #plack-debugger .collapsed {
     background    : #cccccc;
-    width         : 70px;
+    /*width         : 70px;*/
     z-index       : 100000000;
     position      : fixed;
     top           : 0;
     right         : 0;
     display       : none;
+    border-left   : 3px ridge;
+    border-bottom : 3px ridge;    
+    border-color  : #111111 #dddddd;    
 }
 
 #plack-debugger .collapsed .open-button {
-    padding    : 5px 10px;
-    background : #aaaaaa;
+    padding     : 5px;
+    background  : #aaaaaa;
+    color       : #666666;
+    font-size   : 3em;
+    line-height : 0.75em;
 }
 
 #plack-debugger .collapsed .open-button:hover {
-    text-decoration : underline;
-    font-weight     : bold;
-    cursor          : pointer;
+    cursor : pointer;
+    color  : #000000;
 }
 
 /* Toolbar */
 
 #plack-debugger .toolbar {
-    background    : #cccccc;
+    background    : #cccccc;    
     width         : 300px;
     z-index       : 100000000;
     position      : fixed;
@@ -120,14 +125,16 @@
 }
 
 #plack-debugger .toolbar .header .close-button {
-    padding    : 5px 10px;
-    background : #aaaaaa;
+    padding     : 5px;
+    background  : #aaaaaa;
+    color       : #666666;
+    font-size   : 3em;
+    line-height : 0.75em;  
 }
 
 #plack-debugger .toolbar .header .close-button:hover {
-    text-decoration : underline;
-    font-weight     : bold;
-    cursor          : pointer;
+    cursor : pointer;
+    color  : #000000;
 }
 
 #plack-debugger .toolbar .panels .panel {
@@ -169,6 +176,18 @@
     height     : 70px;
 }
 
+#plack-debugger .panel-content .panel .header .close-button {
+    float         : right;
+    font-size     : 3.5em;
+    padding-right : 30px;
+    color         : #666666;
+}
+
+#plack-debugger .panel-content .panel .header .close-button:hover {
+    cursor : pointer;
+    color  : #000000;
+}
+
 #plack-debugger .panel-content .panel .header .title {
     font-size : 2.5em;
 }
@@ -189,10 +208,7 @@
 }
 
 #plack-debugger .panel-content .panel .content table td {
-    border : 1px solid #999999;
-}
-
-#plack-debugger .panel-content .panel .content table td {
+    border  : 1px solid #999999;
     padding : 5px;
 }
 
