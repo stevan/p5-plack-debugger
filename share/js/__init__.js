@@ -128,22 +128,22 @@ plack_debugger.ready(function ($) {
     // load and draw panel information 
 
     var generate_data_for_panel = function (data) {
-        switch ( typeof data ) {
-            case 'string':
-            case 'number':
+        switch ( data.constructor ) {
+            case String:
+            case Number:
                 return data;
-            case 'object':
+            case Array:
+                var out = '<table>';
+                for (var i = 0; i < data.length; i++) {
+                    out += '<tr><td>' + data[i] + '</td></tr>';
+                }
+                return out + '</table>'; 
+            case Object:
                 var out = '<table>';
                 for (key in data) {
                     out += '<tr><td>' + key + '</td><td>' + data[key] + '</td></tr>';
                 }
                 return out + '</table>';
-            case 'array':
-                var out = '<ul>';
-                for (var i = 0; i < data.length; i++) {
-                    out += '<li>' + data[i] + '</li>';
-                }
-                return out + '</ul>';  
             default:
                 return "NO IDEA WHAT THIS IS! " + (typeof data);          
         }
