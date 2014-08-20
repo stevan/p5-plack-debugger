@@ -101,26 +101,25 @@ plack_debugger.ready(function ($) {
 
                 $.each( res.data, function (i, e) {
 
-                    self.subrequest_panels["content"].find(".content").append(
-                        '<h2>Subrequest UID: ' + e.request_uid + '</h2>'
-                    );
+                    var subrequest_content = '<div class="subrequest-content">' 
+                        + '<div class="title">Subrequest [' + e.request_uid + ']</div>';
 
                     $.each( e.results, function (j, f) {
                         if ( f.notifications ) {
-                            subrequest_notification_totals.error   += f.notifications.error;
-                            subrequest_notification_totals.warning += f.notifications.warning;
-                            subrequest_notification_totals.success += f.notifications.success;
+                            subrequest_notification_totals.error   += f['notifications']['error'];
+                            subrequest_notification_totals.warning += f['notifications']['warning'];
+                            subrequest_notification_totals.success += f['notifications']['success'];
                         }
 
-                        self.subrequest_panels["content"].find(".content").append(
-                            '<h3>' + f.title + '</h3>'
+                        subrequest_content += '<div class="subcontent">'
+                            + '<h3>' + f.title + '</h3>'
                             + '<h4>' + f.subtitle + '</h4>'
                             + '<div>' + generate_data_for_panel( f.result ) + '</div>'
-                        );
+                        + '</div>';
                     });
 
                     self.subrequest_panels["content"].find(".content").append(
-                        '<hr/>'
+                        subrequest_content + '</div>' 
                     );
 
                     self.subrequest_panels["toolbar"].find(".notifications .error").text( subrequest_notification_totals.error );
