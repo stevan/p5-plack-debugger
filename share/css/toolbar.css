@@ -236,16 +236,35 @@
     padding : 5px;
 }
 
+/* subrequest content */
+
 #plack-debugger .panel-content .panel .content .subrequest-content {
 
 }
 
-#plack-debugger .panel-content .panel .content .subrequest-content .title {
-    font-size     : 2.5em;
-    background    : #aaaaaa;
+#plack-debugger .panel-content .panel .content .subrequest-content .subheader {
+    background   : #aaaaaa;
+    min-height   : 25px; 
+    border       : 1px solid #333333;
 }
 
-#plack-debugger .panel-content .panel .content .subrequest-content .subcontent {
+#plack-debugger .panel-content .panel .content .subrequest-content .subheader .title:hover {
+    cursor : pointer;
+}
+
+#plack-debugger .panel-content .panel .content .subrequest-content .subheader .notifications {
+    margin-right  : 10px;
+}
+
+#plack-debugger .panel-content .panel .content .subrequest-content .subheader .notifications .badge {
+    float         : right;    
+    margin-top    : 5px;
+    margin-left   : 5px;    
+    padding       : 2px 5px;
+    border-radius : 5px;
+}
+
+#plack-debugger .panel-content .panel .content .subrequest-content .subpanel {
     border  : 1px solid #999999;
     padding : 5px;
 }

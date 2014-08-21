@@ -91,33 +91,59 @@ plack_debugger.ready(function ($) {
                 url      : self.request_results.links[1].url,
                 global   : false
             }).then(function (res) {
+
+                // save the subrequest results 
                 self.subrequest_results = res;
 
-                var subrequest_notification_totals = { "success" : 0, "error" : 0, "warning" : 0 };
+                // need totals for all subrequests
+                var all_subrequest_notification_totals = { "success" : 0, "error" : 0, "warning" : 0 };
 
-                self.subrequest_panels["content"].find(".content").html('');
+                // clean out the content area ...
+                var $content_area = self.subrequest_panels["content"].find(".content");
+                $content_area.html('');
 
-                $.each( res.data, function (i, e) {
+                // looping through all the subrequests
+                $.each( res.data, function (i, subrequest) {
 
-                    var subrequest_content = '<div class="subrequest-content">' 
-                        + '<div class="title">Subrequest [' + e.request_uid + ']</div>';
+                    var subpanels = '';
 
-                    $.each( e.results, function (j, f) {
-                        if ( f.notifications ) {
-                            subrequest_notification_totals.error   += f['notifications']['error'];
-                            subrequest_notification_totals.warning += f['notifications']['warning'];
-                            subrequest_notification_totals.success += f['notifications']['success'];
+                    // need totals for all subrequests
+                    var subrequest_notification_totals = { "success" : 0, "error" : 0, "warning" : 0 };
+
+                    $.each( subrequest.results, function (j, results) {
+                        if ( results.notifications ) {
+                            subrequest_notification_totals.error   += results.notifications.error;
+                            subrequest_notification_totals.warning += results.notifications.warning;
+                            subrequest_notification_totals.success += results.notifications.success;
+
+                            all_subrequest_notification_totals.error   += results.notifications.error;
+                            all_subrequest_notification_totals.warning += results.notifications.warning;
+                            all_subrequest_notification_totals.success += results.notifications.success;
                         }
 
-                        subrequest_content += '<div class="subcontent">'
-                            + '<h3>' + f.title + '</h3>'
-                            + '<h4>' + f.subtitle + '</h4>'
-                            + '<div>' + generate_data_for_panel( f.result ) + '</div>'
+                        subpanels += '<div class="subpanel">'
+                            + '<h3>' + results.title + '</h3>'
+                            + '<h4>' + results.subtitle + '</h4>'
+                            + '<div>' + generate_data_for_panel( results.result ) + '</div>'
                         + '</div>';
                     });
 
-                    self.subrequest_panels["content"].find(".content").append(
-                        subrequest_content + '</div>' 
+                    $content_area.append(
+                        '<div class="subrequest-content">' 
+                            + '<div class="subheader">'
+                                + '<div class="notifications">'
+                                    + '<div class="badge warning">' + subrequest_notification_totals.warning + '</div>'
+                                    + '<div class="badge error">'   + subrequest_notification_totals.error   + '</div>'
+                                    + '<div class="badge success">' + subrequest_notification_totals.success + '</div>'
+                                + '</div>'
+                                + '<div class="title">' 
+                                    + subrequest.request_uid 
+                                + '</div>'
+                            + '</div>'
+                            + '<div class="subpanels">'
+                                + subpanels
+                            + '</div>' 
+                        + '</div>' 
                     );
 
                     self.subrequest_panels["toolbar"].find(".notifications .error").text( subrequest_notification_totals.error );
@@ -130,6 +156,15 @@ plack_debugger.ready(function ($) {
                     self.subrequest_panels["content"].find(".notifications .success > span").text( subrequest_notification_totals.success );
 
                     self.subrequest_panels["content"].find(".notifications .info > span").text( res.data.length );                    
+                });
+
+                $content_area.find(".subrequest-content .title").click(function () {
+                    var $e = $(this).parent().parent().find(".subpanels");
+                    if ( $e.css('display') == 'none' ) {
+                        $e.show();
+                    } else {
+                        $e.hide();
+                    }
                 });
 
             });
