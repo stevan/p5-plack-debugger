@@ -7,7 +7,7 @@ use File::Spec;
 
 sub new {
     my $class = shift;
-    my %args  = @_;
+    my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
     die "You must specify a data directory for collecting debugging data"
         unless defined $args{'data_dir'};

@@ -9,7 +9,7 @@ use constant NOTIFICATION_LEVELS => [ qw[ error warning success ] ];
 
 sub new {
     my $class = shift;
-    my %args  = @_;
+    my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
     foreach my $phase (qw( before after cleanup )) {
         if (defined $args{$phase}) {
