@@ -146,14 +146,14 @@ plack_debugger.ready(function ($) {
                         + '</div>' 
                     );
 
-                    self.subrequest_panels["toolbar"].find(".notifications .error").text( subrequest_notification_totals.error );
-                    self.subrequest_panels["content"].find(".notifications .error > span").text( subrequest_notification_totals.error );
+                    self.subrequest_panels["toolbar"].find(".notifications .error").text( all_subrequest_notification_totals.error );
+                    self.subrequest_panels["content"].find(".notifications .error > span").text( all_subrequest_notification_totals.error );
 
-                    self.subrequest_panels["toolbar"].find(".notifications .warning").text( subrequest_notification_totals.warning );
-                    self.subrequest_panels["content"].find(".notifications .warning > span").text( subrequest_notification_totals.warning );
+                    self.subrequest_panels["toolbar"].find(".notifications .warning").text( all_subrequest_notification_totals.warning );
+                    self.subrequest_panels["content"].find(".notifications .warning > span").text( all_subrequest_notification_totals.warning );
 
-                    self.subrequest_panels["toolbar"].find(".notifications .success").text( subrequest_notification_totals.success );
-                    self.subrequest_panels["content"].find(".notifications .success > span").text( subrequest_notification_totals.success );
+                    self.subrequest_panels["toolbar"].find(".notifications .success").text( all_subrequest_notification_totals.success );
+                    self.subrequest_panels["content"].find(".notifications .success > span").text( all_subrequest_notification_totals.success );
 
                     self.subrequest_panels["content"].find(".notifications .info > span").text( res.data.length );                    
                 });
