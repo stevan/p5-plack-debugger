@@ -43,6 +43,12 @@ sub new {
 sub title    { (shift)->{'title'}    } # the main title to display for this debug panel (optional, but recommended)
 sub subtitle { (shift)->{'subtitle'} } # the sub-title to display for this debug panel (optional)    
 
+sub set_subtitle {
+    my $self     = shift;
+    my $subtitle = shift // die "Must supply a value for subtitle";
+    $self->{'subtitle'} = $subtitle;
+}
+
 # phase handlers
 
 sub before   { (shift)->{'before'}   } # code ref to be run before the request   - args: ($self, $env)
