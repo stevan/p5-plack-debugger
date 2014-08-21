@@ -16,6 +16,11 @@ use Plack::Debugger::Storage;
 
 use Plack::App::Debugger;
 
+use Plack::Debugger::Panel::Timer;
+use Plack::Debugger::Panel::Response;
+use Plack::Debugger::Panel::PerlConfig;
+use Plack::Debugger::Panel::Parameters;
+
 my $JSON         = JSON::XS->new->utf8->pretty;
 my $DATA_DIR     = dir('/tmp/debugger_panel');
 my $DEBUGGER_URL = Plack::App::Debugger->DEFAULT_BASE_URL;
@@ -35,18 +40,10 @@ my $debugger = Plack::Debugger->new(
         filename_fmt => "%s.json",
     ),
     panels => [
-        Plack::Debugger::Panel->new(
-            title     => 'Timer',
-            subtitle  => '... timing the response',
-            before    => sub { 
-                my ($self, $env) = @_;
-                $self->stash([ gettimeofday ]); 
-            },
-            after     => sub { 
-                my ($self, $env, $resp) = @_;
-                $self->set_result( tv_interval( $self->stash, [ gettimeofday ]) );
-            }
-        ),
+        Plack::Debugger::Panel::Timer->new( title => 'Timer' ),
+        Plack::Debugger::Panel::Parameters->new( title => 'Request Parameters' ),        
+        Plack::Debugger::Panel::Response->new( title => 'Plack Response' ),
+        Plack::Debugger::Panel::PerlConfig->new( title => 'Perl Config' ),
         Plack::Debugger::Panel->new(
             title     => 'Env',
             subtitle  => '... capturing the execution env',
@@ -60,7 +57,13 @@ my $debugger = Plack::Debugger->new(
             subtitle  => '... capturing the Plack env',
             before    => sub { 
                 my ($self, $env) = @_;
-                $self->set_result({ map { ($_ => (''.$env->{ $_ })) } keys %$env }); 
+                $self->set_result({ 
+                    map { 
+                        $_ => (ref $env->{ $_ } && ref $env->{ $_ } eq 'ARRAY' || ref $env->{ $_ } eq 'HASH'
+                                ? $env->{ $_ } 
+                                : (''.$env->{ $_ }))
+                    } keys %$env 
+                }); 
             }
         ),
         Plack::Debugger::Panel->new(
@@ -78,18 +81,6 @@ my $debugger = Plack::Debugger->new(
                 my ($self, $env) = @_;
                 $SIG{'__WARN__'} = 'DEFAULT';  
                 $self->set_result( $self->stash );
-            }            
-        ),
-        Plack::Debugger::Panel->new(
-            title => 'Pass/Fail',
-            after => sub { 
-                my ($self, $env, $resp) = @_;
-                if ($resp->[0] >= 500) {
-                    $self->notify('error');
-                } 
-                else {
-                    $self->notify('success');
-                }
             }            
         )
     ]
