@@ -228,13 +228,13 @@ plack_debugger.ready(function ($) {
             case Array:
                 var out = '<table>';
                 for (var i = 0; i < data.length; i++) {
-                    out += '<tr><td>' + data[i] + '</td></tr>';
+                    out += '<tr><td>' + generate_data_for_panel( data[i] ) + '</td></tr>';
                 }
                 return out + '</table>'; 
             case Object:
                 var out = '<table>';
                 for (key in data) {
-                    out += '<tr><td>' + key + '</td><td>' + data[key] + '</td></tr>';
+                    out += '<tr><td>' + key + '</td><td>' + generate_data_for_panel( data[key] ) + '</td></tr>';
                 }
                 return out + '</table>';
             default:
