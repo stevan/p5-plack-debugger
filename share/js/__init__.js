@@ -80,10 +80,8 @@ plack_debugger.ready(function ($) {
     // Global AJAX request setup ...
 
     $(document).ajaxSend(function (e, xhr, options) {
-        if ( self.config["root_url"] != undefined && options.url.indexOf( self.config["root_url"] ) == -1 ) {
-            xhr.setRequestHeader('X-Plack-Debugger-Parent-Request-UID', self.request_uid);
-            self.subrequest_count++;
-        }
+        xhr.setRequestHeader('X-Plack-Debugger-Parent-Request-UID', self.request_uid);
+        self.subrequest_count++;
     });
 
     $(document).ajaxComplete(function (e, xhr, options) {
