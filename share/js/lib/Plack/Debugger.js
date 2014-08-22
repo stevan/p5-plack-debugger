@@ -49,11 +49,11 @@ Plack.Debugger.prototype._get_ready = function ( $, callback ) {
 
 Plack.Debugger.prototype.load_request_by_id = function ( request_uid ) {
     var self = this;
-    self._clear_cache();
     self.AJAX
         .load_JSON( $CONFIG.root_url + "/" + request_uid )
         .then(function ( result ) {
         
+            self._clear_all_cache();
             self._cache_page_result( result );
 
             $.each( result.data.results, function (i, panel) {
@@ -175,7 +175,7 @@ Plack.Debugger.prototype._handle_AJAX_error = function (e, xhr, options) {
 
 // caching ...
 
-Plack.Debugger.prototype._clear_cache = function () {
+Plack.Debugger.prototype._clear_all_cache = function () {
     this._results_cache.page        = null;
     this._results_cache.subrequests = [];
 }
@@ -261,7 +261,6 @@ Plack.Debugger.UI = function ( $root ) {
     this.toolbar   = new Plack.Debugger.UI.Toolbar   ( this.$root.find("#plack-debugger .toolbar"),   this );
 }
 
-
 Plack.Debugger.UI.prototype.setup_panel = function ( id, panel, formatter ) {
     this.toolbar.add_new_button( id, panel );
     this.content.add_new_panel( id, panel, formatter );    
@@ -282,12 +281,8 @@ Plack.Debugger.UI.AbstractElement.prototype.show = function () { if ( this.$root
 Plack.Debugger.UI.Collapsed = function ( $root, parent ) {
     this.$root  = $root;
     this.parent = parent;
-    this._init();
-}
-
-Plack.Debugger.UI.Collapsed.prototype = new Plack.Debugger.UI.AbstractElement();
-
-Plack.Debugger.UI.Collapsed.prototype._init = function () {
+    
+    // events ...
     var self = this;
     this.$root.find(".open-button").click(function () {
         self.hide();        
@@ -295,20 +290,19 @@ Plack.Debugger.UI.Collapsed.prototype._init = function () {
     });
 }
 
+Plack.Debugger.UI.Collapsed.prototype = new Plack.Debugger.UI.AbstractElement();
+
 // ----------------------------------------------------- //
 
 Plack.Debugger.UI.Toolbar = function ( $root, parent ) {
     this.$root  = $root;
     this.parent = parent;
-    this._init();
-}
-
-Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.UI.AbstractElement();
-
-Plack.Debugger.UI.Toolbar.prototype._init = function () {
+    
+    // private data ...
     this._button_id_prefix = "plack-debugger-button-";
     this._buttons          = {};
 
+    // events ...
     var self = this;
     this.$root.find(".close-button").click(function () {
         self.parent.content.hide();
@@ -317,6 +311,8 @@ Plack.Debugger.UI.Toolbar.prototype._init = function () {
         self.parent.collapsed.show();
     });
 }
+
+Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.UI.AbstractElement();
 
 Plack.Debugger.UI.Toolbar.prototype.get_button_by_id = function ( id ) { return this._buttons[ id ] }
 
@@ -342,17 +338,13 @@ Plack.Debugger.UI.Toolbar.prototype.add_new_button = function ( id, panel ) {
 Plack.Debugger.UI.Content = function ( $root, parent ) {
     this.$root  = $root;
     this.parent = parent;
-    this._init();
-}
-
-Plack.Debugger.UI.Content.prototype = new Plack.Debugger.UI.AbstractElement();
-
-Plack.Debugger.UI.Content.prototype._init = function () {
+    
+    // private data ....
     this._panel_id_prefix = "plack-debugger-panel-";
     this._panels          = {};
 }
 
-// ...
+Plack.Debugger.UI.Content.prototype = new Plack.Debugger.UI.AbstractElement();
 
 Plack.Debugger.UI.Content.prototype.hide_all_panels = function () { this.$root.find('.panel').hide() }
 Plack.Debugger.UI.Content.prototype.get_panel_by_id = function ( id ) { return this._panels[ id ] }
@@ -377,10 +369,6 @@ Plack.Debugger.UI.Content.prototype.add_new_panel = function ( id, panel, result
 // ----------------------------------------------------- //
 
 Plack.Debugger.UI.Toolbar.Button = function ( id, panel, on_click ) {
-    this._init( id, panel, on_click );
-}
-
-Plack.Debugger.UI.Toolbar.Button.prototype._init = function ( id, panel, on_click ) {
     this.$root = jQuery(
         '<div class="button" id="' + id + '">'
             + '<div class="notifications">'
@@ -398,6 +386,8 @@ Plack.Debugger.UI.Toolbar.Button.prototype._init = function ( id, panel, on_clic
     this.$root.click( on_click );
 }
 
+Plack.Debugger.UI.Toolbar.Button.prototype = new Plack.Debugger.UI.AbstractElement();
+
 Plack.Debugger.UI.Toolbar.Button.prototype.show_all_notifications = function () {
     this.$root.find(".notifications .badge").show();
 }
@@ -411,12 +401,6 @@ Plack.Debugger.UI.Toolbar.Button.prototype.set_notifications = function ( notifi
 // ----------------------------------------------------- //
 
 Plack.Debugger.UI.Content.Panel = function ( id, panel, on_close, formatter ) {
-    this._init( id, panel, on_close, formatter );
-}
-
-Plack.Debugger.UI.Content.Panel.prototype = new Plack.Debugger.UI.AbstractElement();
-
-Plack.Debugger.UI.Content.Panel.prototype._init = function ( id, panel, on_close, formatter ) {
     this.$root = jQuery(
         '<div class="panel" id="' + id + '">'
             + '<div class="header">'
@@ -439,6 +423,8 @@ Plack.Debugger.UI.Content.Panel.prototype._init = function ( id, panel, on_close
 
     this.$root.find(".header > .close-button").click( on_close );
 }
+
+Plack.Debugger.UI.Content.Panel.prototype = new Plack.Debugger.UI.AbstractElement();
 
 Plack.Debugger.UI.Content.Panel.prototype.show_all_notifications = function () {
     this.$root.find(".header .notifications .badge").show();
