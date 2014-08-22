@@ -8,12 +8,6 @@ if ( Plack == undefined ) var Plack = {};
 // ----------------------------------------------------- //
 
 Plack.Debugger = function () {    
-    this._init();    
-};
-
-// initializer 
-
-Plack.Debugger.prototype._init = function () {
     this.UI   = null;
     this.AJAX = null
 
@@ -21,7 +15,7 @@ Plack.Debugger.prototype._init = function () {
     this._results_cache      = { "page" : null, "subrequests" : [] };    
     this._subrequest_counter = 0;
     this._subrequest_UI      = { "button" : null, "panel" : null }; 
-};
+}
 
 // getting things ready ...
 
@@ -82,8 +76,8 @@ Plack.Debugger.prototype.load_request_by_id = function ( request_uid ) {
             self._subrequest_UI["button"] = self.UI.toolbar.get_button_by_id( result.data.results.length );
             self._subrequest_UI["panel"]  = self.UI.content.get_panel_by_id( result.data.results.length );
 
-            self._subrequest_UI["button"].$root.find('.notifications .badge').show();
-            self._subrequest_UI["panel"].$root.find('.header .notifications .badge').show();
+            self._subrequest_UI["button"].show_all_notifications();
+            self._subrequest_UI["panel"].show_all_notifications();
         });
 }
 
@@ -202,10 +196,7 @@ Plack.Debugger.prototype._are_there_uncached_subrequests = function () {
 
 Plack.Debugger.AJAX = function ( $root ) {
     this.$root = $root;
-    this._init();
 }
-
-Plack.Debugger.AJAX.prototype._init = function () {}
 
 Plack.Debugger.AJAX.prototype.load_JSON = function ( url ) {
     return this.$root.ajax({
@@ -246,14 +237,7 @@ Plack.Debugger.AJAX.prototype.register_global_handlers = function ( handlers ) {
 
 Plack.Debugger.UI = function ( $root ) {
     this.$root = $root;
-    this._init();
-
-    this.collapsed = new Plack.Debugger.UI.Collapsed ( this.$root.find("#plack-debugger .collapsed"), this );
-    this.content   = new Plack.Debugger.UI.Content   ( this.$root.find("#plack-debugger .panels"),    this );
-    this.toolbar   = new Plack.Debugger.UI.Toolbar   ( this.$root.find("#plack-debugger .toolbar"),   this );
-}
-
-Plack.Debugger.UI.prototype._init = function () {
+    
     this.$root.append(
         '<style type="text/css">' 
             + '@import url(' + $CONFIG.static_url + '/css/toolbar.css);'
@@ -271,7 +255,12 @@ Plack.Debugger.UI.prototype._init = function () {
             + '<div class="panels"></div>'
         + '</div>'
     );
+
+    this.collapsed = new Plack.Debugger.UI.Collapsed ( this.$root.find("#plack-debugger .collapsed"), this );
+    this.content   = new Plack.Debugger.UI.Content   ( this.$root.find("#plack-debugger .panels"),    this );
+    this.toolbar   = new Plack.Debugger.UI.Toolbar   ( this.$root.find("#plack-debugger .toolbar"),   this );
 }
+
 
 Plack.Debugger.UI.prototype.setup_panel = function ( id, panel, formatter ) {
     this.toolbar.add_new_button( id, panel );
@@ -409,6 +398,16 @@ Plack.Debugger.UI.Toolbar.Button.prototype._init = function ( id, panel, on_clic
     this.$root.click( on_click );
 }
 
+Plack.Debugger.UI.Toolbar.Button.prototype.show_all_notifications = function () {
+    this.$root.find(".notifications .badge").show();
+}
+
+Plack.Debugger.UI.Toolbar.Button.prototype.set_notifications = function ( notifications ) {
+    this.$root.find(".notifications .warning").text( notifications.warning );
+    this.$root.find(".notifications .error  ").text( notifications.error   );
+    this.$root.find(".notifications .success").text( notifications.success );
+}
+
 // ----------------------------------------------------- //
 
 Plack.Debugger.UI.Content.Panel = function ( id, panel, on_close, formatter ) {
@@ -441,5 +440,14 @@ Plack.Debugger.UI.Content.Panel.prototype._init = function ( id, panel, on_close
     this.$root.find(".header > .close-button").click( on_close );
 }
 
+Plack.Debugger.UI.Content.Panel.prototype.show_all_notifications = function () {
+    this.$root.find(".header .notifications .badge").show();
+}
+
+Plack.Debugger.UI.Content.Panel.prototype.set_notifications = function ( notifications ) {
+    this.$root.find(".header .notifications .warning > span").text( notifications.warning );
+    this.$root.find(".header .notifications .error   > span").text( notifications.error   );
+    this.$root.find(".header .notifications .success > span").text( notifications.success );
+}
 
 // ===================================================== //
