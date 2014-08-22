@@ -136,22 +136,22 @@
     color  : #000000;
 }
 
-#plack-debugger .toolbar .panels .panel {
+#plack-debugger .toolbar .buttons .button {
     border-bottom : 2px groove;
     border-color  : #aaaaaa #111111;
     min-height    : 35px;
 }
 
-#plack-debugger .toolbar .panels .panel:hover {
+#plack-debugger .toolbar .buttons .button:hover {
     background : #eeeeee;
     cursor     : pointer;
 }
 
-#plack-debugger .toolbar .panels .panel .notifications {
+#plack-debugger .toolbar .buttons .button .notifications {
     margin-right  : 10px;
 }
 
-#plack-debugger .toolbar .panels .panel .notifications .badge {
+#plack-debugger .toolbar .buttons .button .notifications .badge {
     float         : right;    
     font-weight   : bold;
     margin-top    : 5px;
@@ -162,7 +162,7 @@
 
 /* Panel Content */
 
-#plack-debugger .panel-content {
+#plack-debugger .panels {
     z-index  : 99999999;
     position : fixed;
     top      : 0;
@@ -172,14 +172,14 @@
     display  : none;
 }
 
-#plack-debugger .panel-content .panel {
+#plack-debugger .panels .panel {
     background : #cccccc;
     height     : 100%;
     display    : none; 
     overflow   : auto;
 }
 
-#plack-debugger .panel-content .panel .header {
+#plack-debugger .panels .panel .header {
     background : #aaaaaa;
     position   : fixed;
     top        : 0;
@@ -188,11 +188,11 @@
     height     : 70px;
 }
 
-#plack-debugger .panel-content .panel .notifications {
+#plack-debugger .panels .panel .notifications {
     margin-right  : 100px;
 }
 
-#plack-debugger .panel-content .panel .notifications .badge {
+#plack-debugger .panels .panel .notifications .badge {
     float         : right;    
     margin-top    : 22px;
     margin-left   : 5px;    
@@ -200,63 +200,63 @@
     border-radius : 5px;
 }
 
-#plack-debugger .panel-content .panel .header .close-button {
+#plack-debugger .panels .panel .header .close-button {
     float         : right;
     font-size     : 3.5em;
     padding-right : 30px;
     color         : #666666;
 }
 
-#plack-debugger .panel-content .panel .header .close-button:hover {
+#plack-debugger .panels .panel .header .close-button:hover {
     cursor : pointer;
     color  : #000000;
 }
 
-#plack-debugger .panel-content .panel .header .title {
+#plack-debugger .panels .panel .header .title {
     font-size : 2.5em;
 }
 
-#plack-debugger .panel-content .panel .header .subtitle {
+#plack-debugger .panels .panel .header .subtitle {
     font-size : 1em;
 }
 
-#plack-debugger .panel-content .panel .content {
+#plack-debugger .panels .panel .content {
     padding-left   : 20px;
     padding-bottom : 20px;
     padding-right  : 20px;
     padding-top    : 90px;
 }
 
-#plack-debugger .panel-content .panel .content table {
+#plack-debugger .panels .panel .content table {
     border : 1px solid #999999;
 }
 
-#plack-debugger .panel-content .panel .content table td {
+#plack-debugger .panels .panel .content table td {
     border  : 1px solid #999999;
     padding : 5px;
 }
 
 /* subrequest content */
 
-#plack-debugger .panel-content .panel .content .subrequest-content {
+#plack-debugger .panels .panel .content .subrequest-content {
 
 }
 
-#plack-debugger .panel-content .panel .content .subrequest-content .subheader {
+#plack-debugger .panels .panel .content .subrequest-content .subheader {
     background   : #aaaaaa;
     min-height   : 25px; 
     border       : 1px solid #333333;
 }
 
-#plack-debugger .panel-content .panel .content .subrequest-content .subheader .title:hover {
+#plack-debugger .panels .panel .content .subrequest-content .subheader .title:hover {
     cursor : pointer;
 }
 
-#plack-debugger .panel-content .panel .content .subrequest-content .subheader .notifications {
+#plack-debugger .panels .panel .content .subrequest-content .subheader .notifications {
     margin-right  : 10px;
 }
 
-#plack-debugger .panel-content .panel .content .subrequest-content .subheader .notifications .badge {
+#plack-debugger .panels .panel .content .subrequest-content .subheader .notifications .badge {
     float         : right;    
     margin-top    : 5px;
     margin-left   : 5px;    
@@ -264,14 +264,14 @@
     border-radius : 5px;
 }
 
-#plack-debugger .panel-content .panel .content .subrequest-content .subpanel {
+#plack-debugger .panels .panel .content .subrequest-content .subpanel {
     border  : 1px solid #999999;
     padding : 5px;
 }
 
 /* generic */
 
-#plack-debugger .idx {
+#plack-debugger .hidden {
     display : none;
 }
 
