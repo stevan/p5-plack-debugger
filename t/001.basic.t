@@ -115,13 +115,17 @@ test_psgi($app, sub {
                 $debugger->load_request_results( $UUIDS[-1] ),
                 {
                     'request_uid' => $UUIDS[-1],
-                    'results' => {
-                        'Tester'      => [
-                            'started request at /',
-                            'finished request with status 200',
-                            'cleaning up request'
-                        ]
-                    }
+                    'results' => [
+                        {
+                            title    => 'Tester',      
+                            subtitle => '... testing all the things',
+                            result   => [
+                                'started request at /',
+                                'finished request with status 200',
+                                'cleaning up request'
+                            ]
+                        }
+                    ]
                 },
                 '... got the expected collected data in the data-dir'
             );
