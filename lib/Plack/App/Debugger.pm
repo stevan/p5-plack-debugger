@@ -20,17 +20,17 @@ sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    $args{'base_url'}    ||= DEFAULT_BASE_URL; 
-    $args{'static_url'}  ||= '/static';
-    $args{'js_init_url'} ||= '/js/__init__.js';
+    $args{'base_url'}         ||= DEFAULT_BASE_URL; 
+    $args{'static_url'}       ||= '/static';
+    $args{'js_init_url'}      ||= '/js/__init__.js';
+    $args{'static_asset_dir'} ||= try { File::ShareDir::dist_dir('Plack-Debugger') } || 'share';
 
     die "You must pass a reference to a 'Plack::Debugger' instance"
         unless blessed $args{'debugger'} 
             && $args{'debugger'}->isa('Plack::Debugger');
 
     # ... private data 
-    $args{'_share_dir'}  = try { File::ShareDir::dist_dir('Plack-Debugger') } || 'share';
-    $args{'_static_app'} = Plack::App::File->new( root => $args{'_share_dir'} )->to_app;
+    $args{'_static_app'} = Plack::App::File->new( root => $args{'static_asset_dir'} )->to_app;
     $args{'_JSON'}       = JSON::XS->new->utf8->pretty;
 
     $class->SUPER::new( %args );
@@ -38,10 +38,11 @@ sub new {
 
 # accessors ...
 
-sub debugger    { (shift)->{'debugger'}    } # a reference to the Plack::Debugger
-sub base_url    { (shift)->{'base_url'}    } # the base URL the debugger application will be mounted at
-sub static_url  { (shift)->{'static_url'}  } # the URL root from where the debugger can load static resources
-sub js_init_url { (shift)->{'js_init_url'} } # the JS application initializer URL
+sub debugger         { (shift)->{'debugger'}         } # a reference to the Plack::Debugger
+sub base_url         { (shift)->{'base_url'}         } # the base URL the debugger application will be mounted at
+sub static_url       { (shift)->{'static_url'}       } # the URL root from where the debugger can load static resources
+sub js_init_url      { (shift)->{'js_init_url'}      } # the JS application initializer URL
+sub static_asset_dir { (shift)->{'static_asset_dir'} } # the directory that the static assets are served from (optional)
 
 # create an injector middleware for this debugger application
 
