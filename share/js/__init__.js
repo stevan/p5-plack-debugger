@@ -36,7 +36,219 @@ function __LOAD_STATIC_JS__ (url, callback) {
     document.getElementsByTagName("body")[0].appendChild( script );
 }
 
+/* =============================================================== */
+
+function AbstractUIElement () {
+    this.$element = null;
+}
+
+AbstractUIElement.prototype.register = function () { 
+    throw new Error("Define a register method man!") 
+}
+
+AbstractUIElement.prototype.trigger = function ( e, data ) { 
+    if ( this.$element != null ) this.$element.trigger( e, [ data ] ) 
+}
+
+AbstractUIElement.prototype.on = function ( e, cb   ) { 
+    if ( this.$element != null ) this.$element.on( e, cb )            
+}
+
+AbstractUIElement.prototype.hide = function ( e ) { 
+    e.stopPropagation(); 
+    if ( this.$element != null ) this.$element.hide();
+}
+
+AbstractUIElement.prototype.show = function ( e ) { 
+    e.stopPropagation(); 
+    if ( this.$element != null ) this.$element.show();
+}
+
+/* =============================================================== */
+
+var Plack = {};
+
+Plack.Debugger = function ( $parent ) {
+    this.UI = new Plack.Debugger.UI( $parent );
+}
+
+Plack.Debugger.UI = function ( $parent ) {
+    this.$element = $(
+        '<style type="text/css">@import url(' + $CONFIG.static_url + '/css/toolbar.css);</style>'
+        + '<div id="plack-debugger"></div>'
+    );
+
+    this.collapsed = new Plack.Debugger.UI.Collapsed( this.$element );
+    this.toolbar   = new Plack.Debugger.UI.Toolbar( this.$element );
+    
+    this.register();
+    $parent.append( this.$element );    
+}
+
+Plack.Debugger.UI.prototype = new AbstractUIElement();
+
+Plack.Debugger.UI.prototype.register = function () {
+
+    // register for events we handle 
+    this.on( "toolbar:open",  this.open_toolbar.bind( this ) );
+    this.on( "toolbar:close", this.close_toolbar.bind( this ) );
+
+    this.on( "hide", function () { console.log('no bubbling for hide') } );
+    this.on( "show", function () { console.log('no bubbling for show') } );
+}
+
+Plack.Debugger.UI.prototype.open_toolbar = function ( e ) {
+    console.log( e );
+    e.stopPropagation();
+    console.log('calling open_toolbar on the Debugger UI');
+    this.collapsed.trigger("hide");
+    this.toolbar.trigger("show");
+}
+
+Plack.Debugger.UI.prototype.close_toolbar = function ( e ) {
+    console.log( e );
+    e.stopPropagation();
+    console.log('calling close_toolbar on the Debugger UI');
+    this.toolbar.trigger("hide");
+    this.collapsed.trigger("show");
+}
+
+// ------------------------------------------------------------------
+
+Plack.Debugger.UI.Collapsed = function ( $parent ) {
+    this.$element = $('<div class="collapsed"><div class="open-button">&#9756;</div></div>');
+    this.register();
+    $parent.append( this.$element );
+}
+
+Plack.Debugger.UI.Collapsed.prototype = new AbstractUIElement();
+
+Plack.Debugger.UI.Collapsed.prototype.register = function () {
+    // fire events
+    this.$element.find(".open-button").click( 
+        this.trigger.bind( this, [ 'toolbar:open' ] ) 
+    );
+
+    // register for events we handle
+    this.on( "hide", this.hide.bind( this ) );
+    this.on( "show", this.show.bind( this ) );
+}
+
+// ------------------------------------------------------------------
+
+Plack.Debugger.UI.Toolbar = function ( $parent ) {
+    this.$element = $(
+        '<div class="toolbar">' 
+            + '<div class="header">'
+                + '<div class="close-button">&#9758;</div>'
+            + '</div>'
+            + '<div class="buttons"></div>'
+        + '</div>'
+    );
+    this.register();
+    $parent.append( this.$element );
+
+    this.buttons = [
+        new Plack.Debugger.UI.Toolbar.Button( this.$element.find(".buttons") )
+    ];
+
+    this.buttons[0].trigger( 
+        "model:update", {
+            title         : "Hello",
+            subtitle      : "... testing",
+            notifications : {
+                warnings : 2,
+                errors   : 0,
+                success  : 1
+            }
+        } 
+    );
+}
+
+Plack.Debugger.UI.Toolbar.prototype = new AbstractUIElement();
+
+Plack.Debugger.UI.Toolbar.prototype.register = function () {
+    // fire events
+    this.$element.find('.header .close-button').click( 
+        this.trigger.bind( this, [ 'toolbar:close' ] ) 
+    );
+
+    // register for events we handle
+    this.on( "hide", this.hide.bind( this ) );
+    this.on( "show", this.show.bind( this ) );
+}
+
+// ------------------------------------------------------------------
+
+Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
+    this.$element = $(
+        '<div class="button">'
+            + '<div class="notifications">'
+                + '<div class="badge warning"></div>'
+                + '<div class="badge error"></div>'
+                + '<div class="badge success"></div>'
+            + '</div>'
+            + '<div class="title"></div>'
+            + '<div class="subtitle"></div>'
+        + '</div>'
+    );
+    this.register();
+    $parent.append( this.$element );
+}
+
+Plack.Debugger.UI.Toolbar.Button.prototype = new AbstractUIElement();
+
+Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
+    // register for events we handle
+    this.on( "model:update", this._update.bind( this ) );
+
+}
+
+Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
+    e.stopPropagation();
+
+    if ( data.title ) {
+        this.$element.find(".title").html( data.title );
+    }
+
+    if ( data.subtitle ) {
+        this.$element.find(".subtitle").html( data.subtitle );
+    }  
+
+    if ( data.notifications ) {
+        if ( data.notifications.warnings > 0 ) {
+            this.$element.find(".notifications .warning").html( data.notifications.warnings ).show();
+        }
+        else {
+            this.$element.find(".notifications .warning").html('').hide();
+        }
+
+        if ( data.notifications.errors > 0 ) {
+            this.$element.find(".notifications .error").html( data.notifications.errors ).show();
+        } 
+        else {
+            this.$element.find(".notifications .error").html('').hide();
+        }
+
+        if ( data.notifications.success > 0 ) {
+            this.$element.find(".notifications .success").html( data.notifications.success ).show();
+        }
+        else {
+            this.$element.find(".notifications .success").html('').hide();
+        }
+    }
+}
+
+/* =============================================================== */
+
 __INIT_CONFIG__();
+__LOAD_STATIC_JS__('/jquery.js', function () {
+    $(document).ready(function () {
+        new Plack.Debugger( $(document.body) );
+    })
+});
+
+/*
 __LOAD_STATIC_JS__('/lib/Plack/Debugger.js', function () {
 
     new Plack.Debugger().ready(
@@ -71,3 +283,6 @@ function generate_data_for_panel (data) {
             return "NO IDEA WHAT THIS IS! " + (typeof data);          
     }
 }
+
+*/
+
