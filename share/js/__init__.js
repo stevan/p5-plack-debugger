@@ -1,4 +1,5 @@
 
+
 var $CONFIG = {};
 
 function __INIT_CONFIG__ () {
@@ -38,39 +39,51 @@ function __LOAD_STATIC_JS__ (url, callback) {
 
 /* =============================================================== */
 
-function AbstractUIElement () {
-    this.$element = null;
-}
-
-AbstractUIElement.prototype.register = function () { 
-    throw new Error("Define a register method man!") 
-}
-
-AbstractUIElement.prototype.trigger = function ( e, data ) { 
-    if ( this.$element != null ) this.$element.trigger( e, [ data ] ) 
-}
-
-AbstractUIElement.prototype.on = function ( e, cb   ) { 
-    if ( this.$element != null ) this.$element.on( e, cb )            
-}
-
-AbstractUIElement.prototype.hide = function ( e ) { 
-    e.stopPropagation(); 
-    if ( this.$element != null ) this.$element.hide();
-}
-
-AbstractUIElement.prototype.show = function ( e ) { 
-    e.stopPropagation(); 
-    if ( this.$element != null ) this.$element.show();
-}
-
-/* =============================================================== */
-
 var Plack = {};
 
 Plack.Debugger = function ( $parent ) {
     this.UI = new Plack.Debugger.UI( $parent );
 }
+
+/* =============================================================== */
+
+Plack.Debugger.Abstract = {};
+
+Plack.Debugger.Abstract.Eventful = function () {
+    this.$element = null;
+}
+
+Plack.Debugger.Abstract.Eventful.prototype.register = function () { 
+    throw new Error("Define a register method man!") 
+}
+
+Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data ) { 
+    if ( this.$element != null ) this.$element.trigger( e, [ data ] ) 
+}
+
+Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb   ) { 
+    if ( this.$element != null ) this.$element.on( e, cb )            
+}
+
+// ----------------------------------------------------------------
+
+Plack.Debugger.Abstract.UI = function () {
+    this.$element = null;
+}
+
+Plack.Debugger.Abstract.UI.prototype = new Plack.Debugger.Abstract.Eventful();
+
+Plack.Debugger.Abstract.UI.prototype.hide = function ( e ) { 
+    e.stopPropagation(); 
+    if ( this.$element != null ) this.$element.hide();
+}
+
+Plack.Debugger.Abstract.UI.prototype.show = function ( e ) { 
+    e.stopPropagation(); 
+    if ( this.$element != null ) this.$element.show();
+}
+
+/* =============================================================== */
 
 Plack.Debugger.UI = function ( $parent ) {
     this.$element = $(
@@ -85,7 +98,7 @@ Plack.Debugger.UI = function ( $parent ) {
     $parent.append( this.$element );    
 }
 
-Plack.Debugger.UI.prototype = new AbstractUIElement();
+Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
 
@@ -98,17 +111,13 @@ Plack.Debugger.UI.prototype.register = function () {
 }
 
 Plack.Debugger.UI.prototype.open_toolbar = function ( e ) {
-    console.log( e );
     e.stopPropagation();
-    console.log('calling open_toolbar on the Debugger UI');
     this.collapsed.trigger("hide");
     this.toolbar.trigger("show");
 }
 
 Plack.Debugger.UI.prototype.close_toolbar = function ( e ) {
-    console.log( e );
     e.stopPropagation();
-    console.log('calling close_toolbar on the Debugger UI');
     this.toolbar.trigger("hide");
     this.collapsed.trigger("show");
 }
@@ -121,7 +130,7 @@ Plack.Debugger.UI.Collapsed = function ( $parent ) {
     $parent.append( this.$element );
 }
 
-Plack.Debugger.UI.Collapsed.prototype = new AbstractUIElement();
+Plack.Debugger.UI.Collapsed.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Collapsed.prototype.register = function () {
     // fire events
@@ -165,7 +174,7 @@ Plack.Debugger.UI.Toolbar = function ( $parent ) {
     );
 }
 
-Plack.Debugger.UI.Toolbar.prototype = new AbstractUIElement();
+Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Toolbar.prototype.register = function () {
     // fire events
@@ -196,12 +205,11 @@ Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
     $parent.append( this.$element );
 }
 
-Plack.Debugger.UI.Toolbar.Button.prototype = new AbstractUIElement();
+Plack.Debugger.UI.Toolbar.Button.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
     // register for events we handle
     this.on( "model:update", this._update.bind( this ) );
-
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
@@ -212,8 +220,11 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
     }
 
     if ( data.subtitle ) {
-        this.$element.find(".subtitle").html( data.subtitle );
+        this.$element.find(".subtitle").html( data.subtitle ).show();
     }  
+    else {
+        this.$element.find(".subtitle").html('').hide();
+    }
 
     if ( data.notifications ) {
         if ( data.notifications.warnings > 0 ) {
