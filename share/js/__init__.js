@@ -1,71 +1,89 @@
-
-
-var $CONFIG = {};
-
-function __INIT_CONFIG__ () {
-    var init_url = document.getElementById("plack-debugger-js-init").src;
-
-    $CONFIG.current_request_uid = init_url.split("#")[1];
-
-    var url_parts = init_url.split("/"); 
-    
-    url_parts.pop();
-    $CONFIG.static_js_url = url_parts.join("/");
-
-    url_parts.pop();
-    $CONFIG.static_url = url_parts.join("/");
-
-    url_parts.pop();
-    $CONFIG.root_url = url_parts.join("/");
-}
-
-function __LOAD_STATIC_JS__ (url, callback) {
-    var script  = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = $CONFIG.static_js_url + url;
-    if (script.readyState) { // IE
-        script.onreadystatechange = function () {
-            if (script.readyState == "loaded" || script.readyState == "complete") {
-                script.onreadystatechange = null;
-                callback();
-            }
-        };
-    } 
-    else { 
-        script.onload = function () { callback() };
-    }
-    document.getElementsByTagName("body")[0].appendChild( script );
-}
-
 /* =============================================================== */
 
-var Plack = {};
+if ( Plack == undefined ) var Plack = {};
 
-Plack.Debugger = function ( $parent ) {
-    this.UI = new Plack.Debugger.UI( $parent );
+Plack.Debugger = function () {
+    Plack.Debugger.$CONFIG = this._init_config();
+}
+
+Plack.Debugger.prototype._init_config = function () {
+    var init_url = document.getElementById('plack-debugger-js-init').src;
+
+    var config = {
+        'current_request_uid' : init_url.split("#")[1]
+    };
+
+    var url_parts = init_url.split('/'); 
+    url_parts.pop(); config.static_js_url = url_parts.join('/');
+    url_parts.pop(); config.static_url    = url_parts.join('/');
+    url_parts.pop(); config.root_url      = url_parts.join('/');
+
+    return config;
+}
+
+Plack.Debugger.prototype.ready = function (callback) {
+    var self           = this;
+    var ready_callback = function ( $jQuery ) { self._ready( $jQuery(document), callback ) };
+
+    if ( typeof jQuery == 'undefined' ) {
+
+        var script  = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src  = this.$CONFIG.static_js_url + '/jquery.js';
+
+        if (script.readyState) { // IE
+            script.onreadystatechange = function () {
+                if (script.readyState == 'loaded' || script.readyState == 'complete') {
+                    script.onreadystatechange = null;
+                    jQuery.noConflict();
+                    jQuery(document).ready(ready_callback);
+                }
+            };
+        } 
+        else { 
+            script.onload = function () {
+                jQuery.noConflict();
+                jQuery(document).ready(ready_callback);
+            };
+        }
+
+        document.getElementsByTagName('body')[0].appendChild( script );
+    } else {
+        jQuery(document).ready(ready_callback);
+    }
+}
+
+Plack.Debugger.prototype._ready = function ( $parent, callback ) {
+    this.UI = new Plack.Debugger.UI( $parent.find('body') );
+
+    callback.apply( this, [] );
 }
 
 /* =============================================================== */
 
 Plack.Debugger.Abstract = {};
 
+// ----------------------------------------------------------------
+// basic event handling object
+
 Plack.Debugger.Abstract.Eventful = function () {
     this.$element = null;
 }
 
 Plack.Debugger.Abstract.Eventful.prototype.register = function () { 
-    throw new Error("Define a register method man!") 
+    throw new Error('[Abstract Method] you must define a `register` method'); 
 }
 
 Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data ) { 
     if ( this.$element != null ) this.$element.trigger( e, [ data ] ) 
 }
 
-Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb   ) { 
+Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) { 
     if ( this.$element != null ) this.$element.on( e, cb )            
 }
 
 // ----------------------------------------------------------------
+// simple UI object to handle common events 
 
 Plack.Debugger.Abstract.UI = function () {
     this.$element = null;
@@ -86,88 +104,98 @@ Plack.Debugger.Abstract.UI.prototype.show = function ( e ) {
 /* =============================================================== */
 
 Plack.Debugger.UI = function ( $parent ) {
-    this.$element = $(
-        '<style type="text/css">@import url(' + $CONFIG.static_url + '/css/toolbar.css);</style>'
+    this.$element = $parent.append(
+        '<style type="text/css">' 
+            + '@import url(' + Plack.Debugger.$CONFIG.static_url + '/css/toolbar.css);' 
+        + '</style>' 
         + '<div id="plack-debugger"></div>'
-    );
+    ).find('#plack-debugger');
 
     this.collapsed = new Plack.Debugger.UI.Collapsed( this.$element );
     this.toolbar   = new Plack.Debugger.UI.Toolbar( this.$element );
     
-    this.register();
-    $parent.append( this.$element );    
+    this.register();   
 }
 
 Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
-
     // register for events we handle 
-    this.on( "toolbar:open",  this.open_toolbar.bind( this ) );
-    this.on( "toolbar:close", this.close_toolbar.bind( this ) );
-
-    this.on( "hide", function () { console.log('no bubbling for hide') } );
-    this.on( "show", function () { console.log('no bubbling for show') } );
+    this.on( 'plack-debugger:toolbar:open',  this.open_toolbar.bind( this ) );
+    this.on( 'plack-debugger:toolbar:close', this.close_toolbar.bind( this ) );
 }
 
 Plack.Debugger.UI.prototype.open_toolbar = function ( e ) {
     e.stopPropagation();
-    this.collapsed.trigger("hide");
-    this.toolbar.trigger("show");
+    this.collapsed.trigger("plack-debugger:_:hide");
+    this.toolbar.trigger("plack-debugger:_:show");
 }
 
 Plack.Debugger.UI.prototype.close_toolbar = function ( e ) {
     e.stopPropagation();
-    this.toolbar.trigger("hide");
-    this.collapsed.trigger("show");
+    this.toolbar.trigger("plack-debugger:_:hide");
+    this.collapsed.trigger("plack-debugger:_:show");
 }
 
 // ------------------------------------------------------------------
 
 Plack.Debugger.UI.Collapsed = function ( $parent ) {
-    this.$element = $('<div class="collapsed"><div class="open-button">&#9756;</div></div>');
+    this.$element = $parent.append(
+        '<div class="collapsed"><div class="open-button">&#9756;</div></div>'
+    ).find('.collapsed');
     this.register();
-    $parent.append( this.$element );
 }
 
 Plack.Debugger.UI.Collapsed.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Collapsed.prototype.register = function () {
     // fire events
-    this.$element.find(".open-button").click( 
-        this.trigger.bind( this, [ 'toolbar:open' ] ) 
+    this.$element.find('.open-button').click( 
+        this.trigger.bind( this, [ 'plack-debugger:toolbar:open' ] ) 
     );
 
     // register for events we handle
-    this.on( "hide", this.hide.bind( this ) );
-    this.on( "show", this.show.bind( this ) );
+    this.on( 'plack-debugger:_:hide', this.hide.bind( this ) );
+    this.on( 'plack-debugger:_:show', this.show.bind( this ) );
 }
 
 // ------------------------------------------------------------------
 
 Plack.Debugger.UI.Toolbar = function ( $parent ) {
-    this.$element = $(
+    this.$element = $parent.append(
         '<div class="toolbar">' 
             + '<div class="header">'
                 + '<div class="close-button">&#9758;</div>'
             + '</div>'
             + '<div class="buttons"></div>'
         + '</div>'
-    );
+    ).find('.toolbar');
     this.register();
-    $parent.append( this.$element );
 
+    var $buttons = this.$element.find('.buttons');
     this.buttons = [
-        new Plack.Debugger.UI.Toolbar.Button( this.$element.find(".buttons") )
+        new Plack.Debugger.UI.Toolbar.Button( $buttons ),
+        new Plack.Debugger.UI.Toolbar.Button( $buttons )
     ];
 
     this.buttons[0].trigger( 
-        "model:update", {
+        'plack-debugger:toolbar:button:update', {
             title         : "Hello",
             subtitle      : "... testing",
             notifications : {
                 warnings : 2,
                 errors   : 0,
+                success  : 1
+            }
+        } 
+    );
+
+    this.buttons[1].trigger( 
+        'plack-debugger:toolbar:button:update', {
+            title         : "Goodbye",
+            notifications : {
+                warnings : 0,
+                errors   : 100,
                 success  : 1
             }
         } 
@@ -179,18 +207,18 @@ Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.Abstract.UI();
 Plack.Debugger.UI.Toolbar.prototype.register = function () {
     // fire events
     this.$element.find('.header .close-button').click( 
-        this.trigger.bind( this, [ 'toolbar:close' ] ) 
+        this.trigger.bind( this, [ 'plack-debugger:toolbar:close' ] ) 
     );
 
     // register for events we handle
-    this.on( "hide", this.hide.bind( this ) );
-    this.on( "show", this.show.bind( this ) );
+    this.on( 'plack-debugger:_:hide', this.hide.bind( this ) );
+    this.on( 'plack-debugger:_:show', this.show.bind( this ) );
 }
 
 // ------------------------------------------------------------------
 
 Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
-    this.$element = $(
+    this.$element = $parent.append(
         '<div class="button">'
             + '<div class="notifications">'
                 + '<div class="badge warning"></div>'
@@ -200,16 +228,15 @@ Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
             + '<div class="title"></div>'
             + '<div class="subtitle"></div>'
         + '</div>'
-    );
+    ).find('.button').last();
     this.register();
-    $parent.append( this.$element );
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
     // register for events we handle
-    this.on( "model:update", this._update.bind( this ) );
+    this.on( 'plack-debugger:toolbar:button:update', this._update.bind( this ) );
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
@@ -252,22 +279,9 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
 
 /* =============================================================== */
 
-__INIT_CONFIG__();
-__LOAD_STATIC_JS__('/jquery.js', function () {
-    $(document).ready(function () {
-        new Plack.Debugger( $(document.body) );
-    })
-});
 
-/*
-__LOAD_STATIC_JS__('/lib/Plack/Debugger.js', function () {
-
-    new Plack.Debugger().ready(
-        function () {
-            this.load_request_by_id( $CONFIG.current_request_uid );
-        }
-    );
-
+new Plack.Debugger().ready(function () {
+    console.log('... ready to debug some stuff!')
 });
 
 // basic formatter ...
@@ -295,5 +309,4 @@ function generate_data_for_panel (data) {
     }
 }
 
-*/
 
