@@ -113,6 +113,7 @@ Plack.Debugger.UI = function ( $parent ) {
 
     this.collapsed = new Plack.Debugger.UI.Collapsed( this.$element );
     this.toolbar   = new Plack.Debugger.UI.Toolbar( this.$element );
+    this.panels    = new Plack.Debugger.UI.Panels( this.$element );
     
     this.register();   
 }
@@ -121,23 +122,40 @@ Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
     // register for events we handle 
-    this.on( 'plack-debugger:toolbar:open',  this.open_toolbar.bind( this ) );
-    this.on( 'plack-debugger:toolbar:close', this.close_toolbar.bind( this ) );
+    this.on( 'plack-debugger:toolbar:open',  this._open_toolbar.bind( this ) );
+    this.on( 'plack-debugger:toolbar:close', this._close_toolbar.bind( this ) );
+
+    this.on( 'plack-debugger:panel:open',  this._open_panel.bind( this ) );
+    this.on( 'plack-debugger:panel:close', this._close_panel.bind( this ) );
+
+    this.on( 'plack-debugger:_:hide', function () { throw new Error("You cannot hide() the Plack.Debugger.UI itself") } );
+    this.on( 'plack-debugger:_:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
 }
 
-Plack.Debugger.UI.prototype.open_toolbar = function ( e ) {
+Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     e.stopPropagation();
-    this.collapsed.trigger("plack-debugger:_:hide");
-    this.toolbar.trigger("plack-debugger:_:show");
+    this.collapsed.trigger('plack-debugger:_:hide');
+    this.toolbar.trigger('plack-debugger:_:show');
 }
 
-Plack.Debugger.UI.prototype.close_toolbar = function ( e ) {
+Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
     e.stopPropagation();
-    this.toolbar.trigger("plack-debugger:_:hide");
-    this.collapsed.trigger("plack-debugger:_:show");
+    this.toolbar.trigger('plack-debugger:_:hide');
+    this.collapsed.trigger('plack-debugger:_:show');
 }
 
-// ------------------------------------------------------------------
+Plack.Debugger.UI.prototype._open_panel = function ( e, index ) {
+    e.stopPropagation();
+    console.log("plack-debugger:panel:open called!!!");
+    this.panels.trigger('plack-debugger:panels:open_panel', index);
+}
+
+Plack.Debugger.UI.prototype._close_panel = function ( e, index ) {
+    e.stopPropagation();
+    this.panels.trigger('plack-debugger:panels:close_panel', index);
+}
+
+/* =============================================================== */
 
 Plack.Debugger.UI.Collapsed = function ( $parent ) {
     this.$element = $parent.append(
@@ -151,7 +169,7 @@ Plack.Debugger.UI.Collapsed.prototype = new Plack.Debugger.Abstract.UI();
 Plack.Debugger.UI.Collapsed.prototype.register = function () {
     // fire events
     this.$element.find('.open-button').click( 
-        this.trigger.bind( this, [ 'plack-debugger:toolbar:open' ] ) 
+        this.trigger.bind( this, 'plack-debugger:toolbar:open' ) 
     );
 
     // register for events we handle
@@ -159,7 +177,7 @@ Plack.Debugger.UI.Collapsed.prototype.register = function () {
     this.on( 'plack-debugger:_:show', this.show.bind( this ) );
 }
 
-// ------------------------------------------------------------------
+/* =============================================================== */
 
 Plack.Debugger.UI.Toolbar = function ( $parent ) {
     this.$element = $parent.append(
@@ -172,34 +190,7 @@ Plack.Debugger.UI.Toolbar = function ( $parent ) {
     ).find('.toolbar');
     this.register();
 
-    var $buttons = this.$element.find('.buttons');
-    this.buttons = [
-        new Plack.Debugger.UI.Toolbar.Button( $buttons ),
-        new Plack.Debugger.UI.Toolbar.Button( $buttons )
-    ];
-
-    this.buttons[0].trigger( 
-        'plack-debugger:toolbar:button:update', {
-            title         : "Hello",
-            subtitle      : "... testing",
-            notifications : {
-                warnings : 2,
-                errors   : 0,
-                success  : 1
-            }
-        } 
-    );
-
-    this.buttons[1].trigger( 
-        'plack-debugger:toolbar:button:update', {
-            title         : "Goodbye",
-            notifications : {
-                warnings : 0,
-                errors   : 100,
-                success  : 1
-            }
-        } 
-    );
+    this.buttons = [];
 }
 
 Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.Abstract.UI();
@@ -207,12 +198,18 @@ Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.Abstract.UI();
 Plack.Debugger.UI.Toolbar.prototype.register = function () {
     // fire events
     this.$element.find('.header .close-button').click( 
-        this.trigger.bind( this, [ 'plack-debugger:toolbar:close' ] ) 
+        this.trigger.bind( this, 'plack-debugger:toolbar:close' ) 
     );
 
     // register for events we handle
     this.on( 'plack-debugger:_:hide', this.hide.bind( this ) );
     this.on( 'plack-debugger:_:show', this.show.bind( this ) );
+}
+
+Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
+    var button = new Plack.Debugger.UI.Toolbar.Button( this.$element.find('.buttons') );
+    button.trigger( 'plack-debugger:toolbar:button:update', data );
+    this.buttons.push( button );
 }
 
 // ------------------------------------------------------------------
@@ -235,6 +232,11 @@ Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
 Plack.Debugger.UI.Toolbar.Button.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
+    // fire events
+    this.$element.click( 
+        this.trigger.bind( this, 'plack-debugger:panel:open', this.$element.index() ) 
+    );
+
     // register for events we handle
     this.on( 'plack-debugger:toolbar:button:update', this._update.bind( this ) );
 }
@@ -243,37 +245,165 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
     e.stopPropagation();
 
     if ( data.title ) {
-        this.$element.find(".title").html( data.title );
+        this.$element.find('.title').html( data.title );
     }
 
     if ( data.subtitle ) {
-        this.$element.find(".subtitle").html( data.subtitle ).show();
+        this.$element.find('.subtitle').html( data.subtitle ).show();
     }  
     else {
-        this.$element.find(".subtitle").html('').hide();
+        this.$element.find('.subtitle').html('').hide();
     }
 
     if ( data.notifications ) {
         if ( data.notifications.warnings > 0 ) {
-            this.$element.find(".notifications .warning").html( data.notifications.warnings ).show();
+            this.$element.find('.notifications .warning').html( data.notifications.warnings ).show();
         }
         else {
-            this.$element.find(".notifications .warning").html('').hide();
+            this.$element.find('.notifications .warning').html('').hide();
         }
 
         if ( data.notifications.errors > 0 ) {
-            this.$element.find(".notifications .error").html( data.notifications.errors ).show();
+            this.$element.find('.notifications .error').html( data.notifications.errors ).show();
         } 
         else {
-            this.$element.find(".notifications .error").html('').hide();
+            this.$element.find('.notifications .error').html('').hide();
         }
 
         if ( data.notifications.success > 0 ) {
-            this.$element.find(".notifications .success").html( data.notifications.success ).show();
+            this.$element.find('.notifications .success').html( data.notifications.success ).show();
         }
         else {
-            this.$element.find(".notifications .success").html('').hide();
+            this.$element.find('.notifications .success').html('').hide();
         }
+    }
+}
+
+/* =============================================================== */
+
+Plack.Debugger.UI.Panels = function ( $parent ) {
+    this.$element = $parent.append(
+        '<div class="panels"></div>'
+    ).find('.panels');
+    this.register();
+
+    this.panels = [];
+}
+
+Plack.Debugger.UI.Panels.prototype = new Plack.Debugger.Abstract.UI();
+
+Plack.Debugger.UI.Panels.prototype.register = function () {
+    // register for events we handle
+    this.on( 'plack-debugger:panels:open_panel',  this._open_panel.bind( this )  );
+    this.on( 'plack-debugger:panels:close_panel', this._close_panel.bind( this ) );
+
+    this.on( 'plack-debugger:_:hide', this.hide.bind( this ) );
+    this.on( 'plack-debugger:_:show', this.show.bind( this ) );
+}
+
+Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
+    var panel = new Plack.Debugger.UI.Panels.Panel( this.$element );
+    panel.trigger( 'plack-debugger:panels:panel:update', data );
+    this.panels.push( panel );
+}
+
+Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
+    e.stopPropagation();
+    this.show( e );
+    this.panels[ index ].trigger( 'plack-debugger:_:show' );
+}
+
+Plack.Debugger.UI.Panels.prototype._close_panel = function ( e, index ) {
+    e.stopPropagation();
+    this.hide( e );
+    this.panels[ index ].trigger( 'plack-debugger:_:hide' );    
+}
+
+// ------------------------------------------------------------------
+
+Plack.Debugger.UI.Panels.Panel = function ( $parent ) {
+    this.$element = $parent.append(
+        '<div class="panel">'
+            + '<div class="header">'
+                + '<div class="close-button">&#9746;</div>'
+                + '<div class="notifications">'
+                    + '<div class="badge warning">warnings (<span></span>)</div>'
+                    + '<div class="badge error">errors (<span></span>)</div>'
+                    + '<div class="badge success">success (<span></span>)</div>'
+                + '</div>'
+                + '<div class="title"></div>'
+                + '<div class="subtitle"></div>'
+            + '</div>'
+            + '<div class="content"></div>'
+        + '</div>'
+    ).find('.panel').last();
+    this.register();
+}
+
+Plack.Debugger.UI.Panels.Panel.prototype = new Plack.Debugger.Abstract.UI();
+
+Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
+    // fire events
+    this.$element.find('.header .close-button').click( 
+        this.trigger.bind( this, 'plack-debugger:panel:close', this.$element.index() ) 
+    );
+
+    // register for events we handle
+    this.on( 'plack-debugger:panels:panel:update', this._update.bind( this ) );
+
+    this.on( 'plack-debugger:_:hide', this.hide.bind( this ) );
+    this.on( 'plack-debugger:_:show', this.show.bind( this ) );
+}
+
+Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
+    e.stopPropagation();
+
+    if ( data.title ) {
+        this.$element.find('.header .title').html( data.title );
+    }
+
+    if ( data.subtitle ) {
+        this.$element.find('.header .subtitle').html( data.subtitle );
+    } 
+
+    if ( data.notifications ) {
+        if ( data.notifications.warnings > 0 ) {
+            var e = this.$element.find('.header .notifications .warning');
+            e.find('span').html( data.notifications.warnings );
+            e.show();
+        }
+        else {
+            var e = this.$element.find('.header .notifications .warning');
+            e.find('span').html('');
+            e.hide();
+        }
+
+        if ( data.notifications.errors > 0 ) {
+            var e = this.$element.find('.header .notifications .error');
+            e.find('span').html( data.notifications.errors );
+            e.show();
+        } 
+        else {
+            var e = this.$element.find('.header .notifications .error');
+            e.find('span').html('');
+            e.hide();
+        }
+
+        if ( data.notifications.success > 0 ) {
+            var e = this.$element.find('.header .notifications .success');
+            e.find('span').html( data.notifications.success );
+            e.show();
+        }
+        else {
+            var e = this.$element.find('.header .notifications .success');
+            e.find('span').html('');
+            e.hide();
+        }
+    }
+
+    if ( data.content ) {
+        // TODO - add formatter ...
+        this.$element.find('.content').html( data.content );
     }
 }
 
@@ -281,7 +411,36 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
 
 
 new Plack.Debugger().ready(function () {
-    console.log('... ready to debug some stuff!')
+    console.log('... ready to debug some stuff!');
+
+    var data = [
+        {
+            title         : 'Testing',
+            subtitle      : '... testing 1, 2, 3',
+            notifications : {
+                errors   : 0,
+                success  : 1,
+                warnings : 2
+            },
+            content : '<h1>hello!</h1>'
+        },
+        {
+            title         : 'Testing 2',
+            subtitle      : '... testing 4, 5, 6',
+            notifications : {
+                errors   : 1,
+                success  : 0,
+                warnings : 2
+            },
+            content : '<h1>Goodbye!</h1>'
+        }
+    ];
+
+    this.UI.toolbar.add_button( data[0] );
+    this.UI.panels.add_panel( data[0] );
+
+    this.UI.toolbar.add_button( data[1] );
+    this.UI.panels.add_panel( data[1] );
 });
 
 // basic formatter ...
