@@ -56,6 +56,22 @@ Plack.Debugger.prototype.ready = function ( callback ) {
 }
 
 Plack.Debugger.prototype._ready = function ( $root, callback ) {
+
+    // IDEAS:
+    // the Plack.Debugger object should have $(document) as 
+    // the this.$element, which will serve two purposes, first
+    // it will provide a 'parent' through which all events
+    // can bubble up to, and second, it will be a place for
+    // the Model class to hook into this (where "model" is 
+    // the renamed "ajax" class).
+    // This pattern should allow the Model class to fire 
+    // events that bubble up to the document layer, and 
+    // are then handled by the UI layer and thrown "down"
+    // the chain. 
+    // Need to work this out tomorrow ...
+    // - SL
+
+
     this.UI   = new Plack.Debugger.UI( $root(document.body) );
     this.AJAX = new Plack.Debugger.AJAX( $root );
 
