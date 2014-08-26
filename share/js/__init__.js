@@ -366,13 +366,13 @@ Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
     e.stopPropagation();
     // XXX - could do this better ...
     this.$element.find('.panel:visible').hide(); // hide any strays
-    this.show( e );
+    this.trigger( 'plack-debugger._:show' );
     this.panels[ index ].trigger( 'plack-debugger._:show' );
 }
 
 Plack.Debugger.UI.Panels.prototype._close_panel = function ( e, index ) {
     e.stopPropagation();
-    this.hide( e );
+    this.trigger( 'plack-debugger._:hide' );
     this.panels[ index ].trigger( 'plack-debugger._:hide' );    
 }
 
