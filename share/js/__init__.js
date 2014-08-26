@@ -132,6 +132,13 @@ Plack.Debugger.UI.prototype.register = function () {
     this.on( 'plack-debugger:_:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
 }
 
+Plack.Debugger.UI.prototype.setup_panels = function ( data ) {
+    for ( var i = 0; i < data.length; i++ ) {
+        this.toolbar.add_button( data[i] );
+        this.panels.add_panel( data[i] );
+    }
+}
+
 Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     e.stopPropagation();
     this.collapsed.trigger('plack-debugger:_:hide');
@@ -146,7 +153,6 @@ Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
 
 Plack.Debugger.UI.prototype._open_panel = function ( e, index ) {
     e.stopPropagation();
-    console.log("plack-debugger:panel:open called!!!");
     this.panels.trigger('plack-debugger:panels:open_panel', index);
 }
 
@@ -415,7 +421,7 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
 
-    var data = [
+    this.UI.setup_panels([
         {
             title         : 'Testing',
             subtitle      : '... testing 1, 2, 3',
@@ -436,13 +442,7 @@ new Plack.Debugger().ready(function () {
             },
             content : '<h1>Goodbye!</h1>'
         }
-    ];
-
-    this.UI.toolbar.add_button( data[0] );
-    this.UI.panels.add_panel( data[0] );
-
-    this.UI.toolbar.add_button( data[1] );
-    this.UI.panels.add_panel( data[1] );
+    ]);
 });
 
 // basic formatter ...
