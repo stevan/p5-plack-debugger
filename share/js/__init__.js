@@ -3,7 +3,9 @@
 if ( Plack == undefined ) var Plack = {};
 
 Plack.Debugger = function () {
-    Plack.Debugger.$CONFIG = this._init_config();
+    if ( Plack.Debugger.$CONFIG == undefined ) {
+        Plack.Debugger.$CONFIG = this._init_config();
+    }
 }
 
 Plack.Debugger.prototype._init_config = function () {
