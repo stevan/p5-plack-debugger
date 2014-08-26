@@ -23,7 +23,7 @@ Plack.Debugger.prototype._init_config = function () {
     return config;
 }
 
-Plack.Debugger.prototype.ready = function (callback) {
+Plack.Debugger.prototype.ready = function ( callback ) {
     var self           = this;
     var ready_callback = function ( $jQuery ) { self._ready( $jQuery, callback ) };
 
