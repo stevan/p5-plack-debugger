@@ -309,6 +309,8 @@ Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
 
 Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
     e.stopPropagation();
+    // XXX - could do this better ...
+    this.$element.find('.panel:visible').hide(); // hide any strays
     this.show( e );
     this.panels[ index ].trigger( 'plack-debugger:_:show' );
 }
