@@ -23,7 +23,7 @@ Plack.Debugger.prototype._init_config = function () {
 
 Plack.Debugger.prototype.ready = function (callback) {
     var self           = this;
-    var ready_callback = function ( $jQuery ) { self._ready( $jQuery(document), callback ) };
+    var ready_callback = function ( $jQuery ) { self._ready( $jQuery, callback ) };
 
     if ( typeof jQuery == 'undefined' ) {
 
@@ -53,10 +53,52 @@ Plack.Debugger.prototype.ready = function (callback) {
     }
 }
 
-Plack.Debugger.prototype._ready = function ( $parent, callback ) {
-    this.UI = new Plack.Debugger.UI( $parent.find('body') );
+Plack.Debugger.prototype._ready = function ( $root, callback ) {
+    this.UI   = new Plack.Debugger.UI( $root(document.body) );
+    this.AJAX = new Plack.Debugger.AJAX( $root );
 
     callback.apply( this, [] );
+}
+
+/* =============================================================== */
+
+Plack.Debugger.AJAX = function ( $root ) {
+    this.$root = $root;
+}
+
+Plack.Debugger.AJAX.prototype.load_JSON = function ( url ) {
+    return this.$root.ajax({
+        dataType : "json",
+        url      : url,
+        global   : false
+    });
+}
+
+Plack.Debugger.AJAX.prototype.register_global_handlers = function ( handlers ) {
+    for ( type in handlers ) {
+        switch ( type.toLowerCase() ) {
+            case 'send':
+                this.$root(document).ajaxSend( handlers[ type ] );
+                break;
+            case 'start':
+                this.$root(document).ajaxStart( handlers[ type ] );
+                break;
+            case 'stop':
+                this.$root(document).ajaxStop( handlers[ type ] );
+                break;
+            case 'success':
+                this.$root(document).ajaxSuccess( handlers[ type ] );
+                break;
+            case 'complete':
+                this.$root(document).ajaxComplete( handlers[ type ] );
+                break;
+            case 'error':
+                this.$root(document).ajaxError( handlers[ type ] );
+                break;
+            default:
+                throw "I have no idea what " + type + " is???";
+        }
+    }
 }
 
 /* =============================================================== */
@@ -282,6 +324,9 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
         else {
             this.$element.find('.notifications .success').html('').hide();
         }
+    } 
+    else {
+        this.$element.find('.notifications .badge').html('').hide();
     }
 }
 
@@ -408,10 +453,15 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
             e.hide();
         }
     }
+    else {
+        var e = this.$element.find('.header .notifications .badge');
+        e.find('span').html('');
+        e.hide();
+    }
 
-    if ( data.content ) {
+    if ( data.result ) {
         // TODO - add formatter ...
-        this.$element.find('.content').html( data.content );
+        this.$element.find('.content').html( generate_data_for_panel( data.result ) );
     }
 }
 
@@ -421,28 +471,13 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
 
-    this.UI.setup_panels([
-        {
-            title         : 'Testing',
-            subtitle      : '... testing 1, 2, 3',
-            notifications : {
-                errors   : 0,
-                success  : 1,
-                warnings : 2
-            },
-            content : '<h1>hello!</h1>'
-        },
-        {
-            title         : 'Testing 2',
-            subtitle      : '... testing 4, 5, 6',
-            notifications : {
-                errors   : 1,
-                success  : 0,
-                warnings : 2
-            },
-            content : '<h1>Goodbye!</h1>'
-        }
-    ]);
+    var self = this;
+    this.AJAX
+        .load_JSON( Plack.Debugger.$CONFIG.root_url + "/" + Plack.Debugger.$CONFIG.current_request_uid )
+        .then(function ( response ) {
+            self.UI.setup_panels( response.data.results );
+        });
+
 });
 
 // basic formatter ...
