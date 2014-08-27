@@ -53,6 +53,8 @@ Plack.Debugger.prototype.ready = function ( callback ) {
     } else {
         jQuery(document).ready(ready_callback);
     }
+
+    return self;
 }
 
 Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
