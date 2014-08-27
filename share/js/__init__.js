@@ -57,21 +57,19 @@ Plack.Debugger.prototype.ready = function ( callback ) {
 
 Plack.Debugger.prototype._ready = function ( $root, callback ) {
     this.UI    = new Plack.Debugger.UI( $root(document.body) );
-    this.model = new Plack.Debugger.Model.Request( $root, this.UI );
+    this.model = new Plack.Debugger.Model( $root, this.UI );
 
     callback.apply( this, [] );
 }
 
 /* =============================================================== */
 
-Plack.Debugger.Model = {};
-
-Plack.Debugger.Model.Request = function ( $root, $target ) {
+Plack.Debugger.Model = function ( $root, $target ) {
     this.$root   = $root;
     this.$target = $target;
 }
 
-Plack.Debugger.Model.Request.prototype.load_request_by_id = function ( request_uid ) {
+Plack.Debugger.Model.prototype.load_request_by_id = function ( request_uid ) {
     this.$root.ajax({
         'dataType' : 'json',
         'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + request_uid),
@@ -81,7 +79,7 @@ Plack.Debugger.Model.Request.prototype.load_request_by_id = function ( request_u
     );
 }
 
-Plack.Debugger.Model.Request.prototype._update_target = function ( response ) {
+Plack.Debugger.Model.prototype._update_target = function ( response ) {
     this.$target.trigger( 'plack-debugger.ui:update', response.data.results );
 }
 
