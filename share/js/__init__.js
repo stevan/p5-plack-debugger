@@ -106,6 +106,10 @@ Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) {
     if ( this.$element != null ) this.$element.on( e, cb )            
 }
 
+Plack.Debugger.Abstract.Eventful.prototype.off = function ( e ) { 
+    if ( this.$element != null ) this.$element.off( e )            
+}
+
 // ----------------------------------------------------------------
 // simple UI object to handle common events 
 
