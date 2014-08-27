@@ -150,28 +150,50 @@ Plack.Debugger.Model.prototype = new Plack.Debugger.Abstract.Eventful();
 
 Plack.Debugger.Model.prototype.register = function () {
     // register for events we handle 
-    this.on( 'plack-debugger.model:load', this._load.bind( this ) );
+    this.on( 'plack-debugger.model.request:load',     this._load_request.bind( this ) );
+    this.on( 'plack-debugger.model.subrequests:load', this._load_subrequests.bind( this ) );
 }
 
-Plack.Debugger.Model.prototype._load = function ( e ) {
+Plack.Debugger.Model.prototype._load_request = function ( e ) {
     e.stopPropagation();
     this.$jQuery.ajax({
         'dataType' : 'json',
         'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + Plack.Debugger.$CONFIG.current_request_uid),
         'global'   : false,
-        'success'  : this._update_target_on_success.bind( this ),
+        'success'  : this._update_target_on_request_success.bind( this ),
         'error'    : this._update_target_on_error.bind( this ),
     });
 }
 
-Plack.Debugger.Model.prototype._update_target_on_success = function ( response, status, xhr ) {
-    this.$target.trigger( 'plack-debugger.ui:load-success', response.data.results );
+Plack.Debugger.Model.prototype._load_subrequests = function ( e ) {
+    e.stopPropagation();
+    this.$jQuery.ajax({
+        'dataType' : 'json',
+        'url'      : (
+            Plack.Debugger.$CONFIG.root_url 
+            + '/' 
+            + Plack.Debugger.$CONFIG.current_request_uid
+            + '/subrequest'
+        ),
+        'global'   : false,
+        'success'  : this._update_target_on_subrequest_success.bind( this ),
+        'error'    : this._update_target_on_error.bind( this ),
+    });
+}
+
+Plack.Debugger.Model.prototype._update_target_on_request_success = function ( response, status, xhr ) {
+    this.$target.trigger( 'plack-debugger.ui:load-request', response.data.results );
 
     // once the target is updated, we can 
     // just start to ignore the event 
-    this.cancel( 'plack-debugger.model:load' );
+    this.cancel( 'plack-debugger.model.request:load' );
 
     this._request = response;
+}
+
+Plack.Debugger.Model.prototype._update_target_on_subrequest_success = function ( response, status, xhr ) {
+    this.$target.trigger( 'plack-debugger.ui:load-subrequests', response.data );
+    this._subrequests = response;
 }
 
 Plack.Debugger.Model.prototype._update_target_on_error = function ( xhr, status, error ) {
@@ -199,14 +221,15 @@ Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
     // register for events we handle 
-    this.on( 'plack-debugger.ui:load-success', this._load_data.bind( this ) );
-    this.on( 'plack-debugger.ui:load-error',   this._load_data_error.bind( this ) );
+    this.on( 'plack-debugger.ui:load-request',     this._load_request.bind( this ) );
+    this.on( 'plack-debugger.ui:load-subrequests', this._load_subrequests.bind( this ) );
+    this.on( 'plack-debugger.ui:load-error',       this._load_data_error.bind( this ) );
 
-    this.on( 'plack-debugger.ui.toolbar:open',  this._open_toolbar_for_first_time.bind( this ) );
-    this.on( 'plack-debugger.ui.toolbar:close', this._close_toolbar.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar:open',     this._open_toolbar_for_first_time.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar:close',    this._close_toolbar.bind( this ) );
 
-    this.on( 'plack-debugger.ui.panels:open',  this._open_panels.bind( this ) );
-    this.on( 'plack-debugger.ui.panels:close', this._close_panels.bind( this ) );
+    this.on( 'plack-debugger.ui.panels:open',      this._open_panels.bind( this ) );
+    this.on( 'plack-debugger.ui.panels:close',     this._close_panels.bind( this ) );
 
     this.on( 'plack-debugger.ui._:hide', function () { throw new Error("You cannot hide() the Plack.Debugger.UI itself") } );
     this.on( 'plack-debugger.ui._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
@@ -214,12 +237,12 @@ Plack.Debugger.UI.prototype.register = function () {
 
 Plack.Debugger.UI.prototype._open_toolbar_for_first_time = function ( e ) {
     // this will bubble up to the model ...
-    this.trigger( 'plack-debugger.model:load' );
+    this.trigger( 'plack-debugger.model.request:load' );
     // TODO - we should add some kind of loading indicator here ...
     // ... and then turn it off in the _load_data method (too lazy)
 }
 
-Plack.Debugger.UI.prototype._load_data = function ( e, data ) {
+Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
     e.stopPropagation();
     
     // load the data into the various places 
@@ -235,6 +258,12 @@ Plack.Debugger.UI.prototype._load_data = function ( e, data ) {
 
     // and now actually open the toolbar ...
     this._open_toolbar( e );
+}
+
+Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
+    e.stopPropagation();
+    console.log('... load-subrequests not implemented yet');
+    console.log( data );
 }
 
 Plack.Debugger.UI.prototype._load_data_error = function ( e ) {
