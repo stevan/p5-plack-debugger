@@ -178,6 +178,7 @@ Plack.Debugger.UI.prototype.register = function () {
 }
 
 Plack.Debugger.UI.prototype._update_data = function ( e, data ) {
+    e.stopPropagation();
     for ( var i = 0; i < data.length; i++ ) {
         this.toolbar.add_button( data[i] );
         this.panels.add_panel( data[i] );
