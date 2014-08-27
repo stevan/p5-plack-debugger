@@ -55,9 +55,9 @@ Plack.Debugger.prototype.ready = function ( callback ) {
     }
 }
 
-Plack.Debugger.prototype._ready = function ( $root, callback ) {
-    this.UI    = new Plack.Debugger.UI( $root(document.body) );
-    this.model = new Plack.Debugger.Model( $root, this.UI );
+Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
+    this.UI    = new Plack.Debugger.UI( $jQuery(document.body) );
+    this.model = new Plack.Debugger.Model( $jQuery, this.UI );
 
     callback.apply( this, [] );
 }
@@ -125,9 +125,9 @@ Plack.Debugger.Abstract.UI.prototype.show = function ( e ) {
 
 /* =============================================================== */
 
-Plack.Debugger.Model = function ( $root, $target ) {
-    this.$root    = $root;
-    this.$target  = $target;
+Plack.Debugger.Model = function ( $jQuery, $target ) {
+    this.$jQuery = $jQuery;
+    this.$target = $target;
 
     // NOTE:
     // we need a place to listen 
@@ -149,7 +149,7 @@ Plack.Debugger.Model.prototype.register = function () {
 
 Plack.Debugger.Model.prototype._update = function ( e ) {
     e.stopPropagation();
-    this.$root.ajax({
+    this.$jQuery.ajax({
         'dataType' : 'json',
         'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + Plack.Debugger.$CONFIG.current_request_uid),
         'global'   : false,
