@@ -182,6 +182,8 @@ Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
     // register for events we handle 
+    this.on( 'plack-debugger.ui:update',  this._update_data.bind( this ) );
+
     this.on( 'plack-debugger.ui.toolbar:open',  this._open_toolbar.bind( this ) );
     this.on( 'plack-debugger.ui.toolbar:close', this._close_toolbar.bind( this ) );
 
@@ -192,7 +194,7 @@ Plack.Debugger.UI.prototype.register = function () {
     this.on( 'plack-debugger.ui._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
 }
 
-Plack.Debugger.UI.prototype.setup_panels = function ( data ) {
+Plack.Debugger.UI.prototype._update_data = function ( e, data ) {
     for ( var i = 0; i < data.length; i++ ) {
         this.toolbar.add_button( data[i] );
         this.panels.add_panel( data[i] );
