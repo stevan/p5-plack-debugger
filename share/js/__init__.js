@@ -113,14 +113,14 @@ Plack.Debugger.Abstract.UI = function () {
 
 Plack.Debugger.Abstract.UI.prototype = new Plack.Debugger.Abstract.Eventful();
 
-Plack.Debugger.Abstract.UI.prototype.hide = function ( e ) { 
+Plack.Debugger.Abstract.UI.prototype.hide = function ( e, duration ) { 
     e.stopPropagation(); 
-    if ( this.$element != null ) this.$element.hide();
+    if ( this.$element != null ) this.$element.hide( duration );
 }
 
-Plack.Debugger.Abstract.UI.prototype.show = function ( e ) { 
+Plack.Debugger.Abstract.UI.prototype.show = function ( e, duration ) { 
     e.stopPropagation(); 
-    if ( this.$element != null ) this.$element.show();
+    if ( this.$element != null ) this.$element.show( duration );
 }
 
 /* =============================================================== */
@@ -242,16 +242,16 @@ Plack.Debugger.UI.prototype._load_data_error = function ( e ) {
 
 Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     e.stopPropagation();
-    this.collapsed.trigger('plack-debugger.ui._:hide');
-    this.toolbar.trigger('plack-debugger.ui._:show');
+    this.collapsed.trigger('plack-debugger.ui._:hide', 'slow');
+    this.toolbar.trigger('plack-debugger.ui._:show',   'slow');
     this.panels.trigger('plack-debugger.ui._:hide'); // re-hide the panels
 }
 
 Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
     e.stopPropagation();
     this.panels.trigger('plack-debugger.ui._:hide');
-    this.toolbar.trigger('plack-debugger.ui._:hide');
-    this.collapsed.trigger('plack-debugger.ui._:show');
+    this.toolbar.trigger('plack-debugger.ui._:hide',   'slow');
+    this.collapsed.trigger('plack-debugger.ui._:show', 'slow');
 }
 
 Plack.Debugger.UI.prototype._open_panels = function ( e, index ) {
