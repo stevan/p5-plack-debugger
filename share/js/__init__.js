@@ -135,6 +135,7 @@ Plack.Debugger.Model = function ( $jQuery, $target ) {
     // be above the $target on 
     // the DOM tree, beyond that 
     // we don't actually care.
+    // - SL
     this.$element = $target.$element.parent();
 
     this.register();
@@ -144,25 +145,30 @@ Plack.Debugger.Model.prototype = new Plack.Debugger.Abstract.Eventful();
 
 Plack.Debugger.Model.prototype.register = function () {
     // register for events we handle 
-    this.on( 'plack-debugger.model:update', this._update.bind( this ) );
+    this.on( 'plack-debugger.model:load', this._load.bind( this ) );
 }
 
-Plack.Debugger.Model.prototype._update = function ( e ) {
+Plack.Debugger.Model.prototype._load = function ( e ) {
     e.stopPropagation();
     this.$jQuery.ajax({
         'dataType' : 'json',
         'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + Plack.Debugger.$CONFIG.current_request_uid),
         'global'   : false,
         'success'  : this._update_target_on_success.bind( this ),
-        //'error'    : this._update_target_on_error.bind( this ),
+        'error'    : this._update_target_on_error.bind( this ),
     });
 }
 
-Plack.Debugger.Model.prototype._update_target_on_success = function ( response ) {
-    this.$target.trigger( 'plack-debugger.ui:update', response.data.results );
+Plack.Debugger.Model.prototype._update_target_on_success = function ( response, status, xhr ) {
+    this.$target.trigger( 'plack-debugger.ui:load-success', response.data.results );
+
     // once the target is updated, we can 
     // just start to ignore the event 
-    this.cancel( 'plack-debugger.model:update' );
+    this.cancel( 'plack-debugger.model:load' );
+}
+
+Plack.Debugger.Model.prototype._update_target_on_error = function ( xhr, status, error ) {
+    this.$target.trigger( 'plack-debugger.ui:load-error', error );
 }
 
 /* =============================================================== */
@@ -186,9 +192,10 @@ Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
     // register for events we handle 
-    this.on( 'plack-debugger.ui:update',  this._update_data.bind( this ) );
+    this.on( 'plack-debugger.ui:load-success', this._load_data.bind( this ) );
+    this.on( 'plack-debugger.ui:load-error',   this._load_data_error.bind( this ) );
 
-    this.on( 'plack-debugger.ui.toolbar:open',  this._open_toolbar.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar:open',  this._open_toolbar_for_first_time.bind( this ) );
     this.on( 'plack-debugger.ui.toolbar:close', this._close_toolbar.bind( this ) );
 
     this.on( 'plack-debugger.ui.panels:open',  this._open_panels.bind( this ) );
@@ -198,12 +205,34 @@ Plack.Debugger.UI.prototype.register = function () {
     this.on( 'plack-debugger.ui._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
 }
 
-Plack.Debugger.UI.prototype._update_data = function ( e, data ) {
+Plack.Debugger.UI.prototype._open_toolbar_for_first_time = function ( e ) {
+    // this will bubble up to the model ...
+    this.trigger( 'plack-debugger.model:load' );
+    // TODO - we should add some kind of loading indicator here ...
+    // ... and then turn it off in the _load_data method (too lazy)
+}
+
+Plack.Debugger.UI.prototype._load_data = function ( e, data ) {
     e.stopPropagation();
+    
+    // load the data into the various places 
     for ( var i = 0; i < data.length; i++ ) {
         this.toolbar.add_button( data[i] );
         this.panels.add_panel( data[i] );
     }
+
+    // now we need to replace the toolbar
+    // handler so that it will work correctly 
+    this.off( 'plack-debugger.ui.toolbar:open' );
+    this.on( 'plack-debugger.ui.toolbar:open', this._open_toolbar.bind( this ) );
+
+    // and now actually open the toolbar ...
+    this._open_toolbar( e );
+}
+
+Plack.Debugger.UI.prototype._load_data_error = function ( e ) {
+    e.stopPropagation();
+    alert("Sorry, we are unable to load the debugging data at the moment, please try again in a few moments.");
 }
 
 Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
@@ -211,9 +240,6 @@ Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     this.collapsed.trigger('plack-debugger.ui._:hide');
     this.toolbar.trigger('plack-debugger.ui._:show');
     this.panels.trigger('plack-debugger.ui._:hide'); // re-hide the panels
-
-    // this will bubble up to the model ...
-    this.trigger( 'plack-debugger.model:update' );
 }
 
 Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
