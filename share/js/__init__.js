@@ -64,27 +64,6 @@ Plack.Debugger.prototype._ready = function ( $root, callback ) {
 
 /* =============================================================== */
 
-Plack.Debugger.Model = function ( $root, $target ) {
-    this.$root   = $root;
-    this.$target = $target;
-}
-
-Plack.Debugger.Model.prototype.load_request_by_id = function ( request_uid ) {
-    this.$root.ajax({
-        'dataType' : 'json',
-        'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + request_uid),
-        'global'   : false
-    }).then(
-        this._update_target.bind( this )       
-    );
-}
-
-Plack.Debugger.Model.prototype._update_target = function ( response ) {
-    this.$target.trigger( 'plack-debugger.ui:update', response.data.results );
-}
-
-/* =============================================================== */
-
 Plack.Debugger.Abstract = {};
 
 // ----------------------------------------------------------------
@@ -146,6 +125,48 @@ Plack.Debugger.Abstract.UI.prototype.show = function ( e ) {
 
 /* =============================================================== */
 
+Plack.Debugger.Model = function ( $root, $target ) {
+    this.$root    = $root;
+    this.$target  = $target;
+
+    // NOTE:
+    // we need a place to listen 
+    // for events and it has to 
+    // be above the $target on 
+    // the DOM tree, beyond that 
+    // we don't actually care.
+    this.$element = $target.$element.parent();
+
+    this.register();
+}
+
+Plack.Debugger.Model.prototype = new Plack.Debugger.Abstract.Eventful();
+
+Plack.Debugger.Model.prototype.register = function () {
+    // register for events we handle 
+    this.on( 'plack-debugger.model:update', this._update.bind( this ) );
+}
+
+Plack.Debugger.Model.prototype._update = function ( e ) {
+    e.stopPropagation();
+    this.$root.ajax({
+        'dataType' : 'json',
+        'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + Plack.Debugger.$CONFIG.current_request_uid),
+        'global'   : false,
+        'success'  : this._update_target_on_success.bind( this ),
+        //'error'    : this._update_target_on_error.bind( this ),
+    });
+}
+
+Plack.Debugger.Model.prototype._update_target_on_success = function ( response ) {
+    this.$target.trigger( 'plack-debugger.ui:update', response.data.results );
+    // once the target is updated, we can 
+    // just start to ignore the event 
+    this.cancel( 'plack-debugger.model:update' );
+}
+
+/* =============================================================== */
+
 Plack.Debugger.UI = function ( $parent ) {
     this.$element = $parent.append(
         '<style type="text/css">' 
@@ -190,6 +211,9 @@ Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     this.collapsed.trigger('plack-debugger.ui._:hide');
     this.toolbar.trigger('plack-debugger.ui._:show');
     this.panels.trigger('plack-debugger.ui._:hide'); // re-hide the panels
+
+    // this will bubble up to the model ...
+    this.trigger( 'plack-debugger.model:update' );
 }
 
 Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
