@@ -530,8 +530,7 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 
 /* =============================================================== */
 
-
-new Plack.Debugger().ready(function () {
+var plack_debugger = new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
 });
 
