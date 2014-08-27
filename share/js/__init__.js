@@ -476,8 +476,6 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 
 new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
-
-    this.model.load_request_by_id( Plack.Debugger.$CONFIG.current_request_uid );
 });
 
 // basic formatter ...
