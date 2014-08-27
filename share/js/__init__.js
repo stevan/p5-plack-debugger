@@ -182,14 +182,14 @@ Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
     // register for events we handle 
-    this.on( 'plack-debugger.toolbar:open',  this._open_toolbar.bind( this ) );
-    this.on( 'plack-debugger.toolbar:close', this._close_toolbar.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar:open',  this._open_toolbar.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar:close', this._close_toolbar.bind( this ) );
 
-    this.on( 'plack-debugger.panels:open',  this._open_panels.bind( this ) );
-    this.on( 'plack-debugger.panels:close', this._close_panels.bind( this ) );
+    this.on( 'plack-debugger.ui.panels:open',  this._open_panels.bind( this ) );
+    this.on( 'plack-debugger.ui.panels:close', this._close_panels.bind( this ) );
 
-    this.on( 'plack-debugger._:hide', function () { throw new Error("You cannot hide() the Plack.Debugger.UI itself") } );
-    this.on( 'plack-debugger._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
+    this.on( 'plack-debugger.ui._:hide', function () { throw new Error("You cannot hide() the Plack.Debugger.UI itself") } );
+    this.on( 'plack-debugger.ui._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
 }
 
 Plack.Debugger.UI.prototype.setup_panels = function ( data ) {
@@ -201,26 +201,26 @@ Plack.Debugger.UI.prototype.setup_panels = function ( data ) {
 
 Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     e.stopPropagation();
-    this.collapsed.trigger('plack-debugger._:hide');
-    this.toolbar.trigger('plack-debugger._:show');
-    this.panels.trigger('plack-debugger._:hide'); // re-hide the panels
+    this.collapsed.trigger('plack-debugger.ui._:hide');
+    this.toolbar.trigger('plack-debugger.ui._:show');
+    this.panels.trigger('plack-debugger.ui._:hide'); // re-hide the panels
 }
 
 Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
     e.stopPropagation();
-    this.panels.trigger('plack-debugger._:hide');
-    this.toolbar.trigger('plack-debugger._:hide');
-    this.collapsed.trigger('plack-debugger._:show');
+    this.panels.trigger('plack-debugger.ui._:hide');
+    this.toolbar.trigger('plack-debugger.ui._:hide');
+    this.collapsed.trigger('plack-debugger.ui._:show');
 }
 
 Plack.Debugger.UI.prototype._open_panels = function ( e, index ) {
     e.stopPropagation();
-    this.panels.trigger('plack-debugger.panels.panel:open', index);
+    this.panels.trigger('plack-debugger.ui.panels.panel:open', index);
 }
 
 Plack.Debugger.UI.prototype._close_panels = function ( e, index ) {
     e.stopPropagation();
-    this.panels.trigger('plack-debugger.panels.panel:close', index);
+    this.panels.trigger('plack-debugger.ui.panels.panel:close', index);
 }
 
 /* =============================================================== */
@@ -237,12 +237,12 @@ Plack.Debugger.UI.Collapsed.prototype = new Plack.Debugger.Abstract.UI();
 Plack.Debugger.UI.Collapsed.prototype.register = function () {
     // fire events
     this.$element.find('.open-button').click( 
-        this.trigger.bind( this, 'plack-debugger.toolbar:open' ) 
+        this.trigger.bind( this, 'plack-debugger.ui.toolbar:open' ) 
     );
 
     // register for events we handle
-    this.on( 'plack-debugger._:hide', this.hide.bind( this ) );
-    this.on( 'plack-debugger._:show', this.show.bind( this ) );
+    this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
+    this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
 }
 
 /* =============================================================== */
@@ -266,17 +266,17 @@ Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.Abstract.UI();
 Plack.Debugger.UI.Toolbar.prototype.register = function () {
     // fire events
     this.$element.find('.header .close-button').click( 
-        this.trigger.bind( this, 'plack-debugger.toolbar:close' ) 
+        this.trigger.bind( this, 'plack-debugger.ui.toolbar:close' ) 
     );
 
     // register for events we handle
-    this.on( 'plack-debugger._:hide', this.hide.bind( this ) );
-    this.on( 'plack-debugger._:show', this.show.bind( this ) );
+    this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
+    this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
 }
 
 Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
     var button = new Plack.Debugger.UI.Toolbar.Button( this.$element.find('.buttons') );
-    button.trigger( 'plack-debugger.toolbar.button:update', data );
+    button.trigger( 'plack-debugger.ui.toolbar.button:update', data );
     this.buttons.push( button );
 }
 
@@ -302,11 +302,11 @@ Plack.Debugger.UI.Toolbar.Button.prototype = new Plack.Debugger.Abstract.UI();
 Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
     // fire events
     this.$element.click( 
-        this.trigger.bind( this, 'plack-debugger.panels:open', this.$element.index() ) 
+        this.trigger.bind( this, 'plack-debugger.ui.panels:open', this.$element.index() ) 
     );
 
     // register for events we handle
-    this.on( 'plack-debugger.toolbar.button:update', this._update.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar.button:update', this._update.bind( this ) );
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
@@ -365,16 +365,16 @@ Plack.Debugger.UI.Panels.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Panels.prototype.register = function () {
     // register for events we handle
-    this.on( 'plack-debugger.panels.panel:open',  this._open_panel.bind( this )  );
-    this.on( 'plack-debugger.panels.panel:close', this._close_panel.bind( this ) );
+    this.on( 'plack-debugger.ui.panels.panel:open',  this._open_panel.bind( this )  );
+    this.on( 'plack-debugger.ui.panels.panel:close', this._close_panel.bind( this ) );
 
-    this.on( 'plack-debugger._:hide', this.hide.bind( this ) );
-    this.on( 'plack-debugger._:show', this.show.bind( this ) );
+    this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
+    this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
 }
 
 Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
     var panel = new Plack.Debugger.UI.Panels.Panel( this.$element );
-    panel.trigger( 'plack-debugger.panels.panel:update', data );
+    panel.trigger( 'plack-debugger.ui.panels.panel:update', data );
     this.panels.push( panel );
 }
 
@@ -382,14 +382,14 @@ Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
     e.stopPropagation();
     // XXX - could do this better ...
     this.$element.find('.panel:visible').hide(); // hide any strays
-    this.trigger( 'plack-debugger._:show' );
-    this.panels[ index ].trigger( 'plack-debugger._:show' );
+    this.trigger( 'plack-debugger.ui._:show' );
+    this.panels[ index ].trigger( 'plack-debugger.ui._:show' );
 }
 
 Plack.Debugger.UI.Panels.prototype._close_panel = function ( e, index ) {
     e.stopPropagation();
-    this.trigger( 'plack-debugger._:hide' );
-    this.panels[ index ].trigger( 'plack-debugger._:hide' );    
+    this.trigger( 'plack-debugger.ui._:hide' );
+    this.panels[ index ].trigger( 'plack-debugger.ui._:hide' );    
 }
 
 // ------------------------------------------------------------------
@@ -418,14 +418,14 @@ Plack.Debugger.UI.Panels.Panel.prototype = new Plack.Debugger.Abstract.UI();
 Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
     // fire events
     this.$element.find('.header .close-button').click( 
-        this.trigger.bind( this, 'plack-debugger.panels:close', this.$element.index() ) 
+        this.trigger.bind( this, 'plack-debugger.ui.panels:close', this.$element.index() ) 
     );
 
     // register for events we handle
-    this.on( 'plack-debugger.panels.panel:update', this._update.bind( this ) );
+    this.on( 'plack-debugger.ui.panels.panel:update', this._update.bind( this ) );
 
-    this.on( 'plack-debugger._:hide', this.hide.bind( this ) );
-    this.on( 'plack-debugger._:show', this.show.bind( this ) );
+    this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
+    this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
 }
 
 Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
