@@ -251,6 +251,25 @@ Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
         this.panels.add_panel( data[i] );
     }
 
+    // =============================================
+    // NOTE:
+    //
+    // This stuff below, it is not really related to 
+    // the function of loading a request, so really 
+    // it should not be in this method anyway. This
+    // should be split out at some point.
+    //
+    // And just in case I forgot what triggered this, 
+    // it was running this in the console:
+    //
+    //    plack_debugger.model.trigger( 'plack-debugger.model.request:load' );
+    //
+    // do that on a newly refreshed page and see 
+    // what I mean.
+    //    
+    // - SL
+    // =============================================
+
     // now we need to replace the toolbar
     // handler so that it will work correctly 
     this.off( 'plack-debugger.ui.toolbar:open' );
