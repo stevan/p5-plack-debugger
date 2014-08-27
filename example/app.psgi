@@ -148,8 +148,7 @@ builder {
                             <input id="ajax-test" type="button" value="TEST ME!" />
                             <br/>
                             <input id="ajax-test-2" type="button" value="BREAK ME!" />
-                            <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-                            <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+                            <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
                             <hr/>
                         </body>
                         </html>
