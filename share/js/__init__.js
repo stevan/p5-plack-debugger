@@ -56,67 +56,33 @@ Plack.Debugger.prototype.ready = function ( callback ) {
 }
 
 Plack.Debugger.prototype._ready = function ( $root, callback ) {
-
-    // IDEAS:
-    // the Plack.Debugger object should have $(document) as 
-    // the this.$element, which will serve two purposes, first
-    // it will provide a 'parent' through which all events
-    // can bubble up to, and second, it will be a place for
-    // the Model class to hook into this (where "model" is 
-    // the renamed "ajax" class).
-    // This pattern should allow the Model class to fire 
-    // events that bubble up to the document layer, and 
-    // are then handled by the UI layer and thrown "down"
-    // the chain. 
-    // Need to work this out tomorrow ...
-    // - SL
-
-
-    this.UI   = new Plack.Debugger.UI( $root(document.body) );
-    this.AJAX = new Plack.Debugger.AJAX( $root );
+    this.UI    = new Plack.Debugger.UI( $root(document.body) );
+    this.model = new Plack.Debugger.Model.Request( $root, this.UI );
 
     callback.apply( this, [] );
 }
 
 /* =============================================================== */
 
-Plack.Debugger.AJAX = function ( $root ) {
-    this.$root = $root;
+Plack.Debugger.Model = {};
+
+Plack.Debugger.Model.Request = function ( $root, $target ) {
+    this.$root   = $root;
+    this.$target = $target;
 }
 
-Plack.Debugger.AJAX.prototype.load_JSON = function ( url ) {
-    return this.$root.ajax({
-        dataType : "json",
-        url      : url,
-        global   : false
-    });
+Plack.Debugger.Model.Request.prototype.load_request_by_id = function ( request_uid ) {
+    this.$root.ajax({
+        'dataType' : 'json',
+        'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + request_uid),
+        'global'   : false
+    }).then(
+        this._update_target.bind( this )       
+    );
 }
 
-Plack.Debugger.AJAX.prototype.register_global_handlers = function ( handlers ) {
-    for ( type in handlers ) {
-        switch ( type.toLowerCase() ) {
-            case 'send':
-                this.$root(document).ajaxSend( handlers[ type ] );
-                break;
-            case 'start':
-                this.$root(document).ajaxStart( handlers[ type ] );
-                break;
-            case 'stop':
-                this.$root(document).ajaxStop( handlers[ type ] );
-                break;
-            case 'success':
-                this.$root(document).ajaxSuccess( handlers[ type ] );
-                break;
-            case 'complete':
-                this.$root(document).ajaxComplete( handlers[ type ] );
-                break;
-            case 'error':
-                this.$root(document).ajaxError( handlers[ type ] );
-                break;
-            default:
-                throw "I have no idea what " + type + " is???";
-        }
-    }
+Plack.Debugger.Model.Request.prototype._update_target = function ( response ) {
+    this.$target.trigger( 'plack-debugger.ui:update', response.data.results );
 }
 
 /* =============================================================== */
@@ -493,13 +459,7 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
 
-    var self = this;
-    this.AJAX
-        .load_JSON( Plack.Debugger.$CONFIG.root_url + "/" + Plack.Debugger.$CONFIG.current_request_uid )
-        .then(function ( response ) {
-            self.UI.setup_panels( response.data.results );
-        });
-
+    this.model.load_request_by_id( Plack.Debugger.$CONFIG.current_request_uid );
 });
 
 // basic formatter ...
