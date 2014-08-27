@@ -138,6 +138,9 @@ Plack.Debugger.Model = function ( $jQuery, $target ) {
         '<div class="listener"></div>'
     ).parent();
 
+    this._request     = null;
+    this._subrequests = null;
+
     this.register();
 }
 
@@ -165,6 +168,8 @@ Plack.Debugger.Model.prototype._update_target_on_success = function ( response, 
     // once the target is updated, we can 
     // just start to ignore the event 
     this.cancel( 'plack-debugger.model:load' );
+
+    this._request = response;
 }
 
 Plack.Debugger.Model.prototype._update_target_on_error = function ( xhr, status, error ) {
