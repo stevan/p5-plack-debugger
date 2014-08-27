@@ -129,14 +129,14 @@ Plack.Debugger.Model = function ( $jQuery, $target ) {
     this.$jQuery = $jQuery;
     this.$target = $target;
 
-    // NOTE:
     // we need a place to listen 
     // for events and it has to 
     // be above the $target on 
-    // the DOM tree, beyond that 
-    // we don't actually care.
-    // - SL
-    this.$element = $target.$element.parent();
+    // the DOM tree, so we create
+    // that level here.
+    this.$element = $target.$element.wrap(
+        '<div class="listener"></div>'
+    ).parent();
 
     this.register();
 }
