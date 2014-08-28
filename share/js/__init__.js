@@ -225,7 +225,7 @@ Plack.Debugger.UI.prototype.register = function () {
     this.on( 'plack-debugger.ui:load-subrequests', this._load_subrequests.bind( this ) );
     this.on( 'plack-debugger.ui:load-error',       this._load_data_error.bind( this ) );
 
-    this.on( 'plack-debugger.ui.toolbar:open',     this._open_toolbar_for_first_time.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar:open',     this._open_toolbar.bind( this ) );
     this.on( 'plack-debugger.ui.toolbar:close',    this._close_toolbar.bind( this ) );
 
     this.on( 'plack-debugger.ui.panels:open',      this._open_panels.bind( this ) );
@@ -235,48 +235,13 @@ Plack.Debugger.UI.prototype.register = function () {
     this.on( 'plack-debugger.ui._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
 }
 
-Plack.Debugger.UI.prototype._open_toolbar_for_first_time = function ( e ) {
-    // this will bubble up to the model ...
-    this.trigger( 'plack-debugger.model.request:load' );
-    // TODO - we should add some kind of loading indicator here ...
-    // ... and then turn it off in the _load_data method (too lazy)
-}
-
 Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
     e.stopPropagation();
-    
     // load the data into the various places 
     for ( var i = 0; i < data.length; i++ ) {
         this.toolbar.add_button( data[i] );
         this.panels.add_panel( data[i] );
     }
-
-    // =============================================
-    // NOTE:
-    //
-    // This stuff below, it is not really related to 
-    // the function of loading a request, so really 
-    // it should not be in this method anyway. This
-    // should be split out at some point.
-    //
-    // And just in case I forgot what triggered this, 
-    // it was running this in the console:
-    //
-    //    plack_debugger.model.trigger( 'plack-debugger.model.request:load' );
-    //
-    // do that on a newly refreshed page and see 
-    // what I mean.
-    //    
-    // - SL
-    // =============================================
-
-    // now we need to replace the toolbar
-    // handler so that it will work correctly 
-    this.off( 'plack-debugger.ui.toolbar:open' );
-    this.on( 'plack-debugger.ui.toolbar:open', this._open_toolbar.bind( this ) );
-
-    // and now actually open the toolbar ...
-    this._open_toolbar( e );
 }
 
 Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
@@ -580,6 +545,8 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 
 var plack_debugger = new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
+
+    this.model.trigger( 'plack-debugger.model.request:load' );
 });
 
 // basic formatter ...
