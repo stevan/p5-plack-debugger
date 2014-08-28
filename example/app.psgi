@@ -82,7 +82,11 @@ my $debugger = Plack::Debugger->new(
                 $SIG{'__WARN__'} = 'DEFAULT';  
                 $self->set_result( $self->stash );
             }            
-        )
+        ),
+        Plack::Debugger::Panel->new(
+            title     => 'AJAX Requests',
+            subtitle  => '... capturing AJAX requests'
+        ),        
     ]
 );
 
