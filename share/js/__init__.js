@@ -58,8 +58,8 @@ Plack.Debugger.prototype.ready = function ( callback ) {
 }
 
 Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
-    this.UI    = new Plack.Debugger.UI( $jQuery(document.body) );
-    this.model = new Plack.Debugger.Model( $jQuery, this.UI );
+    this.UI       = new Plack.Debugger.UI( $jQuery(document.body) );
+    this.resource = new Plack.Debugger.Resource( $jQuery, this.UI );
 
     callback.apply( this, [] );
 }
@@ -127,7 +127,7 @@ Plack.Debugger.Abstract.UI.prototype.show = function ( e, duration ) {
 
 /* =============================================================== */
 
-Plack.Debugger.Model = function ( $jQuery, $target ) {
+Plack.Debugger.Resource = function ( $jQuery, $target ) {
     this.$jQuery = $jQuery;
     this.$target = $target;
 
@@ -146,15 +146,15 @@ Plack.Debugger.Model = function ( $jQuery, $target ) {
     this.register();
 }
 
-Plack.Debugger.Model.prototype = new Plack.Debugger.Abstract.Eventful();
+Plack.Debugger.Resource.prototype = new Plack.Debugger.Abstract.Eventful();
 
-Plack.Debugger.Model.prototype.register = function () {
+Plack.Debugger.Resource.prototype.register = function () {
     // register for events we handle 
-    this.on( 'plack-debugger.model.request:load',     this._load_request.bind( this ) );
-    this.on( 'plack-debugger.model.subrequests:load', this._load_subrequests.bind( this ) );
+    this.on( 'plack-debugger.resource.request:load',     this._load_request.bind( this ) );
+    this.on( 'plack-debugger.resource.subrequests:load', this._load_subrequests.bind( this ) );
 }
 
-Plack.Debugger.Model.prototype._load_request = function ( e ) {
+Plack.Debugger.Resource.prototype._load_request = function ( e ) {
     e.stopPropagation();
     this.$jQuery.ajax({
         'dataType' : 'json',
@@ -165,7 +165,7 @@ Plack.Debugger.Model.prototype._load_request = function ( e ) {
     });
 }
 
-Plack.Debugger.Model.prototype._load_subrequests = function ( e ) {
+Plack.Debugger.Resource.prototype._load_subrequests = function ( e ) {
     e.stopPropagation();
     this.$jQuery.ajax({
         'dataType' : 'json',
@@ -181,22 +181,22 @@ Plack.Debugger.Model.prototype._load_subrequests = function ( e ) {
     });
 }
 
-Plack.Debugger.Model.prototype._update_target_on_request_success = function ( response, status, xhr ) {
+Plack.Debugger.Resource.prototype._update_target_on_request_success = function ( response, status, xhr ) {
     this.$target.trigger( 'plack-debugger.ui:load-request', response.data.results );
 
     // once the target is updated, we can 
     // just start to ignore the event 
-    this.cancel( 'plack-debugger.model.request:load' );
+    this.cancel( 'plack-debugger.resource.request:load' );
 
     this._request = response;
 }
 
-Plack.Debugger.Model.prototype._update_target_on_subrequest_success = function ( response, status, xhr ) {
+Plack.Debugger.Resource.prototype._update_target_on_subrequest_success = function ( response, status, xhr ) {
     this.$target.trigger( 'plack-debugger.ui:load-subrequests', response.data );
     this._subrequests = response;
 }
 
-Plack.Debugger.Model.prototype._update_target_on_error = function ( xhr, status, error ) {
+Plack.Debugger.Resource.prototype._update_target_on_error = function ( xhr, status, error ) {
     this.$target.trigger( 'plack-debugger.ui:load-error', error );
 }
 
@@ -546,7 +546,7 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 var plack_debugger = new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
 
-    this.model.trigger( 'plack-debugger.model.request:load' );
+    this.resource.trigger( 'plack-debugger.resource.request:load' );
 });
 
 // basic formatter ...
