@@ -13,12 +13,19 @@ sub new {
 
     $args{'title'} ||= 'AJAX Requests';
 
-    $args{'after'} = sub {
-        (shift)->set_result('... no AJAX results yet');
+    $args{'before'} = sub {
+        my ($self, $env) = @_;
+        # if it is a subrequest already,
+        # then we can just disable it
+        $self->disable if 
+            exists $env->{'HTTP_X_PLACK_DEBUGGER_PARENT_REQUEST_UID'} 
+                || 
+            exists $env->{'plack.debugger.parent_request_uid'};
     };
 
     my $self = $class->SUPER::new( \%args );
     $self->add_metadata( track_subrequests => 1 );
+    $self->add_metadata( formatter         => 'subrequest_formatter' );
     $self;
 }
 
