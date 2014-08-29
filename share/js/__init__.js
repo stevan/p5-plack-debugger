@@ -771,12 +771,13 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 }
                 return out + '</table>';
             default:
-                return "NO IDEA WHAT THIS IS! " + (typeof data);          
+                throw new Error("[Bad Formatter Args] 'generic_data_formatter' expected type { String,Number,Array,Object }");
         }
     },
+    // some specialities ...
     ordered_key_value_pairs : function (data) {
-        if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] expected an Array");
-        if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] expected an even length Array");
+        if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an Array");
+        if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an even length Array");
         var out = '<table>';
         for ( var i = 0; i < data.length; i += 2 ) {
             out += '<tr>' 
