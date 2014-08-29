@@ -408,17 +408,17 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
         all.result.push( page );
     }
 
-    // TODO:
-    // We need a better way to find and mark the ajax
-    // button & panel, this makes a seriously bad 
-    // assumption.
-    // - SL
+    $.each( this.toolbar.buttons, function (i, b) { 
+        if (b.metadata('requires_AJAX_tracking')) {
+            b.trigger( 'plack-debugger.ui.toolbar.button:update', all ) 
+        }
+    });
 
-    var ajax_button = this.toolbar.buttons[ this.toolbar.buttons.length -1 ];
-    var ajax_panel  = this.panels.panels[ this.panels.panels.length -1 ];
-
-    ajax_button.trigger( 'plack-debugger.ui.toolbar.button:update', all );
-    ajax_panel.trigger(  'plack-debugger.ui.panels.panel:update', all );    
+    $.each( this.panels.panels,  function (i, p) { 
+        if (p.metadata('requires_AJAX_tracking')) {
+            p.trigger( 'plack-debugger.ui.panels.panel:update', all )
+        }
+    });    
 }
 
 Plack.Debugger.UI.prototype._load_data_error = function ( e, error ) {
@@ -521,6 +521,8 @@ Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
             + '<div class="pdb-subtitle"></div>'
         + '</div>'
     ).find('.pdb-button').last();
+
+    this._metadata = {};
     this.register();
 }
 
@@ -534,6 +536,10 @@ Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
 
     // register for events we handle
     this.on( 'plack-debugger.ui.toolbar.button:update', this._update.bind( this ) );
+}
+
+Plack.Debugger.UI.Toolbar.Button.prototype.metadata = function ( key ) {
+    return this._metadata[ key ];
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
@@ -571,6 +577,10 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
     } 
     else {
         this.$element.find('.pdb-notifications .pdb-badge').html('').hide();
+    }
+
+    if ( data.metadata ) {
+        this._metadata = data.metadata;
     }
 }
 
@@ -634,6 +644,8 @@ Plack.Debugger.UI.Panels.Panel = function ( $parent ) {
             + '<div class="pdb-content"></div>'
         + '</div>'
     ).find('.pdb-panel').last();
+
+    this._metadata = {};
     this.register();
 }
 
@@ -650,6 +662,10 @@ Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
 
     this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
     this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
+}
+
+Plack.Debugger.UI.Panels.Panel.prototype.metadata = function ( key ) {
+    return this._metadata[ key ];
 }
 
 Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
@@ -703,10 +719,14 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
         e.hide();
     }
 
+    if ( data.metadata ) {
+        this._metadata = data.metadata;
+    }  
+
     if ( data.result ) {
         // TODO - add formatter ...
         this.$element.find('.pdb-content').html( generate_data_for_panel( data.result ) );
-    }
+    }  
 }
 
 /* =============================================================== */
