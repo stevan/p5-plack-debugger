@@ -401,7 +401,8 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
             page.results.push({
                 'title'    : data[i].results[j].title,
                 'subtitle' : data[i].results[j].subtitle,
-                'result'   : data[i].results[j].result
+                'result'   : data[i].results[j].result,
+                'metadata' : data[i].results[j].metadata
             });
         }
 
