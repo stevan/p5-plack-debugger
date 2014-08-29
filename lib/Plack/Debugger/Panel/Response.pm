@@ -9,6 +9,8 @@ sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
+    $args{'title'} ||= 'Plack Response';
+
     $args{'after'} = sub {
         my ($self, $env, $resp) = @_;
 

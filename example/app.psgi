@@ -41,10 +41,10 @@ my $debugger = Plack::Debugger->new(
         filename_fmt => "%s.json",
     ),
     panels => [
-        Plack::Debugger::Panel::Timer->new( title => 'Timer' ),
-        Plack::Debugger::Panel::Parameters->new( title => 'Request Parameters' ),        
-        Plack::Debugger::Panel::Response->new( title => 'Plack Response' ),
-        Plack::Debugger::Panel::PerlConfig->new( title => 'Perl Config' ),
+        Plack::Debugger::Panel::Timer->new,
+        Plack::Debugger::Panel::Parameters->new,        
+        Plack::Debugger::Panel::Response->new,
+        Plack::Debugger::Panel::PerlConfig->new,
         Plack::Debugger::Panel->new(
             title     => 'Env',
             subtitle  => '... capturing the execution env',
@@ -84,7 +84,7 @@ my $debugger = Plack::Debugger->new(
                 $self->set_result( $self->stash );
             }            
         ),
-        Plack::Debugger::Panel::AJAX->new( title => 'AJAX Requests' ),        
+        Plack::Debugger::Panel::AJAX->new,        
     ]
 );
 
