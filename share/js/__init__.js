@@ -31,7 +31,7 @@ Plack.Debugger.prototype.ready = function ( callback ) {
 
         var script  = document.createElement('script');
         script.type = 'text/javascript';
-        script.src  = this.$CONFIG.static_js_url + '/jquery.js';
+        script.src  = Plack.Debugger.$CONFIG.static_js_url + '/jquery.js';
 
         if (script.readyState) { // IE
             script.onreadystatechange = function () {
