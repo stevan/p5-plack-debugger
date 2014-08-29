@@ -376,6 +376,8 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
 
     for ( var i = 0; i < data.length; i++ ) {
         var page = {
+            'method'             : data[i].method,
+            'uri'                : data[i].uri,                
             'request_uid'        : data[i].request_uid,
             'parent_request_uid' : data[i].parent_request_uid,
             'notifications'      : { 'warning' : 0, 'error' : 0, 'success' : 0 },
@@ -398,7 +400,7 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
                     page.notifications.success += notifications.success;
                 }
             }            
-            page.results.push({
+            page.results.push({            
                 'title'    : data[i].results[j].title,
                 'subtitle' : data[i].results[j].subtitle,
                 'result'   : data[i].results[j].result,
@@ -791,8 +793,9 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     subrequest_formatter : function (data) {
         var out = '';
         for ( var i = 0; i < data.length; i++ ) {
+            console.log( data[i] );
             out += '<div>'; 
-                out += '<div>' + data[i].request_uid + '</div>'
+                out += '<div>' + ([ data[i].method, data[i].uri, data[i].request_uid ].join(' -- ')) + '</div>'
                 out += '<div>' 
                         + '<div>' + data[i].notifications.warning + '</div>'
                         + '<div>' + data[i].notifications.error   + '</div>'
