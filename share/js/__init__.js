@@ -728,9 +728,64 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
     }  
 
     if ( data.result ) {
-        // TODO - add formatter ...
-        this.$element.find('.pdb-content').html( generate_data_for_panel( data.result ) );
+        
+        // use a special formatter if specified
+        var formatter = this._metadata.formatter
+            ? this.formatters[ this._metadata.formatter ]
+            : this.formatters.generic_data_formatter;
+
+        this.$element.find('.pdb-content').html( 
+            // NOTE:
+            // it is not uncommon for a formatter
+            // to need to be recursive in some way
+            // so we make `this` in the formatters
+            // be the `formatters` object itself
+            // so that it can recursive on itself
+            // or on another formatter if needed.
+            // - SL
+            formatter.apply( this.formatters, [ data.result ] ) 
+        );
     }  
+}
+
+// formatters for the Panel content
+
+Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
+    // basic formatter ...
+    generic_data_formatter : function (data) {
+        if (!data) return "";
+        switch ( data.constructor ) {
+            case String:
+            case Number:
+                return data;
+            case Array:
+                var out = '<table>';
+                for (var i = 0; i < data.length; i++) {
+                    out += '<tr><td>' + this.generic_data_formatter( data[i] ) + '</td></tr>';
+                }
+                return out + '</table>'; 
+            case Object:
+                var out = '<table>';
+                for (key in data) {
+                    out += '<tr><td>' + key + '</td><td>' + this.generic_data_formatter( data[key] ) + '</td></tr>';
+                }
+                return out + '</table>';
+            default:
+                return "NO IDEA WHAT THIS IS! " + (typeof data);          
+        }
+    },
+    ordered_key_value_pairs : function (data) {
+        if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] expected an Array");
+        if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] expected an even length Array");
+        var out = '<table>';
+        for ( var i = 0; i < data.length; i += 2 ) {
+            out += '<tr>' 
+                + '<td>' + data[i] + '</td>' 
+                + '<td>' + this.generic_data_formatter( data[ i + 1 ] ) + '</td>' 
+                + '</tr>';
+        }
+        return out + '</table>'; 
+    }
 }
 
 /* =============================================================== */
@@ -738,30 +793,5 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 var plack_debugger = new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
 });
-
-// basic formatter ...
-
-function generate_data_for_panel (data) {
-    if (!data) return "";
-    switch ( data.constructor ) {
-        case String:
-        case Number:
-            return data;
-        case Array:
-            var out = '<table>';
-            for (var i = 0; i < data.length; i++) {
-                out += '<tr><td>' + generate_data_for_panel( data[i] ) + '</td></tr>';
-            }
-            return out + '</table>'; 
-        case Object:
-            var out = '<table>';
-            for (key in data) {
-                out += '<tr><td>' + key + '</td><td>' + generate_data_for_panel( data[key] ) + '</td></tr>';
-            }
-            return out + '</table>';
-        default:
-            return "NO IDEA WHAT THIS IS! " + (typeof data);          
-    }
-}
 
 

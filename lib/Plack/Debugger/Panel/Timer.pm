@@ -26,14 +26,16 @@ sub new {
         my $elapsed = tv_interval( $start, $end ); 
 
         $self->set_subtitle( $elapsed );
-        $self->set_result({
+        $self->set_result([
+            'Elapsed Time'  => $elapsed,
             'Starting Time' => $class->format_time( $start ),
             'Ending Time'   => $class->format_time( $end ),
-            'Elapsed Time'  => $elapsed,
-        });
+        ]);
     };
 
-    $class->SUPER::new( \%args );
+    my $self = $class->SUPER::new( \%args );
+    $self->add_metadata( formatter => 'ordered_key_value_pairs' );
+    $self;
 }
 
 sub format_time {

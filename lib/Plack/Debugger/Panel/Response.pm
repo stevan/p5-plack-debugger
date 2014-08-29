@@ -15,13 +15,16 @@ sub new {
         my ($self, $env, $resp) = @_;
 
         $self->notify( $resp->[0] >= 400 ? 'error' : 'success' );
-        $self->set_result({
+        $self->set_result([
             'Status'  => $resp->[0],
             'Headers' => { @{ $resp->[1] } }
-        });
+        ]);
     };
 
-    $class->SUPER::new( \%args );
+    my $self = $class->SUPER::new( \%args );
+    $self->add_metadata( formatter => 'ordered_key_value_pairs' );
+    $self;
+
 }
 
 1;
