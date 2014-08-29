@@ -158,7 +158,7 @@ Plack.Debugger.Resource = function ( $jQuery, $target ) {
     // the DOM tree, so we create
     // that level here.
     this.$element = $target.$element.wrap(
-        '<div class="listener"></div>'
+        '<div class="pdb-listener"></div>'
     ).parent();
 
     this._request          = null;
@@ -377,8 +377,8 @@ Plack.Debugger.UI.prototype._close_panels = function ( e, index ) {
 
 Plack.Debugger.UI.Collapsed = function ( $parent ) {
     this.$element = $parent.append(
-        '<div class="collapsed"><div class="open-button">&#9756;</div></div>'
-    ).find('.collapsed');
+        '<div class="pdb-collapsed"><div class="pdb-open-button">&#9756;</div></div>'
+    ).find('.pdb-collapsed');
     this.register();
 }
 
@@ -386,7 +386,7 @@ Plack.Debugger.UI.Collapsed.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Collapsed.prototype.register = function () {
     // fire events
-    this.$element.find('.open-button').click( 
+    this.$element.find('.pdb-open-button').click( 
         this.trigger.bind( this, 'plack-debugger.ui.toolbar:open' ) 
     );
 
@@ -399,13 +399,13 @@ Plack.Debugger.UI.Collapsed.prototype.register = function () {
 
 Plack.Debugger.UI.Toolbar = function ( $parent ) {
     this.$element = $parent.append(
-        '<div class="toolbar">' 
-            + '<div class="header">'
-                + '<div class="close-button">&#9758;</div>'
+        '<div class="pdb-toolbar">' 
+            + '<div class="pdb-header">'
+                + '<div class="pdb-close-button">&#9758;</div>'
             + '</div>'
-            + '<div class="buttons"></div>'
+            + '<div class="pdb-buttons"></div>'
         + '</div>'
-    ).find('.toolbar');
+    ).find('.pdb-toolbar');
     this.register();
 
     this.buttons = [];
@@ -415,7 +415,7 @@ Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Toolbar.prototype.register = function () {
     // fire events
-    this.$element.find('.header .close-button').click( 
+    this.$element.find('.pdb-header .pdb-close-button').click( 
         this.trigger.bind( this, 'plack-debugger.ui.toolbar:close' ) 
     );
 
@@ -425,7 +425,7 @@ Plack.Debugger.UI.Toolbar.prototype.register = function () {
 }
 
 Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
-    var button = new Plack.Debugger.UI.Toolbar.Button( this.$element.find('.buttons') );
+    var button = new Plack.Debugger.UI.Toolbar.Button( this.$element.find('.pdb-buttons') );
     button.trigger( 'plack-debugger.ui.toolbar.button:update', data );
     this.buttons.push( button );
 }
@@ -434,16 +434,16 @@ Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
 
 Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
     this.$element = $parent.append(
-        '<div class="button">'
-            + '<div class="notifications">'
-                + '<div class="badge warning"></div>'
-                + '<div class="badge error"></div>'
-                + '<div class="badge success"></div>'
+        '<div class="pdb-button">'
+            + '<div class="pdb-notifications">'
+                + '<div class="pdb-badge pdb-warning"></div>'
+                + '<div class="pdb-badge pdb-error"></div>'
+                + '<div class="pdb-badge pdb-success"></div>'
             + '</div>'
-            + '<div class="title"></div>'
-            + '<div class="subtitle"></div>'
+            + '<div class="pdb-title"></div>'
+            + '<div class="pdb-subtitle"></div>'
         + '</div>'
-    ).find('.button').last();
+    ).find('.pdb-button').last();
     this.register();
 }
 
@@ -463,37 +463,37 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
     e.stopPropagation();
 
     if ( data.title ) {
-        this.$element.find('.title').html( data.title );
+        this.$element.find('.pdb-title').html( data.title );
     }
 
     if ( data.subtitle ) {
-        this.$element.find('.subtitle').html( data.subtitle ).show();
+        this.$element.find('.pdb-subtitle').html( data.subtitle ).show();
     }  
 
     if ( data.notifications ) {
         if ( data.notifications.warning > 0 ) {
-            this.$element.find('.notifications .warning').html( data.notifications.warning ).show();
+            this.$element.find('.pdb-notifications .pdb-warning').html( data.notifications.warning ).show();
         }
         else {
-            this.$element.find('.notifications .warning').html('').hide();
+            this.$element.find('.pdb-notifications .pdb-warning').html('').hide();
         }
 
         if ( data.notifications.error > 0 ) {
-            this.$element.find('.notifications .error').html( data.notifications.error ).show();
+            this.$element.find('.pdb-notifications .pdb-error').html( data.notifications.error ).show();
         } 
         else {
-            this.$element.find('.notifications .error').html('').hide();
+            this.$element.find('.pdb-notifications .pdb-error').html('').hide();
         }
 
         if ( data.notifications.success > 0 ) {
-            this.$element.find('.notifications .success').html( data.notifications.success ).show();
+            this.$element.find('.pdb-notifications .pdb-success').html( data.notifications.success ).show();
         }
         else {
-            this.$element.find('.notifications .success').html('').hide();
+            this.$element.find('.pdb-notifications .pdb-success').html('').hide();
         }
     } 
     else {
-        this.$element.find('.notifications .badge').html('').hide();
+        this.$element.find('.pdb-notifications .pdb-badge').html('').hide();
     }
 }
 
@@ -501,8 +501,8 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
 
 Plack.Debugger.UI.Panels = function ( $parent ) {
     this.$element = $parent.append(
-        '<div class="panels"></div>'
-    ).find('.panels');
+        '<div class="pdb-panels"></div>'
+    ).find('.pdb-panels');
     this.register();
 
     this.panels = [];
@@ -528,7 +528,7 @@ Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
 Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
     e.stopPropagation();
     // XXX - could do this better ...
-    this.$element.find('.panel:visible').hide(); // hide any strays
+    this.$element.find('.pdb-panel:visible').hide(); // hide any strays
     this.trigger( 'plack-debugger.ui._:show' );
     this.panels[ index ].trigger( 'plack-debugger.ui._:show' );
 }
@@ -543,18 +543,18 @@ Plack.Debugger.UI.Panels.prototype._close_panel = function ( e, index ) {
 
 Plack.Debugger.UI.Panels.Panel = function ( $parent ) {
     this.$element = $parent.append(
-        '<div class="panel">'
-            + '<div class="header">'
-                + '<div class="close-button">&#9746;</div>'
-                + '<div class="notifications">'
-                    + '<div class="badge warning">warnings (<span></span>)</div>'
-                    + '<div class="badge error">errors (<span></span>)</div>'
-                    + '<div class="badge success">success (<span></span>)</div>'
+        '<div class="pdb-panel">'
+            + '<div class="pdb-header">'
+                + '<div class="pdb-close-button">&#9746;</div>'
+                + '<div class="pdb-notifications">'
+                    + '<div class="pdb-badge pdb-warning">warnings (<span></span>)</div>'
+                    + '<div class="pdb-badge pdb-error">errors (<span></span>)</div>'
+                    + '<div class="pdb-badge pdb-success">success (<span></span>)</div>'
                 + '</div>'
-                + '<div class="title"></div>'
-                + '<div class="subtitle"></div>'
+                + '<div class="pdb-title"></div>'
+                + '<div class="pdb-subtitle"></div>'
             + '</div>'
-            + '<div class="content"></div>'
+            + '<div class="pdb-content"></div>'
         + '</div>'
     ).find('.panel').last();
     this.register();
@@ -564,7 +564,7 @@ Plack.Debugger.UI.Panels.Panel.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
     // fire events
-    this.$element.find('.header .close-button').click( 
+    this.$element.find('.pdb-header .pdb-close-button').click( 
         this.trigger.bind( this, 'plack-debugger.ui.panels:close', this.$element.index() ) 
     );
 
@@ -579,56 +579,56 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
     e.stopPropagation();
 
     if ( data.title ) {
-        this.$element.find('.header .title').html( data.title );
+        this.$element.find('.pdb-header .pdb-title').html( data.title );
     }
 
     if ( data.subtitle ) {
-        this.$element.find('.header .subtitle').html( data.subtitle );
+        this.$element.find('.pdb-header .pdb-subtitle').html( data.subtitle );
     } 
 
     if ( data.notifications ) {
         if ( data.notifications.warning > 0 ) {
-            var e = this.$element.find('.header .notifications .warning');
+            var e = this.$element.find('.pdb-header .pdb-notifications .pdb-warning');
             e.find('span').html( data.notifications.warning );
             e.show();
         }
         else {
-            var e = this.$element.find('.header .notifications .warning');
+            var e = this.$element.find('.pdb-header .pdb-notifications .pdb-warning');
             e.find('span').html('');
             e.hide();
         }
 
         if ( data.notifications.error > 0 ) {
-            var e = this.$element.find('.header .notifications .error');
+            var e = this.$element.find('.pdb-header .pdb-notifications .pdb-error');
             e.find('span').html( data.notifications.error );
             e.show();
         } 
         else {
-            var e = this.$element.find('.header .notifications .error');
+            var e = this.$element.find('.pdb-header .pdb-notifications .pdb-error');
             e.find('span').html('');
             e.hide();
         }
 
         if ( data.notifications.success > 0 ) {
-            var e = this.$element.find('.header .notifications .success');
+            var e = this.$element.find('.pdb-header .pdb-notifications .pdb-success');
             e.find('span').html( data.notifications.success );
             e.show();
         }
         else {
-            var e = this.$element.find('.header .notifications .success');
+            var e = this.$element.find('.pdb-header .pdb-notifications .pdb-success');
             e.find('span').html('');
             e.hide();
         }
     }
     else {
-        var e = this.$element.find('.header .notifications .badge');
+        var e = this.$element.find('.pdb-header .pdb-notifications .pdb-badge');
         e.find('span').html('');
         e.hide();
     }
 
     if ( data.result ) {
         // TODO - add formatter ...
-        this.$element.find('.content').html( generate_data_for_panel( data.result ) );
+        this.$element.find('.pdb-content').html( generate_data_for_panel( data.result ) );
     }
 }
 

@@ -1,4 +1,6 @@
-/* Plack-Debugger CSS Reset, adapted from Eric Meyer's CSS Reset */
+/* Plack-Debugger CSS Reset, 
+    ... adapted from Plack-Middelware-Debug's CSS Reset, 
+        ... adapted from Eric Meyer's CSS Reset */
 #plack-debugger {
     color      : #000000;
     background : #ffffff;
@@ -79,7 +81,7 @@
 
 /* Collapsed Toolbar */
 
-#plack-debugger .collapsed {
+#plack-debugger .pdb-collapsed {
     background    : #dddddd;
     z-index       : 100000000;
     position      : fixed;
@@ -90,7 +92,7 @@
     border-color  : #bbbbbb #cccccc; 
 }
 
-#plack-debugger .collapsed .open-button {
+#plack-debugger .pdb-collapsed .pdb-open-button {
     padding     : 5px;
     background  : #aaaaaa;
     color       : #666666;
@@ -98,14 +100,14 @@
     line-height : 0.75em;
 }
 
-#plack-debugger .collapsed .open-button:hover {
+#plack-debugger .pdb-collapsed .pdb-open-button:hover {
     cursor : pointer;
     color  : #000000;
 }
 
 /* Toolbar */
 
-#plack-debugger .toolbar {
+#plack-debugger .pdb-toolbar {
     background    : #dddddd;    
     width         : 300px;
     z-index       : 100000000;
@@ -118,12 +120,12 @@
     display       : none;
 }
 
-#plack-debugger .toolbar .header {
+#plack-debugger .pdb-toolbar .pdb-header {
     border-bottom : 2px groove;
     border-color  : #aaaaaa #111111;
 }
 
-#plack-debugger .toolbar .header .close-button {
+#plack-debugger .pdb-toolbar .pdb-header .pdb-close-button {
     padding     : 5px;
     background  : #aaaaaa;
     color       : #666666;
@@ -131,27 +133,27 @@
     line-height : 0.75em;  
 }
 
-#plack-debugger .toolbar .header .close-button:hover {
+#plack-debugger .pdb-toolbar .pdb-header .pdb-close-button:hover {
     cursor : pointer;
     color  : #000000;
 }
 
-#plack-debugger .toolbar .buttons .button {
+#plack-debugger .pdb-toolbar .pdb-buttons .pdb-button {
     border-bottom : 2px groove;
     border-color  : #aaaaaa #111111;
     min-height    : 35px;
 }
 
-#plack-debugger .toolbar .buttons .button:hover {
+#plack-debugger .pdb-toolbar .pdb-buttons .pdb-button:hover {
     background : #eeeeee;
     cursor     : pointer;
 }
 
-#plack-debugger .toolbar .buttons .button .notifications {
+#plack-debugger .pdb-toolbar .pdb-buttons .pdb-button .pdb-notifications {
     margin-right  : 10px;
 }
 
-#plack-debugger .toolbar .buttons .button .notifications .badge {
+#plack-debugger .pdb-toolbar .pdb-buttons .pdb-button .pdb-notifications .pdb-badge {
     float         : right;    
     font-weight   : bold;
     margin-top    : 5px;
@@ -162,7 +164,7 @@
 
 /* Panel Content */
 
-#plack-debugger .panels {
+#plack-debugger .pdb-panels {
     z-index  : 99999999;
     position : fixed;
     top      : 0;
@@ -172,14 +174,14 @@
     display  : none;
 }
 
-#plack-debugger .panels .panel {
+#plack-debugger .pdb-panels .pdb-panel {
     background : #cccccc;
     height     : 100%;
     display    : none; 
     overflow   : auto;
 }
 
-#plack-debugger .panels .panel .header {
+#plack-debugger .pdb-panels .pdb-panel .pdb-header {
     background : #aaaaaa;
     position   : fixed;
     top        : 0;
@@ -188,31 +190,31 @@
     height     : 70px;
 }
 
-#plack-debugger .panels .panel .header .close-button {
+#plack-debugger .pdb-panels .pdb-panel .pdb-header .pdb-close-button {
     float         : right;
     font-size     : 3.5em;
     padding-right : 30px;
     color         : #666666;
 }
 
-#plack-debugger .panels .panel .header .close-button:hover {
+#plack-debugger .pdb-panels .pdb-panel .pdb-header .pdb-close-button:hover {
     cursor : pointer;
     color  : #000000;
 }
 
-#plack-debugger .panels .panel .header .title {
+#plack-debugger .pdb-panels .pdb-panel .pdb-header .pdb-title {
     font-size : 2.5em;
 }
 
-#plack-debugger .panels .panel .header .subtitle {
+#plack-debugger .pdb-panels .pdb-panel .pdb-header .pdb-subtitle {
     font-size : 1em;
 }
 
-#plack-debugger .panels .panel .notifications {
+#plack-debugger .pdb-panels .pdb-panel .pdb-notifications {
     margin-right  : 100px;
 }
 
-#plack-debugger .panels .panel .notifications .badge {
+#plack-debugger .pdb-panels .pdb-panel .pdb-notifications .pdb-badge {
     float         : right;    
     margin-top    : 22px;
     margin-left   : 5px;    
@@ -220,54 +222,50 @@
     border-radius : 5px;
 }
 
-#plack-debugger .panels .panel .content {
+#plack-debugger .pdb-panels .pdb-panel .pdb-content {
     padding-left   : 20px;
     padding-bottom : 20px;
     padding-right  : 20px;
     padding-top    : 90px;
 }
 
-#plack-debugger .panels .panel .content table {
+#plack-debugger .pdb-panels .pdb-panel .pdb-content table {
     border : 1px solid #999999;
 }
 
-#plack-debugger .panels .panel .content table td {
+#plack-debugger .pdb-panels .pdb-panel .pdb-content table td {
     border  : 1px solid #999999;
     padding : 5px;
 }
 
 /* generic */
 
-#plack-debugger .hidden {
-    display : none;
-}
-
-#plack-debugger .badge span {
+#plack-debugger .pdb-badge span {
     color : inherit;
 }
 
-#plack-debugger .error {
+#plack-debugger .pdb-error {
     background : #d9534f;
     color      : #ffffff;
 }
 
-#plack-debugger .warning {
+#plack-debugger .pdb-warning {
     background : #f0ad4e;
     color      : #ffffff;
 }
 
-#plack-debugger .success {
+#plack-debugger .pdb-success {
     background : #5cb85c;
     color      : #ffffff;
 }
 
-#plack-debugger .title {
+#plack-debugger .pdb-title {
     font-size    : 1.5em;
     padding-left : 10px;
     padding-top  : 2px;
 }
 
-#plack-debugger .subtitle {
+#plack-debugger .pdb-subtitle {
     font-size    : 0.9em;
     font-style   : oblique;
     padding-left : 20px;
