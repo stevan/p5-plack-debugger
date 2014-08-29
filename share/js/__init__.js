@@ -279,6 +279,17 @@ Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
     e.stopPropagation();
     // load the data into the various places 
     for ( var i = 0; i < data.length; i++ ) {
+
+        // TODO:
+        // if we notice an AJAX panel here
+        // we should bubble an event up to 
+        // the Resource level so that it can 
+        // turn on the AJAX handling and then
+        // we should make a note of where the
+        // index is for the AJAX button/panel
+        // are in the list.
+        // - SL
+
         this.toolbar.add_button( data[i] );
         this.panels.add_panel( data[i] );
     }
@@ -331,7 +342,7 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
         all.result.push( page );
     }
 
-    // TODO
+    // TODO:
     // We need a better way to find and mark the ajax
     // button & panel, this makes a seriously bad 
     // assumption.
