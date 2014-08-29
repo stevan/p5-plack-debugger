@@ -61,7 +61,28 @@ Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
     this.UI       = new Plack.Debugger.UI( $jQuery(document.body) );
     this.resource = new Plack.Debugger.Resource( $jQuery, this.UI );
 
+    $jQuery(document).ajaxSend( this._handle_AJAX_send.bind( this ) );
+    $jQuery(document).ajaxComplete( this._handle_AJAX_complete.bind( this ) );
+
+    // NOTE:
+    // Not sure I see the need for any of this yet, but 
+    // we can just leave them here for now.
+    // - SL
+    // $jQuery(document).ajaxError( this._handle_AJAX_error.bind( this ) );    
+    // $jQuery(document).ajaxSuccess( this._handle_AJAX_success.bind( this ) );
+    // $jQuery(document).ajaxStart( this._handle_AJAX_start.bind( this ) );
+    // $jQuery(document).ajaxStop( this._handle_AJAX_stop.bind( this ) );
+
     callback.apply( this, [] );
+}
+
+Plack.Debugger.prototype._handle_AJAX_send = function (e, xhr, options) {
+    xhr.setRequestHeader( 'X-Plack-Debugger-Parent-Request-UID', Plack.Debugger.$CONFIG.current_request_uid );
+    this.resource.trigger('plack-debugger._:ajax-send' );
+}
+
+Plack.Debugger.prototype._handle_AJAX_complete = function (e, xhr, options) {
+    this.resource.trigger('plack-debugger._:ajax-complete');
 }
 
 /* =============================================================== */
@@ -140,8 +161,9 @@ Plack.Debugger.Resource = function ( $jQuery, $target ) {
         '<div class="listener"></div>'
     ).parent();
 
-    this._request     = null;
-    this._subrequests = null;
+    this._request          = null;
+    this._subrequests      = [];
+    this._subrequest_count = 0;
 
     this.register();
 }
@@ -152,6 +174,9 @@ Plack.Debugger.Resource.prototype.register = function () {
     // register for events we handle 
     this.on( 'plack-debugger.resource.request:load',     this._load_request.bind( this ) );
     this.on( 'plack-debugger.resource.subrequests:load', this._load_subrequests.bind( this ) );
+
+    this.on( 'plack-debugger._:ajax-send',     this._handle_ajax_send.bind( this ) );
+    this.on( 'plack-debugger._:ajax-complete', this._handle_ajax_complete.bind( this ) );    
 }
 
 Plack.Debugger.Resource.prototype._load_request = function ( e ) {
@@ -200,6 +225,16 @@ Plack.Debugger.Resource.prototype._update_target_on_error = function ( xhr, stat
     this.$target.trigger( 'plack-debugger.ui:load-error', error );
 }
 
+Plack.Debugger.Resource.prototype._handle_ajax_send = function ( e ) {
+    this._subrequest_count++;
+}
+
+Plack.Debugger.Resource.prototype._handle_ajax_complete = function ( e ) {
+    if ( this._subrequest_count != this._subrequests.length ) {
+        this.trigger('plack-debugger.resource.subrequests:load')
+    }
+}
+
 /* =============================================================== */
 
 Plack.Debugger.UI = function ( $parent ) {
@@ -246,11 +281,59 @@ Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
 
 Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
     e.stopPropagation();
-    console.log('... load-subrequests not implemented yet');
-    console.log( data );
+
+    // collect and collate some information on 
+    // all the subrequests that have been fired
+    // so that we have something to display in 
+    // the panel content.
+
+    var all = { 
+        'notifications' : { 'warning' : 0, 'error' : 0, 'success' : 0 },
+        'result'        : []
+    };
+
+    for ( var i = 0; i < data.length; i++ ) {
+        var page = {
+            'request_uid'        : data[i].request_uid,
+            'parent_request_uid' : data[i].parent_request_uid,
+            'notifications'      : { 'warning' : 0, 'error' : 0, 'success' : 0 },
+            'results'            : [],
+        };
+
+        for ( var j = 0; j < data[i].results.length; j++ ) {
+            if ( data[i].results[j].notifications ) {
+                var notifications = data[i].results[j].notifications;
+                if ( notifications.warning ) {
+                    all.notifications.warning  += notifications.warning;
+                    page.notifications.warning += notifications.warning;
+                }
+                if ( notifications.error ) {
+                    all.notifications.error  += notifications.error;
+                    page.notifications.error += notifications.error;
+                }
+                if ( notifications.success ) {
+                    all.notifications.success  += notifications.success;
+                    page.notifications.success += notifications.success;
+                }
+            }            
+            page.results.push({
+                'title'    : data[i].results[j].title,
+                'subtitle' : data[i].results[j].subtitle,
+                'result'   : data[i].results[j].result
+            });
+        }
+
+        all.result.push( page );
+    }
+
+    var ajax_button = this.toolbar.buttons[ this.toolbar.buttons.length -1 ];
+    var ajax_panel  = this.panels.panels[ this.panels.panels.length -1 ];
+
+    ajax_button.trigger( 'plack-debugger.ui.toolbar.button:update', all );
+    ajax_panel.trigger(  'plack-debugger.ui.panels.panel:update', all );    
 }
 
-Plack.Debugger.UI.prototype._load_data_error = function ( e ) {
+Plack.Debugger.UI.prototype._load_data_error = function ( e, error ) {
     e.stopPropagation();
     alert("Sorry, we are unable to load the debugging data at the moment, please try again in a few moments.");
 }
@@ -375,20 +458,17 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
     if ( data.subtitle ) {
         this.$element.find('.subtitle').html( data.subtitle ).show();
     }  
-    else {
-        this.$element.find('.subtitle').html('').hide();
-    }
 
     if ( data.notifications ) {
-        if ( data.notifications.warnings > 0 ) {
-            this.$element.find('.notifications .warning').html( data.notifications.warnings ).show();
+        if ( data.notifications.warning > 0 ) {
+            this.$element.find('.notifications .warning').html( data.notifications.warning ).show();
         }
         else {
             this.$element.find('.notifications .warning').html('').hide();
         }
 
-        if ( data.notifications.errors > 0 ) {
-            this.$element.find('.notifications .error').html( data.notifications.errors ).show();
+        if ( data.notifications.error > 0 ) {
+            this.$element.find('.notifications .error').html( data.notifications.error ).show();
         } 
         else {
             this.$element.find('.notifications .error').html('').hide();
@@ -496,9 +576,9 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
     } 
 
     if ( data.notifications ) {
-        if ( data.notifications.warnings > 0 ) {
+        if ( data.notifications.warning > 0 ) {
             var e = this.$element.find('.header .notifications .warning');
-            e.find('span').html( data.notifications.warnings );
+            e.find('span').html( data.notifications.warning );
             e.show();
         }
         else {
@@ -507,9 +587,9 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
             e.hide();
         }
 
-        if ( data.notifications.errors > 0 ) {
+        if ( data.notifications.error > 0 ) {
             var e = this.$element.find('.header .notifications .error');
-            e.find('span').html( data.notifications.errors );
+            e.find('span').html( data.notifications.error );
             e.show();
         } 
         else {
