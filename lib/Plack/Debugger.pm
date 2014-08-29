@@ -6,6 +6,7 @@ use warnings;
 use Scalar::Util qw[ blessed ];
 use POSIX        qw[ strftime ];
 
+use Plack::Request;
 use Plack::Debugger::Panel;
 
 our $UID_SEQ = 0;
@@ -101,7 +102,8 @@ sub run_cleanup_phase {
 }
 
 sub finalize_request {
-    my ($self, $env) = @_;
+    my $self = shift;
+    my $r    = Plack::Request->new( shift );
 
     my @results;
     foreach my $panel ( @{ $self->panels } ) {
@@ -119,18 +121,11 @@ sub finalize_request {
         };
     }
 
-    if ( exists $env->{'plack.debugger.parent_request_uid'} ) {
-        $self->store_subrequest_results( 
-            $env->{'plack.debugger.parent_request_uid'}, 
-            $env->{'plack.debugger.request_uid'}, 
-            \@results 
-        );
+    if ( exists $r->env->{'plack.debugger.parent_request_uid'} ) {
+        $self->store_subrequest_results( $r, \@results );
     }
     else {
-        $self->store_request_results( 
-            $env->{'plack.debugger.request_uid'}, 
-            \@results 
-        );
+        $self->store_request_results( $r, \@results );
     }
 
     # always good to reset here too ...
@@ -140,24 +135,28 @@ sub finalize_request {
 # ... delegate to the underlying storage
 
 sub store_request_results {
-    my ($self, $request_uid, $results) = @_;
+    my ($self, $r, $results) = @_;
     $self->storage->store_request_results( 
-        $request_uid, 
+        $r->env->{'plack.debugger.request_uid'}, 
         {
-            'request_uid' => $request_uid,
+            'method'      => $r->method,
+            'uri'         => $r->uri->as_string,
+            'request_uid' => $r->env->{'plack.debugger.request_uid'},
             'results'     => $results 
         }
     );
 }
 
 sub store_subrequest_results {
-    my ($self, $request_uid, $subrequest_uid, $results) = @_;
+    my ($self, $r, $results) = @_;
     $self->storage->store_subrequest_results( 
-        $request_uid, 
-        $subrequest_uid, 
+        $r->env->{'plack.debugger.parent_request_uid'},
+        $r->env->{'plack.debugger.request_uid'}, 
         {
-            'parent_request_uid' => $request_uid,
-            'request_uid'        => $subrequest_uid,
+            'method'             => $r->method,
+            'uri'                => $r->uri->as_string,
+            'request_uid'        => $r->env->{'plack.debugger.request_uid'},            
+            'parent_request_uid' => $r->env->{'plack.debugger.parent_request_uid'},            
             'results'            => $results 
         }
     );
