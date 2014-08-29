@@ -134,6 +134,7 @@ sub reset {
     my $self = shift;
     undef $self->{'_stash'};
     undef $self->{'_result'};
+    $self->{'_is_enabled'} = 1;
     $self->{'_notifications'}->{ $_ } = 0 foreach @{ NOTIFICATION_LEVELS() };
 }
 
