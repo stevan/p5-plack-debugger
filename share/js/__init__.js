@@ -230,6 +230,11 @@ Plack.Debugger.Resource.prototype._handle_ajax_send = function ( e ) {
 }
 
 Plack.Debugger.Resource.prototype._handle_ajax_complete = function ( e ) {
+    // NOTE:
+    // while it is unlikely that this will get out 
+    // of sync, one can never tell so best to just 
+    // have this simple check here.
+    // - SL
     if ( this._subrequest_count != this._subrequests.length ) {
         this.trigger('plack-debugger.resource.subrequests:load')
     }
@@ -325,6 +330,12 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
 
         all.result.push( page );
     }
+
+    // TODO
+    // We need a better way to find and mark the ajax
+    // button & panel, this makes a seriously bad 
+    // assumption.
+    // - SL
 
     var ajax_button = this.toolbar.buttons[ this.toolbar.buttons.length -1 ];
     var ajax_panel  = this.panels.panels[ this.panels.panels.length -1 ];
