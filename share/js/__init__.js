@@ -266,7 +266,7 @@ Plack.Debugger.Resource.prototype._handle_ajax_complete = function ( e ) {
 Plack.Debugger.UI = function ( $parent ) {
     this.$element = $parent.append(
         '<style type="text/css">' 
-            + '@import url(' + Plack.Debugger.$CONFIG.static_url + '/css/toolbar.css);' 
+            + '@import url(' + Plack.Debugger.$CONFIG.static_url + '/css/plack-debugger.css);' 
         + '</style>' 
         + '<div id="plack-debugger"></div>'
     ).find('#plack-debugger');
