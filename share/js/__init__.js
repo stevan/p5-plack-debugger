@@ -353,7 +353,7 @@ Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
         if ( data[i].metadata ) {
 
             // turn on AJAX tracking ...
-            if ( data[i].metadata.requires_AJAX_tracking ) {
+            if ( data[i].metadata.track_subrequests ) {
                 this.trigger( 'plack-debugger._:ajax-tracking-enable' );
             }
 
@@ -409,15 +409,11 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
     }
 
     $.each( this.toolbar.buttons, function (i, b) { 
-        if (b.metadata('requires_AJAX_tracking')) {
-            b.trigger( 'plack-debugger.ui.toolbar.button:update', all ) 
-        }
+        if ( b.is_tracking_subrequests() ) b.trigger( 'plack-debugger.ui.toolbar.button:update', all ) 
     });
 
-    $.each( this.panels.panels,  function (i, p) { 
-        if (p.metadata('requires_AJAX_tracking')) {
-            p.trigger( 'plack-debugger.ui.panels.panel:update', all )
-        }
+    $.each( this.panels.panels, function (i, p) { 
+        if ( p.is_tracking_subrequests() ) p.trigger( 'plack-debugger.ui.panels.panel:update', all )
     });    
 }
 
@@ -540,6 +536,10 @@ Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
 
 Plack.Debugger.UI.Toolbar.Button.prototype.metadata = function ( key ) {
     return this._metadata[ key ];
+}
+
+Plack.Debugger.UI.Toolbar.Button.prototype.is_tracking_subrequests = function () {
+    return this._metadata.track_subrequests ? true : false
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
@@ -666,6 +666,10 @@ Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
 
 Plack.Debugger.UI.Panels.Panel.prototype.metadata = function ( key ) {
     return this._metadata[ key ];
+}
+
+Plack.Debugger.UI.Panels.Panel.prototype.is_tracking_subrequests = function () {
+    return this._metadata.track_subrequests ? true : false
 }
 
 Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {

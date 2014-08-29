@@ -19,7 +19,7 @@ sub new {
 
     my $self = $class->SUPER::new( \%args );
 
-    $self->add_metadata( requires_AJAX_tracking => 1 );
+    $self->add_metadata( track_subrequests => 1 );
 
     $self;
 }
