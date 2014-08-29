@@ -29,6 +29,7 @@ sub new {
         _result        => undef,
         _stash         => undef,
         _notifications => { map { $_ => 0 } @{ NOTIFICATION_LEVELS() } },
+        _metadata      => {},
     } => $class;
 
     # ... title if one is not provided
@@ -76,6 +77,28 @@ sub notify {
     die "Notification must be one of the following types (error, warning or info)"
         unless scalar grep { $_ eq $type } @{ NOTIFICATION_LEVELS() };
     $self->{'_notifications'}->{ $type } += $inc;
+}
+
+# metadata ...
+
+sub has_metadata {
+    my $self = shift;
+    !! scalar keys %{ $self->{'_metadata'} };
+}
+
+sub metadata { (shift)->{'_metadata'} }
+
+# TODO:
+# it might make sense to restrict the 
+# metadata keys eventually since they 
+# will need to be understood by the 
+# JS side and basically, random stuff 
+# is bad.
+# - SL
+
+sub add_metadata {
+    my ($self, $key, $data) = @_;
+    $self->{'_metadata'}->{ $key } = $data;
 }
 
 # stash ...
