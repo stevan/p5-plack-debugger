@@ -787,6 +787,31 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 + '</tr>';
         }
         return out + '</table>'; 
+    },
+    subrequest_formatter : function (data) {
+        var out = '';
+        for ( var i = 0; i < data.length; i++ ) {
+            out += '<div>'; 
+                out += '<div>' + data[i].request_uid + '</div>'
+                out += '<div>' 
+                        + '<div>' + data[i].notifications.warning + '</div>'
+                        + '<div>' + data[i].notifications.error   + '</div>'
+                        + '<div>' + data[i].notifications.success + '</div>'
+                    + '</div>';
+                out += '<div>';
+                    for ( var j = 0; j < data[i].results.length; j++ ) {
+                        var result = data[i].results[j];
+                        if ( result.metadata && result.metadata.formatter ) {
+                            out += this[ result.metadata.formatter ]( result.result );
+                        } 
+                        else {
+                            out += this.generic_data_formatter( result.result );
+                        }
+                    }
+                out += '</div>';
+            out += '</div>';
+        }
+        return out;
     }
 }
 
