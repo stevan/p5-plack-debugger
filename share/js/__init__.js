@@ -78,7 +78,7 @@ Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
 
 Plack.Debugger.prototype._handle_AJAX_send = function (e, xhr, options) {
     xhr.setRequestHeader( 'X-Plack-Debugger-Parent-Request-UID', Plack.Debugger.$CONFIG.current_request_uid );
-    this.resource.trigger('plack-debugger._:ajax-send' );
+    this.resource.trigger('plack-debugger._:ajax-send');
 }
 
 Plack.Debugger.prototype._handle_AJAX_complete = function (e, xhr, options) {
