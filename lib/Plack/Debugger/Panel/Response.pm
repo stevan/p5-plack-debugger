@@ -15,10 +15,12 @@ sub new {
         my ($self, $env, $resp) = @_;
 
         $self->notify( $resp->[0] >= 400 ? 'error' : 'success' );
-        $self->set_result([
-            'Status'  => $resp->[0],
-            'Headers' => { @{ $resp->[1] } }
-        ]);
+
+
+        my @headers;
+        Plack::Util::header_iter( $resp->[1], sub { push @headers, @_ } );
+
+        $self->set_result([ 'Status' => $resp->[0], @headers ]);
     };
 
     my $self = $class->SUPER::new( \%args );
