@@ -73,6 +73,8 @@ Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
     // $jQuery(document).ajaxStart( this._handle_AJAX_start.bind( this ) );
     // $jQuery(document).ajaxStop( this._handle_AJAX_stop.bind( this ) );
 
+    this.resource.trigger( 'plack-debugger.resource.request:load' );
+
     callback.apply( this, [] );
 }
 
@@ -666,8 +668,6 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 
 var plack_debugger = new Plack.Debugger().ready(function () {
     console.log('... ready to debug some stuff!');
-
-    this.resource.trigger( 'plack-debugger.resource.request:load' );
 });
 
 // basic formatter ...
