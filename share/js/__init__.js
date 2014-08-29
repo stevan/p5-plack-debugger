@@ -556,7 +556,7 @@ Plack.Debugger.UI.Panels.Panel = function ( $parent ) {
             + '</div>'
             + '<div class="pdb-content"></div>'
         + '</div>'
-    ).find('.panel').last();
+    ).find('.pdb-panel').last();
     this.register();
 }
 
