@@ -101,7 +101,10 @@ Plack.Debugger.Abstract.Eventful.prototype.register = function () {
 }
 
 Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data ) { 
-    if ( this.$element != null ) this.$element.trigger( e, [ data ] ) 
+    if ( this.$element != null ) {
+        //console.log('... calling event <' + e + '> on ' + this.$element.selector);
+        this.$element.trigger( e, [ data ] );
+    }
 }
 
 // register events ...
