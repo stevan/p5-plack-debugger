@@ -30,6 +30,7 @@ sub new {
         _stash         => undef,
         _notifications => { map { $_ => 0 } @{ NOTIFICATION_LEVELS() } },
         _metadata      => {},
+        _is_enabled    => 1
     } => $class;
 
     # ... title if one is not provided
@@ -100,6 +101,14 @@ sub add_metadata {
     my ($self, $key, $data) = @_;
     $self->{'_metadata'}->{ $key } = $data;
 }
+
+# turning it on and off ...
+
+sub is_disabled { (shift)->{'_is_enabled'} == 0 }
+sub is_enabled  { (shift)->{'_is_enabled'} == 1 }
+
+sub disable { (shift)->{'_is_enabled'} = 0 }
+sub enable  { (shift)->{'_is_enabled'} = 1 }
 
 # stash ...
 

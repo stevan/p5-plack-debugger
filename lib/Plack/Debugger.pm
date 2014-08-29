@@ -105,6 +105,7 @@ sub finalize_request {
 
     my @results;
     foreach my $panel ( @{ $self->panels } ) {
+        next if $panel->is_disabled;
         push @results => { 
             title    => $panel->title,
             subtitle => $panel->subtitle,
