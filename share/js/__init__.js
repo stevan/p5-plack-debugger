@@ -141,8 +141,8 @@ Plack.Debugger.Abstract.Eventful.prototype.off = function ( e ) {
 
 Plack.Debugger.Abstract.Eventful.prototype.cancel = function ( e ) { 
     if ( this.$element != null ) {
-        this.$element.off( e );
-        this.$element.on( e, function ( e ) { e.stopPropagation() } );
+        this.off( e );
+        this.on( e, function ( _e ) { _e.stopPropagation() } );
     }
 }
 
