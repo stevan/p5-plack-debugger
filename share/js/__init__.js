@@ -116,7 +116,7 @@ Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) {
         // NOTE:
         // Yuk, this silliness is so that we can support
         // jQuery going all the way back to 1.0, instead
-        // of the nice 1.7 .on method.
+        // of the nice 1.7 .on() method.
         // - SL 
         if ( this._cache == undefined ) this._cache = {};
         this._cache[ e ] = cb;
@@ -131,7 +131,7 @@ Plack.Debugger.Abstract.Eventful.prototype.off = function ( e ) {
         // NOTE:
         // Yuk, this silliness is so that we can support
         // jQuery going all the way back to 1.0, instead
-        // of the nice 1.7 .off method.
+        // of the nice 1.7 .off() method.
         // - SL
         if ( this._cache == undefined ) this._cache = {};        
         if ( this._cache[ e ] != undefined ) {
