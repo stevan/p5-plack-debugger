@@ -111,6 +111,9 @@ sub finalize_request {
             result   => $panel->get_result,
             ($panel->has_notifications 
                 ? (notifications => $panel->notifications) 
+                : ()),
+            ($panel->has_metadata 
+                ? (metadata => $panel->metadata) 
                 : ())
         };
     }

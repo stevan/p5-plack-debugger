@@ -185,6 +185,7 @@ Plack.Debugger.Resource = function ( $jQuery, $target ) {
     this._request          = null;
     this._subrequests      = [];
     this._subrequest_count = 0;
+    this._AJAX_tracking    = false;
 
     this.register();
 }
@@ -196,9 +197,18 @@ Plack.Debugger.Resource.prototype.register = function () {
     this.on( 'plack-debugger.resource.request:load',     this._load_request.bind( this ) );
     this.on( 'plack-debugger.resource.subrequests:load', this._load_subrequests.bind( this ) );
 
-    this.on( 'plack-debugger._:ajax-send',     this._handle_ajax_send.bind( this ) );
-    this.on( 'plack-debugger._:ajax-complete', this._handle_ajax_complete.bind( this ) );    
+    // also catch these global events
+    // ... see NOTE below by the registered 
+    //     event handler functions themselves
+    this.on( 'plack-debugger._:ajax-tracking-enable',  this._enable_AJAX_tracking.bind( this ) );
+    this.on( 'plack-debugger._:ajax-tracking-disable', this._disable_AJAX_tracking.bind( this ) );    
 }
+
+Plack.Debugger.Resource.prototype.is_AJAX_tracking_enabled = function () {
+    return this._AJAX_tracking;
+}
+
+// ... events handlers
 
 Plack.Debugger.Resource.prototype._load_request = function ( e ) {
     e.stopPropagation();
@@ -245,6 +255,41 @@ Plack.Debugger.Resource.prototype._update_target_on_subrequest_success = functio
 Plack.Debugger.Resource.prototype._update_target_on_error = function ( xhr, status, error ) {
     this.$target.trigger( 'plack-debugger.ui:load-error', error );
 }
+
+// NOTE:
+// These AJAX handlers are hooked to global 
+// events such as:
+//
+//   plack-debugger._:ajax-tracking-enable
+//   plack-debugger._:ajax-tracking-disable
+//
+// as well as then registering for the other 
+// generic AJAX events. 
+//
+// Since these global events might want to 
+// be handled elsewhere, do not stop the 
+// propagation as we do in other events.
+// - SL
+
+// enable/disable AJAX tracking
+
+Plack.Debugger.Resource.prototype._enable_AJAX_tracking = function ( e ) {
+    if ( !this._AJAX_tracking ) { // don't do silly things ...
+        this.on( 'plack-debugger._:ajax-send',     this._handle_ajax_send.bind( this ) );
+        this.on( 'plack-debugger._:ajax-complete', this._handle_ajax_complete.bind( this ) );        
+        this._AJAX_tracking = true;  
+    }  
+}
+
+Plack.Debugger.Resource.prototype._disable_AJAX_tracking = function ( e ) {
+    if ( this._AJAX_tracking ) { // don't do silly things ...
+        this.off( 'plack-debugger._:ajax-send' );
+        this.off( 'plack-debugger._:ajax-complete' );        
+        this._AJAX_tracking = false;    
+    }
+}
+
+// AJAX tracking event handlers
 
 Plack.Debugger.Resource.prototype._handle_ajax_send = function ( e ) {
     this._subrequest_count++;
@@ -301,18 +346,18 @@ Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
     // load the data into the various places 
     for ( var i = 0; i < data.length; i++ ) {
 
-        // TODO:
-        // if we notice an AJAX panel here
-        // we should bubble an event up to 
-        // the Resource level so that it can 
-        // turn on the AJAX handling and then
-        // we should make a note of where the
-        // index is for the AJAX button/panel
-        // are in the list.
-        // - SL
-
         this.toolbar.add_button( data[i] );
         this.panels.add_panel( data[i] );
+
+        // handle metadata ...
+        if ( data[i].metadata ) {
+
+            // turn on AJAX tracking ...
+            if ( data[i].metadata.requires_AJAX_tracking ) {
+                this.trigger( 'plack-debugger._:ajax-tracking-enable' );
+            }
+
+        }
     }
 }
 

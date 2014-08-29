@@ -17,7 +17,11 @@ sub new {
         (shift)->set_result('... no AJAX results yet');
     };
 
-    $class->SUPER::new( \%args );
+    my $self = $class->SUPER::new( \%args );
+
+    $self->add_metadata( requires_AJAX_tracking => 1 );
+
+    $self;
 }
 
 1;
