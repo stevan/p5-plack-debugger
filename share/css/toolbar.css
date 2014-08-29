@@ -188,18 +188,6 @@
     height     : 70px;
 }
 
-#plack-debugger .panels .panel .notifications {
-    margin-right  : 100px;
-}
-
-#plack-debugger .panels .panel .notifications .badge {
-    float         : right;    
-    margin-top    : 22px;
-    margin-left   : 5px;    
-    padding       : 2px 5px;
-    border-radius : 5px;
-}
-
 #plack-debugger .panels .panel .header .close-button {
     float         : right;
     font-size     : 3.5em;
@@ -220,6 +208,18 @@
     font-size : 1em;
 }
 
+#plack-debugger .panels .panel .notifications {
+    margin-right  : 100px;
+}
+
+#plack-debugger .panels .panel .notifications .badge {
+    float         : right;    
+    margin-top    : 22px;
+    margin-left   : 5px;    
+    padding       : 2px 5px;
+    border-radius : 5px;
+}
+
 #plack-debugger .panels .panel .content {
     padding-left   : 20px;
     padding-bottom : 20px;
@@ -236,53 +236,10 @@
     padding : 5px;
 }
 
-/* subrequest content */
-
-#plack-debugger .panels .panel .content .subrequest-content {
-
-}
-
-#plack-debugger .panels .panel .content .subrequest-content .subheader {
-    background   : #aaaaaa;
-    min-height   : 25px; 
-    border       : 1px solid #333333;
-}
-
-#plack-debugger .panels .panel .content .subrequest-content .subheader .title:hover {
-    cursor : pointer;
-}
-
-#plack-debugger .panels .panel .content .subrequest-content .subheader .notifications {
-    margin-right  : 10px;
-}
-
-#plack-debugger .panels .panel .content .subrequest-content .subheader .notifications .badge {
-    float         : right;    
-    margin-top    : 5px;
-    margin-left   : 5px;    
-    padding       : 2px 5px;
-    border-radius : 5px;
-}
-
-#plack-debugger .panels .panel .content .subrequest-content .subpanel {
-    border  : 1px solid #999999;
-    padding : 5px;
-}
-
 /* generic */
 
 #plack-debugger .hidden {
     display : none;
-}
-
-#plack-debugger .data {
-    padding : 10px;
-}
-
-#plack-debugger .data a:hover {
-    text-decoration : underline;
-    font-weight     : bold;
-    cursor          : pointer;
 }
 
 #plack-debugger .badge span {
@@ -296,11 +253,6 @@
 
 #plack-debugger .warning {
     background : #f0ad4e;
-    color      : #ffffff;
-}
-
-#plack-debugger .info {
-    background : #5bc0de;
     color      : #ffffff;
 }
 
