@@ -20,6 +20,7 @@ use Plack::Debugger::Panel::Timer;
 use Plack::Debugger::Panel::Response;
 use Plack::Debugger::Panel::PerlConfig;
 use Plack::Debugger::Panel::Parameters;
+use Plack::Debugger::Panel::AJAX;
 
 my $JSON         = JSON::XS->new->utf8->pretty;
 my $DATA_DIR     = dir('/tmp/debugger_panel');
@@ -83,10 +84,7 @@ my $debugger = Plack::Debugger->new(
                 $self->set_result( $self->stash );
             }            
         ),
-        Plack::Debugger::Panel->new(
-            title     => 'AJAX Requests',
-            subtitle  => '... capturing AJAX requests'
-        ),        
+        Plack::Debugger::Panel::AJAX->new( title => 'AJAX Requests' ),        
     ]
 );
 
