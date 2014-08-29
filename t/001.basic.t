@@ -115,7 +115,9 @@ test_psgi($app, sub {
                 $debugger->load_request_results( $UUIDS[-1] ),
                 {
                     'request_uid' => $UUIDS[-1],
-                    'results' => [
+                    'method'      => 'GET',
+                    'uri'         => 'http://localhost/',
+                    'results'     => [
                         {
                             title    => 'Tester',      
                             subtitle => '... testing all the things',
