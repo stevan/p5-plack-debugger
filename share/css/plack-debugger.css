@@ -141,7 +141,7 @@
 }
 
 #plack-debugger .pdb-toolbar .pdb-buttons .pdb-button:hover {
-    background : #cccccc;   
+    background : #666666;   
     cursor     : pointer;
 }
 
