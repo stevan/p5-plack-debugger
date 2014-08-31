@@ -326,6 +326,11 @@ Plack.Debugger.UI = function ( $parent ) {
 Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
+    // fire events
+    this.$element.parent().keyup( 
+        this._close_toolbar_with_key.bind( this )
+    );
+
     // register for events we handle 
     this.on( 'plack-debugger.ui:load-request',     this._load_request.bind( this ) );
     this.on( 'plack-debugger.ui:load-subrequests', this._load_subrequests.bind( this ) );
@@ -437,6 +442,13 @@ Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
     this.panels.trigger('plack-debugger.ui._:hide');
     this.toolbar.trigger('plack-debugger.ui._:hide',   'slow');
     this.collapsed.trigger('plack-debugger.ui._:show', 'slow');
+}
+
+Plack.Debugger.UI.prototype._close_toolbar_with_key = function ( e ) {
+    if (e.keyCode == 27) { 
+        e.stopPropagation();
+        this._close_toolbar( e );
+    }
 }
 
 Plack.Debugger.UI.prototype._open_panels = function ( e, index ) {
