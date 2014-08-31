@@ -2,7 +2,7 @@
     ... adapted from Plack-Middelware-Debug's CSS Reset, 
         ... adapted from Eric Meyer's CSS Reset */
 #plack-debugger {
-    color      : #000000;
+    color      : #999999;
     background : #ffffff;
 }
 #plack-debugger, 
@@ -72,7 +72,7 @@
     outline        : 0;
     font-size      : 12px;
     line-height    : 1.5em;
-    color          : #000000;
+    color          : #999999;
     vertical-align : baseline;
     background     : transparent;
     font-family    : sans-serif;
@@ -82,70 +82,66 @@
 /* Collapsed Toolbar */
 
 #plack-debugger .pdb-collapsed {
-    background    : #dddddd;
+    background    : #333333;
     z-index       : 100000000;
     position      : fixed;
     top           : 0;
     right         : 0;
-    border-left   : 3px ridge;
-    border-bottom : 3px ridge;    
-    border-color  : #bbbbbb #cccccc; 
+
 }
 
 #plack-debugger .pdb-collapsed .pdb-open-button {
     padding     : 5px;
-    background  : #aaaaaa;
-    color       : #666666;
+    color       : #999999;
     font-size   : 3em;
     line-height : 0.75em;
 }
 
 #plack-debugger .pdb-collapsed .pdb-open-button:hover {
     cursor : pointer;
-    color  : #000000;
+    color  : #ffffff;
 }
 
 /* Toolbar */
 
 #plack-debugger .pdb-toolbar {
-    background    : #dddddd;    
+    background    : #666666;    
     width         : 300px;
     z-index       : 100000000;
     position      : fixed;
     top           : 0;
     bottom        : 0;
     right         : 0;
-    border-left   : 3px ridge;
-    border-color  : #aaaaaa #cccccc;
     display       : none;
+    border-left   : 1px solid #ffffff;
 }
 
 #plack-debugger .pdb-toolbar .pdb-header {
-    border-bottom : 2px groove;
-    border-color  : #aaaaaa #111111;
+    border-bottom : 1px solid #ffffff;
 }
 
 #plack-debugger .pdb-toolbar .pdb-header .pdb-close-button {
+    background  : #333333;
     padding     : 5px;
-    background  : #aaaaaa;
-    color       : #666666;
+    color       : #999999;
     font-size   : 3em;
     line-height : 0.75em;  
 }
 
 #plack-debugger .pdb-toolbar .pdb-header .pdb-close-button:hover {
     cursor : pointer;
-    color  : #000000;
+    color  : #ffffff;
 }
 
 #plack-debugger .pdb-toolbar .pdb-buttons .pdb-button {
-    border-bottom : 2px groove;
-    border-color  : #aaaaaa #111111;
+    background    : #333333;
+    border-bottom : 1px solid #ffffff;
+    color         : #999999;
     min-height    : 35px;
 }
 
 #plack-debugger .pdb-toolbar .pdb-buttons .pdb-button:hover {
-    background : #eeeeee;
+    background : #cccccc;   
     cursor     : pointer;
 }
 
@@ -160,6 +156,7 @@
     margin-left   : 5px;
     padding       : 2px 5px;
     border-radius : 10px;
+    border        : 1px solid #ffffff;
 }
 
 /* Panel Content */
@@ -175,14 +172,14 @@
 }
 
 #plack-debugger .pdb-panels .pdb-panel {
-    background : #cccccc;
+    background : #333333;
     height     : 100%;
     display    : none; 
     overflow   : auto;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-header {
-    background : #aaaaaa;
+    background : #666666;
     position   : fixed;
     top        : 0;
     left       : 0;   
@@ -194,19 +191,21 @@
     float         : right;
     font-size     : 3.5em;
     padding-right : 30px;
-    color         : #666666;
+    color         : #333333;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-header .pdb-close-button:hover {
     cursor : pointer;
-    color  : #000000;
+    color  : #ffffff;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-header .pdb-title {
+    color     : #ffffff;    
     font-size : 2.5em;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-header .pdb-subtitle {
+    color     : #ffffff;
     font-size : 1em;
 }
 
@@ -220,6 +219,7 @@
     margin-left   : 5px;    
     padding       : 2px 5px;
     border-radius : 5px;
+    border        : 1px solid #ffffff;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-content {
@@ -230,11 +230,12 @@
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-content table {
-    border : 1px solid #999999;
+    border : 1px solid #666666;
+    width  : 100%;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-content table td {
-    border  : 1px solid #999999;
+    border  : 1px solid #666666;
     padding : 5px;
 }
 
