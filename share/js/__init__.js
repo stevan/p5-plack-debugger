@@ -629,6 +629,16 @@ Plack.Debugger.UI.Panels.prototype._close_panel = function ( e, index ) {
     this.panels[ index ].trigger( 'plack-debugger.ui._:hide' );    
 }
 
+// override to make sure we always close
+// all the individual panels as well
+Plack.Debugger.UI.Panels.prototype.hide = function ( e, duration ) { 
+    e.stopPropagation(); 
+    this.$element.hide( duration );
+    for ( var i = 0; i < this.panels.length; i++ ) {
+        this.panels[ i ].trigger( 'plack-debugger.ui._:hide' );    
+    }
+}
+
 // ------------------------------------------------------------------
 
 Plack.Debugger.UI.Panels.Panel = function ( $parent ) {
