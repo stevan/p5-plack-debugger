@@ -3,8 +3,6 @@ package Plack::Debugger::Panel::AJAX;
 use strict;
 use warnings;
 
-use Config;
-
 use parent 'Plack::Debugger::Panel';
 
 sub new {
