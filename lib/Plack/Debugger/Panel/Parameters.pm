@@ -17,12 +17,12 @@ sub new {
         my $self = shift;
         my $r    = Plack::Request->new( shift );
         $self->set_result({
-            get     => $r->query_parameters->as_hashref_mixed,
-            cookies => $r->cookies,
-            post    => $r->body_parameters->as_hashref_mixed,
-            headers => { map { $_ => $r->headers->header( $_ ) } $r->headers->header_field_names },
+            'Query String' => $r->query_parameters->as_hashref_mixed,
+            'Cookies'      => $r->cookies,
+            'Body Content' => $r->body_parameters->as_hashref_mixed,
+            'Headers'      => { map { $_ => $r->headers->header( $_ ) } $r->headers->header_field_names },
             ($r->env->{'psgix.session'} 
-                ? (session => $r->env->{'psgix.session'})
+                ? ('Session' => $r->env->{'psgix.session'})
                 : ()),
         });
     };
