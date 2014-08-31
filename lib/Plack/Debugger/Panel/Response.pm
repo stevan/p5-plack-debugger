@@ -16,7 +16,6 @@ sub new {
 
         $self->notify( $resp->[0] >= 400 ? 'error' : 'success' );
 
-
         my @headers;
         Plack::Util::header_iter( $resp->[1], sub { push @headers, @_ } );
 
