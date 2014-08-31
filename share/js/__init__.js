@@ -432,16 +432,16 @@ Plack.Debugger.UI.prototype._load_data_error = function ( e, error ) {
 
 Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     e.stopPropagation();
-    this.collapsed.trigger('plack-debugger.ui._:hide', 'slow');
-    this.toolbar.trigger('plack-debugger.ui._:show',   'slow');
+    this.collapsed.trigger('plack-debugger.ui._:hide', 'fast');
+    this.toolbar.trigger('plack-debugger.ui._:show',   'fast');
     this.panels.trigger('plack-debugger.ui._:hide'); // re-hide the panels
 }
 
 Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
     e.stopPropagation();
     this.panels.trigger('plack-debugger.ui._:hide');
-    this.toolbar.trigger('plack-debugger.ui._:hide',   'slow');
-    this.collapsed.trigger('plack-debugger.ui._:show', 'slow');
+    this.toolbar.trigger('plack-debugger.ui._:hide',   'fast');
+    this.collapsed.trigger('plack-debugger.ui._:show', 'fast');
 }
 
 Plack.Debugger.UI.prototype._close_toolbar_with_escape_key = function ( e ) {
