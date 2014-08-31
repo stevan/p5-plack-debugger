@@ -328,7 +328,7 @@ Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 Plack.Debugger.UI.prototype.register = function () {
     // fire events
     this.$element.parent().keyup( 
-        this._close_toolbar_with_key.bind( this )
+        this._close_toolbar_with_escape_key.bind( this )
     );
 
     // register for events we handle 
@@ -444,7 +444,7 @@ Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
     this.collapsed.trigger('plack-debugger.ui._:show', 'slow');
 }
 
-Plack.Debugger.UI.prototype._close_toolbar_with_key = function ( e ) {
+Plack.Debugger.UI.prototype._close_toolbar_with_escape_key = function ( e ) {
     if (e.keyCode == 27) { 
         e.stopPropagation();
         this._close_toolbar( e );
