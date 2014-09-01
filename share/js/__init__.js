@@ -808,11 +808,11 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     ordered_key_value_pairs : function (data) {
         if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an Array");
         if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an even length Array");
-        var out = '<table>';
+        var out = '<table class="ordered-key-value-pairs">';
         for ( var i = 0; i < data.length; i += 2 ) {
             out += '<tr>' 
-                + '<td>' + data[i] + '</td>' 
-                + '<td>' + this.generic_data_formatter( data[ i + 1 ] ) + '</td>' 
+                + '<td class="key">' + data[i] + '</td>' 
+                + '<td class="value">' + this.generic_data_formatter( data[ i + 1 ] ) + '</td>' 
                 + '</tr>';
         }
         return out + '</table>'; 
