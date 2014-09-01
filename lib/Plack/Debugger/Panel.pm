@@ -28,9 +28,13 @@ sub new {
         # private data ...
         _result        => undef,
         _stash         => undef,
+        _is_enabled    => 1,
         _notifications => { map { $_ => 0 } @{ NOTIFICATION_LEVELS() } },
-        _metadata      => {},
-        _is_enabled    => 1
+        _metadata      => { 
+            (exists $args{'formatter'} 
+                ? (formatter => $args{'formatter'}) 
+                : ()) 
+        },
     } => $class;
 
     # ... title if one is not provided
