@@ -778,25 +778,25 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
 Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     // basic formatter ...
     generic_data_formatter : function (data) {
-        if (!data) return "";
+        if (!data) return "...";
         switch ( data.constructor ) {
             case String:
             case Number:
                 return data;
             case Array:
-                var out = '<table>';
+                var out = '<table class="pdb-item-list">';
                 for (var i = 0; i < data.length; i++) {
                     out += '<tr>' 
-                        + '<td>' + this.generic_data_formatter( data[i] ) + '</td>' 
+                        + '<td class="pdb-item">' + this.generic_data_formatter( data[i] ) + '</td>' 
                         + '</tr>';
                 }
                 return out + '</table>'; 
             case Object:
-                var out = '<table>';
+                var out = '<table class="pdb-key-value-pairs">';
                 for (key in data) {
                     out += '<tr>' 
-                        + '<td>' + key + '</td>' 
-                        + '<td>' + this.generic_data_formatter( data[key] ) + '</td>' 
+                        + '<td class="pdb-key">' + key + '</td>' 
+                        + '<td class="pdb-value">' + this.generic_data_formatter( data[key] ) + '</td>' 
                         + '</tr>';
                 }
                 return out + '</table>';
@@ -808,11 +808,11 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     ordered_key_value_pairs : function (data) {
         if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an Array");
         if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an even length Array");
-        var out = '<table class="ordered-key-value-pairs">';
+        var out = '<table class="pdb-key-value-pairs">';
         for ( var i = 0; i < data.length; i += 2 ) {
             out += '<tr>' 
-                + '<td class="key">' + data[i] + '</td>' 
-                + '<td class="value">' + this.generic_data_formatter( data[ i + 1 ] ) + '</td>' 
+                + '<td class="pdb-key">' + data[i] + '</td>' 
+                + '<td class="pdb-value">' + this.generic_data_formatter( data[ i + 1 ] ) + '</td>' 
                 + '</tr>';
         }
         return out + '</table>'; 
@@ -820,22 +820,29 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     subrequest_formatter : function (data) {
         var out = '';
         for ( var i = 0; i < data.length; i++ ) {
-            out += '<div>'; 
-                out += '<div>' + ([ data[i].method, data[i].uri, data[i].request_uid ].join(' -- ')) + '</div>'
-                out += '<div>' 
-                        + '<div>' + data[i].notifications.warning + '</div>'
-                        + '<div>' + data[i].notifications.error   + '</div>'
-                        + '<div>' + data[i].notifications.success + '</div>'
+            out += '<div class="pdb-subrequest">'; 
+                out += '<div class="pdb-subrequest-details">' 
+                        + '<div class="pdb-notifications">' 
+                            + '<div class="pdb-badge pdb-warning">' + data[i].notifications.warning + '</div>'
+                            + '<div class="pdb-badge pdb-error">'   + data[i].notifications.error   + '</div>'
+                            + '<div class="pdb-badge pdb-success">' + data[i].notifications.success + '</div>'
+                        + '</div>'
+                        + '<strong>' + data[i].uri + '</strong>' 
+                        + '<small>{ request uid : ' + data[i].request_uid + ', method : ' + data[i].method + ' }</small>'
                     + '</div>';
-                out += '<div>';
+                out += '<div class="pdb-subrequest-results">';
                     for ( var j = 0; j < data[i].results.length; j++ ) {
                         var result = data[i].results[j];
-                        if ( result.metadata && result.metadata.formatter ) {
-                            out += this[ result.metadata.formatter ]( result.result );
-                        } 
-                        else {
-                            out += this.generic_data_formatter( result.result );
-                        }
+                        out += '<div class="pdb-subrequest-result">' 
+                            + '<div class="pdb-title">' + result.title    + '</div>'
+                            + '<div class="pdb-subtitle">' + result.subtitle + '</div>';
+                            if ( result.metadata && result.metadata.formatter ) {
+                                out += this[ result.metadata.formatter ]( result.result );
+                            } 
+                            else {
+                                out += this.generic_data_formatter( result.result );
+                            }
+                        out += '</div>'
                     }
                 out += '</div>';
             out += '</div>';
