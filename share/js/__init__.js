@@ -815,7 +815,6 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     subrequest_formatter : function (data) {
         var out = '';
         for ( var i = 0; i < data.length; i++ ) {
-            console.log( data[i] );
             out += '<div>'; 
                 out += '<div>' + ([ data[i].method, data[i].uri, data[i].request_uid ].join(' -- ')) + '</div>'
                 out += '<div>' 
