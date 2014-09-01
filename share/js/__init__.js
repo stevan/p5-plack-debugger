@@ -786,13 +786,18 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             case Array:
                 var out = '<table>';
                 for (var i = 0; i < data.length; i++) {
-                    out += '<tr><td>' + this.generic_data_formatter( data[i] ) + '</td></tr>';
+                    out += '<tr>' 
+                        + '<td>' + this.generic_data_formatter( data[i] ) + '</td>' 
+                        + '</tr>';
                 }
                 return out + '</table>'; 
             case Object:
                 var out = '<table>';
                 for (key in data) {
-                    out += '<tr><td>' + key + '</td><td>' + this.generic_data_formatter( data[key] ) + '</td></tr>';
+                    out += '<tr>' 
+                        + '<td>' + key + '</td>' 
+                        + '<td>' + this.generic_data_formatter( data[key] ) + '</td>' 
+                        + '</tr>';
                 }
                 return out + '</table>';
             default:
