@@ -93,8 +93,8 @@
 #plack-debugger .pdb-collapsed .pdb-open-button {
     padding     : 5px;
     color       : #999999;
-    font-size   : 3em;
-    line-height : 0.75em;
+    font-size   : 2.5em;
+    line-height : 1.0em;
 }
 
 #plack-debugger .pdb-collapsed .pdb-open-button:hover {
@@ -124,8 +124,9 @@
     background  : #333333;
     padding     : 5px;
     color       : #999999;
-    font-size   : 3em;
-    line-height : 0.75em;  
+    font-size   : 2.5em;
+    line-height : 1.0em;  
+    text-align  : right;
 }
 
 #plack-debugger .pdb-toolbar .pdb-header .pdb-close-button:hover {
