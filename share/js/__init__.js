@@ -465,7 +465,7 @@ Plack.Debugger.UI.prototype._close_panels = function ( e, index ) {
 
 Plack.Debugger.UI.Collapsed = function ( $parent ) {
     this.$element = $parent.append(
-        '<div class="pdb-collapsed"><div class="pdb-open-button">&#9756;</div></div>'
+        '<div class="pdb-collapsed"><div class="pdb-open-button">&#9776;</div></div>'
     ).find('.pdb-collapsed');
     this.register();
 }
@@ -489,7 +489,7 @@ Plack.Debugger.UI.Toolbar = function ( $parent ) {
     this.$element = $parent.append(
         '<div class="pdb-toolbar">' 
             + '<div class="pdb-header">'
-                + '<div class="pdb-close-button">&#9758;</div>'
+                + '<div class="pdb-close-button">&#9776;</div>'
             + '</div>'
             + '<div class="pdb-buttons"></div>'
         + '</div>'
