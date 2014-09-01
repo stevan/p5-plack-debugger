@@ -11,12 +11,9 @@ sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    $args{'title'}     ||= 'Perl Config';
-    $args{'formatter'} ||= 'ordered_key_value_pairs';
+    $args{'title'} ||= 'Perl Config';
 
-    $args{'after'} = sub {
-        (shift)->set_result([ %Config ]);
-    };
+    $args{'after'} = sub { (shift)->set_result( \%Config ) };
 
     $class->SUPER::new( \%args );
 }
