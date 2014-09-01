@@ -9,7 +9,8 @@ sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    $args{'title'} ||= 'Plack Response';
+    $args{'title'}     ||= 'Plack Response';
+    $args{'formatter'} ||= 'ordered_key_value_pairs';
 
     $args{'after'} = sub {
         my ($self, $env, $resp) = @_;
@@ -22,10 +23,7 @@ sub new {
         $self->set_result([ 'Status' => $resp->[0], @headers ]);
     };
 
-    my $self = $class->SUPER::new( \%args );
-    $self->add_metadata( formatter => 'ordered_key_value_pairs' );
-    $self;
-
+    $class->SUPER::new( \%args );
 }
 
 1;

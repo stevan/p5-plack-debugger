@@ -11,7 +11,8 @@ sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    $args{'title'} ||= 'Timer';
+    $args{'title'}     ||= 'Timer';
+    $args{'formatter'} ||= 'ordered_key_value_pairs';
 
     $args{'before'} = sub {
         my ($self, $env) = @_;
@@ -33,9 +34,7 @@ sub new {
         ]);
     };
 
-    my $self = $class->SUPER::new( \%args );
-    $self->add_metadata( formatter => 'ordered_key_value_pairs' );
-    $self;
+    $class->SUPER::new( \%args );
 }
 
 sub format_time {

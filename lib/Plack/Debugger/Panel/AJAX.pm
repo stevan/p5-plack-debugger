@@ -9,7 +9,8 @@ sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    $args{'title'} ||= 'AJAX Requests';
+    $args{'title'}     ||= 'AJAX Requests';
+    $args{'formatter'} ||= 'subrequest_formatter';
 
     $args{'before'} = sub {
         my ($self, $env) = @_;
@@ -23,7 +24,6 @@ sub new {
 
     my $self = $class->SUPER::new( \%args );
     $self->add_metadata( track_subrequests => 1 );
-    $self->add_metadata( formatter         => 'subrequest_formatter' );
     $self;
 }
 
