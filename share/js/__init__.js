@@ -448,7 +448,9 @@ Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     e.stopPropagation();
     this.collapsed.trigger('plack-debugger.ui._:hide');
     this.toolbar.trigger('plack-debugger.ui._:show');
-    this.panels.trigger('plack-debugger.ui._:show');
+    if ( this.panels.active_panel ) {
+        this.panels.trigger('plack-debugger.ui._:show');
+    }
 }
 
 Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
