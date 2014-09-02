@@ -278,7 +278,7 @@
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results {
-    border : 10px solid green;
+    margin : 10px;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-title {
@@ -290,7 +290,7 @@
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-result {
-    border : 10px solid red;
+    margin : 10px;
 
 }
 
