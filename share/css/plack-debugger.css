@@ -278,20 +278,27 @@
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results {
-    margin : 10px;
+    margin : 5px;
 }
 
-#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-title {
-
+#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-header .pdb-title {
+    border-bottom : 1px solid #666666;
 }
 
-#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subtitle {
+#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-header .pdb-title:hover {
+    cursor : pointer;
+}
 
+#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-header .pdb-subtitle {
+    display: none;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-result {
-    margin : 10px;
+    margin : 5px;
+}
 
+#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-result-data {
+    display : none;
 }
 
 /* formatter styles */
