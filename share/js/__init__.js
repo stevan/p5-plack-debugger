@@ -621,7 +621,8 @@ Plack.Debugger.UI.Panels = function ( $parent ) {
     ).find('.pdb-panels');
     this.register();
 
-    this.panels = [];
+    this.panels       = [];
+    this.active_panel = null;
 }
 
 Plack.Debugger.UI.Panels.prototype = new Plack.Debugger.Abstract.UI();
@@ -643,25 +644,23 @@ Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
 
 Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
     e.stopPropagation();
-    // XXX - could do this better ...
-    this.$element.find('.pdb-panel:visible').hide(); // hide any strays
+    if ( this.active_panel ) {
+        // close the last active panel ...
+        this.active_panel.trigger( 'plack-debugger.ui._:hide' );
+    }
     this.trigger( 'plack-debugger.ui._:show' );
-    this.panels[ index ].trigger( 'plack-debugger.ui._:show' );
+    this.active_panel = this.panels[ index ];
+    this.active_panel.trigger( 'plack-debugger.ui._:show' );
 }
 
 Plack.Debugger.UI.Panels.prototype._close_panel = function ( e, index ) {
     e.stopPropagation();
     this.trigger( 'plack-debugger.ui._:hide' );
-    this.panels[ index ].trigger( 'plack-debugger.ui._:hide' );    
-}
-
-// override to make sure we always close
-// all the individual panels as well
-Plack.Debugger.UI.Panels.prototype.hide = function ( e, duration ) { 
-    e.stopPropagation(); 
-    this.$element.hide( duration );
-    for ( var i = 0; i < this.panels.length; i++ ) {
-        this.panels[ i ].trigger( 'plack-debugger.ui._:hide' );    
+    if ( this.active_panel ) {
+        this.active_panel.trigger( 'plack-debugger.ui._:hide' );    
+    }
+    else {
+        throw new Error('This should never happen!');
     }
 }
 
