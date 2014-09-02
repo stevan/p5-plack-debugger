@@ -654,6 +654,9 @@ Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
         this.active_panel.trigger( 'plack-debugger.ui._:hide' );
     }
     this.trigger( 'plack-debugger.ui._:show' );
+    if ( index >= this.panels.length ) {
+        throw new Error('[Invalid Event Args] there is no panel at index:' + index);
+    }
     this.active_panel = this.panels[ index ];
     this.active_panel.trigger( 'plack-debugger.ui._:show' );
 }
