@@ -167,6 +167,10 @@ Plack.Debugger.Abstract.UI = function () {
 
 Plack.Debugger.Abstract.UI.prototype = new Plack.Debugger.Abstract.Eventful();
 
+Plack.Debugger.Abstract.UI.prototype.is_hidden = function ( e ) { 
+    return this.$element.is(':hidden');
+}
+
 Plack.Debugger.Abstract.UI.prototype.hide = function ( e, duration ) { 
     e.stopPropagation(); 
     if ( this.$element != null ) this.$element.hide( duration );
