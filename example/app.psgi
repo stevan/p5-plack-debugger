@@ -22,6 +22,7 @@ use Plack::Debugger::Panel::PerlConfig;
 use Plack::Debugger::Panel::Parameters;
 use Plack::Debugger::Panel::AJAX;
 use Plack::Debugger::Panel::ModuleVersions;
+use Plack::Debugger::Panel::Memory;
 
 my $JSON         = JSON::XS->new->utf8->pretty;
 my $DATA_DIR     = dir('/tmp/debugger_panel');
@@ -48,6 +49,7 @@ my $debugger = Plack::Debugger->new(
         Plack::Debugger::Panel::PerlConfig->new,
         Plack::Debugger::Panel::AJAX->new, 
         Plack::Debugger::Panel::ModuleVersions->new,
+        Plack::Debugger::Panel::Memory->new,
         Plack::Debugger::Panel->new(
             title     => 'Env',
             subtitle  => '... capturing the execution env',
