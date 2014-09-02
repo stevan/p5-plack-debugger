@@ -15,7 +15,7 @@ sub new {
     $args{'formatter'} ||= 'ordered_key_value_pairs';
 
     $args{'after'} = sub {
-        my ($self, $env) = @_;
+        my ($self, $env, $resp) = @_;
         my $modules = Module::Versions->HASH;
         $self->set_result([
             map { 
