@@ -59,7 +59,12 @@ my $debugger = Plack::Debugger->new(
             after => sub { 
                 my ($self, $env) = @_;
                 $self->set_result(q{
-                    <table>
+                    <script>
+                        function testing() {
+                            return "... and yah don't stop!";
+                        }
+                    </script>
+                    <table id="test-table">
                         <tr>
                             <td>Testing</td>
                             <td>1</td>
@@ -67,6 +72,11 @@ my $debugger = Plack::Debugger->new(
                             <td>3</td>
                         </tr>
                     </table>
+                    <script>
+                        $(document).ready(function () {
+                            $('#test-table tr').append('<td>' + testing() + '</td>');
+                        });
+                    </script>
                 }); 
             }
         ),
