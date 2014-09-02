@@ -55,6 +55,22 @@ my $debugger = Plack::Debugger->new(
             }
         ),
         Plack::Debugger::Panel->new(
+            title => 'HTML Result Passthrough',
+            after => sub { 
+                my ($self, $env) = @_;
+                $self->set_result(q{
+                    <table>
+                        <tr>
+                            <td>Testing</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                        </tr>
+                    </table>
+                }); 
+            }
+        ),
+        Plack::Debugger::Panel->new(
             title     => 'Plack Env',
             subtitle  => '... capturing the Plack env',
             before    => sub { 
