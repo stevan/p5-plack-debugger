@@ -108,6 +108,14 @@ Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
     this.UI       = new Plack.Debugger.UI( $jQuery(document.body) );
     this.resource = new Plack.Debugger.Resource( $jQuery, this.UI );
 
+    // YAGNI (yet):
+    // It might be useful to be able to capture AJAX calls
+    // that are made by frameworks other then jQuery, in 
+    // which case this needs to get more sophisticated. I 
+    // can't easily see a need for it right now, but if 
+    // there is a need, it could be done.
+    // - SL
+
     $jQuery(document).ajaxSend( this._handle_AJAX_send.bind( this ) );
     $jQuery(document).ajaxComplete( this._handle_AJAX_complete.bind( this ) );
 
