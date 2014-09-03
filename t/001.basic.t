@@ -68,7 +68,7 @@ my $debugger_application = Plack::App::Debugger->new(
     debugger    => $debugger,
     base_url    => $DEBUGGER_URL, 
     static_url  => '/static',
-    js_init_url => '/js/__init__.js',
+    js_init_url => '/js/plack-debugger.js',
 );
 
 my $app = builder {

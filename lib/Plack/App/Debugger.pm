@@ -22,7 +22,7 @@ sub new {
 
     $args{'base_url'}         ||= DEFAULT_BASE_URL; 
     $args{'static_url'}       ||= '/static';
-    $args{'js_init_url'}      ||= '/js/__init__.js';
+    $args{'js_init_url'}      ||= '/js/plack-debugger.js';
     $args{'static_asset_dir'} ||= try { File::ShareDir::dist_dir('Plack-Debugger') } || 'share';
 
     die "You must pass a reference to a 'Plack::Debugger' instance"
