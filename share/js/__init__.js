@@ -822,11 +822,8 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
             formatter['formatter'].apply( this.formatters, [ data.result ] ) 
         );
 
-        if ( formatter['callbacks'] ) {
-            var cbs = formatter['callbacks'];
-            for ( var i = 0; i < cbs.length; i++ ) {
-                cbs[ i ].apply( cbs[ i ], [ this.$element, data.result ] )
-            }
+        if ( formatter['callback'] ) {
+            formatter['callback']( this.$element, data.result )
         }
     }  
 }
@@ -880,18 +877,16 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
         }
     },
     subrequest_formatter : {
-        'callbacks' : [
-            function ( $e , data ) {
-                $e.find('.pdb-subrequest-details').click(function () {
-                    $(this).siblings('.pdb-subrequest-results').toggle();
-                });
+        'callback' : function ( $e , data ) {
+            $e.find('.pdb-subrequest-details').click(function () {
+                $(this).siblings('.pdb-subrequest-results').toggle();
+            });
 
-                $e.find('.pdb-subrequest-result .pdb-subrequest-header .pdb-title').click(function () {
-                    $(this).siblings('.pdb-subtitle').toggle();
-                    $(this).parent().siblings('.pdb-subrequest-result-data').toggle();
-                });
-            }
-        ],
+            $e.find('.pdb-subrequest-result .pdb-subrequest-header .pdb-title').click(function () {
+                $(this).siblings('.pdb-subtitle').toggle();
+                $(this).parent().siblings('.pdb-subrequest-result-data').toggle();
+            });
+        },
         'formatter' : function (data) {
             var out = '';
             for ( var i = 0; i < data.length; i++ ) {
