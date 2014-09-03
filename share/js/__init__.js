@@ -25,7 +25,17 @@ Plack.Debugger.prototype._init_config = function () {
 
 Plack.Debugger.prototype.ready = function ( callback ) {
     var self           = this;
-    var ready_callback = function ( $jQuery ) { self._ready( $jQuery, callback ) };
+    var ready_callback = function ( $jQuery ) { 
+        // NOTE:
+        // We need a jQuery newer then 1.7 so that 
+        // we can assure stable event handling 
+        // - SL
+        if ( self._is_jQuery_acceptable( $jQuery, '1.7' ) ) {
+            self._ready( $jQuery, callback ) 
+        } else {
+            throw new Error('[Bad jQuery version] The version of jQuery loaded (' + $jQuery().jquery + ') is not supported')
+        }
+    };
 
     if ( typeof jQuery == 'undefined' ) {
 
@@ -55,6 +65,43 @@ Plack.Debugger.prototype.ready = function ( callback ) {
     }
 
     return self;
+}
+
+// NOTE:
+// adapted this from here:
+//    http://stackoverflow.com/questions/6832596/how-to-compare-software-version-number-using-js-only-number/6832721#6832721
+// and made it more specific
+// to my usage.
+// - SL
+Plack.Debugger.prototype._is_jQuery_acceptable = function ( $jQuery, min_version ) {
+    var v1 = ('' + $jQuery().jquery).split('.');
+    var v2 = ('' + min_version).split('.');
+
+    var min_length = Math.min(v1.length, v2.length);
+
+    for( var i = 0; i < min_length; i++ ) {
+        var p1 = parseInt( v1[i], 10 );
+        var p2 = parseInt( v2[i], 10 );
+
+        if ( isNaN(p1) ) p1 = v1[i];
+        if ( isNaN(p2) ) p2 = v2[i];
+        
+        if ( p1 == p2 ) continue;
+        if ( p1 >  p2 ) return true;
+        if ( p1 <  p2 ) return false;
+
+        throw new Error(
+            '[Bad jQuery version] Cannot compare jQuery versions, got: [' 
+            + $jQuery().jquery 
+            + ', ' 
+            + min_version 
+            + ']'
+        );
+    }
+    
+    if (v1.length === v2.length) return true;
+
+    return (v1.length < v2.length) ? true : false;
 }
 
 Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
@@ -104,7 +151,6 @@ Plack.Debugger.Abstract.Eventful.prototype.register = function () {
 
 Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data ) { 
     if ( this.$element != null ) {
-        //console.log('... calling event <' + e + '> on ' + this.$element.selector);
         this.$element.trigger( e, [ data ] );
     }
 }
@@ -113,19 +159,7 @@ Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data ) {
 
 Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) { 
     if ( this.$element != null ) {
-        if ( this.$element.on == undefined ) {
-            // NOTE:
-            // Yuk, this silliness is so that we can support
-            // jQuery going all the way back to 1.0, instead
-            // of the nice 1.7 .on() method.
-            // - SL 
-            if ( this._cache == undefined ) this._cache = {};
-            this._cache[ e ] = cb;
-            this.$element.bind( e, cb );
-        } 
-        else {
-            this.$element.on( e, cb );
-        }
+        this.$element.on( e, cb );
     }
 }
 
@@ -133,21 +167,7 @@ Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) {
 
 Plack.Debugger.Abstract.Eventful.prototype.off = function ( e ) { 
     if ( this.$element != null ) {
-        if ( this.$element.off == undefined ) {
-            // NOTE:
-            // Yuk, this silliness is so that we can support
-            // jQuery going all the way back to 1.0, instead
-            // of the nice 1.7 .off() method.
-            // - SL
-            if ( this._cache == undefined ) this._cache = {};        
-            if ( this._cache[ e ] != undefined ) {
-                this.$element.unbind( e, this._cache[ e ] );
-                delete this._cache[ e ];
-            }
-        }
-        else {
-            this.$element.off( e );
-        }
+        this.$element.off( e );
     }
 }
 
