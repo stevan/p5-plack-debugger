@@ -25,6 +25,7 @@ use Plack::Debugger::Panel::Parameters;
 use Plack::Debugger::Panel::AJAX;
 use Plack::Debugger::Panel::ModuleVersions;
 use Plack::Debugger::Panel::Memory;
+use Plack::Debugger::Panel::Warnings;
 
 my $JSON         = JSON::XS->new->utf8->pretty;
 my $DATA_DIR     = dir('/tmp/debugger_panel');
@@ -54,6 +55,7 @@ my $debugger = Plack::Debugger->new(
         Plack::Debugger::Panel::AJAX->new, 
         Plack::Debugger::Panel::ModuleVersions->new,
         Plack::Debugger::Panel::Memory->new,
+        Plack::Debugger::Panel::Warnings->new,
         Plack::Debugger::Panel->new(
             title => 'HTML Result Passthrough',
             after => sub { 
@@ -79,24 +81,7 @@ my $debugger = Plack::Debugger->new(
                     </script>
                 }); 
             }
-        ),
-        Plack::Debugger::Panel->new(
-            title      => 'Warnings',
-            before     => sub { 
-                my ($self, $env) = @_;
-                $self->stash([]);
-                $SIG{'__WARN__'} = sub { 
-                    push @{ $self->stash } => @_;
-                    $self->notify('warning');
-                    CORE::warn @_;
-                };
-            },
-            after    => sub { 
-                my ($self, $env) = @_;
-                $SIG{'__WARN__'} = 'DEFAULT';  
-                $self->set_result( $self->stash );
-            }            
-        ),
+        )    
     ]
 );
 
