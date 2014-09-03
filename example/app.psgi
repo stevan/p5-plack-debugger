@@ -17,8 +17,10 @@ use Plack::Debugger::Storage;
 use Plack::App::Debugger;
 
 use Plack::Debugger::Panel::Timer;
-use Plack::Debugger::Panel::Response;
+use Plack::Debugger::Panel::PlackResponse;
+use Plack::Debugger::Panel::PlackRequest;
 use Plack::Debugger::Panel::PerlConfig;
+use Plack::Debugger::Panel::Environment;
 use Plack::Debugger::Panel::Parameters;
 use Plack::Debugger::Panel::AJAX;
 use Plack::Debugger::Panel::ModuleVersions;
@@ -43,21 +45,15 @@ my $debugger = Plack::Debugger->new(
         filename_fmt => "%s.json",
     ),
     panels => [
-        Plack::Debugger::Panel::Timer->new,
-        Plack::Debugger::Panel::Parameters->new,        
-        Plack::Debugger::Panel::Response->new,
+        Plack::Debugger::Panel::Timer->new,     
+        Plack::Debugger::Panel::PlackResponse->new,
+        Plack::Debugger::Panel::PlackRequest->new,
+        Plack::Debugger::Panel::Parameters->new,   
+        Plack::Debugger::Panel::Environment->new,   
         Plack::Debugger::Panel::PerlConfig->new,
         Plack::Debugger::Panel::AJAX->new, 
         Plack::Debugger::Panel::ModuleVersions->new,
         Plack::Debugger::Panel::Memory->new,
-        Plack::Debugger::Panel->new(
-            title     => 'Env',
-            subtitle  => '... capturing the execution env',
-            before    => sub { 
-                my ($self, $env) = @_;
-                $self->set_result({ %ENV }); 
-            }
-        ),
         Plack::Debugger::Panel->new(
             title => 'HTML Result Passthrough',
             after => sub { 
@@ -81,20 +77,6 @@ my $debugger = Plack::Debugger->new(
                             $('#test-table tr').append('<td>' + testing() + '</td>');
                         });
                     </script>
-                }); 
-            }
-        ),
-        Plack::Debugger::Panel->new(
-            title     => 'Plack Env',
-            subtitle  => '... capturing the Plack env',
-            before    => sub { 
-                my ($self, $env) = @_;
-                $self->set_result({ 
-                    map { 
-                        $_ => (ref $env->{ $_ } && ref $env->{ $_ } eq 'ARRAY' || ref $env->{ $_ } eq 'HASH'
-                                ? $env->{ $_ } 
-                                : (''.$env->{ $_ }))
-                    } keys %$env 
                 }); 
             }
         ),
