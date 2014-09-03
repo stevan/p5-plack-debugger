@@ -882,17 +882,13 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     subrequest_formatter : {
         'callbacks' : [
             function ( $e , data ) {
-                var $result   = $e.find('.pdb-subrequest-results');
-                var $header   = $result.find('.pdb-subrequest-header');
-                $header.find('.pdb-title').each(function ( i ) {
-                    $(this).click(function () {
-                        var $subtitle = $header.siblings('.pdb-subtitle');
-                        if ( $subtitle.is(':hidden') ) {
-                            $subtitle.show();
-                        } else {
-                            $subtitle.hide();
-                        }
-                    });
+                $e.find('.pdb-subrequest-details').click(function () {
+                    $(this).siblings('.pdb-subrequest-results').toggle();
+                });
+
+                $e.find('.pdb-subrequest-result .pdb-subrequest-header .pdb-title').click(function () {
+                    $(this).siblings('.pdb-subtitle').toggle();
+                    $(this).parent().siblings('.pdb-subrequest-result-data').toggle();
                 });
             }
         ],

@@ -247,11 +247,13 @@
 /* sub-requests */
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest {
-    border : 5px solid #555555;
+    border        : 5px solid #555555;
+    margin-bottom : 5px;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-details {
     padding : 5px;
+    cursor  : pointer;    
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-details strong {
@@ -260,8 +262,7 @@
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-details small {
     font-size    : 0.9em;
-    margin-left  : 5px;
-    margin-right : 5px; 
+    margin-left  : 10px;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-notifications {
@@ -278,11 +279,16 @@
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results {
-    margin : 5px;
+    margin  : 5px;
+    display : none;
+}
+
+#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-header {
+    border-bottom : 1px solid #666666;
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-header .pdb-title {
-    border-bottom : 1px solid #666666;
+
 }
 
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-header .pdb-title:hover {
