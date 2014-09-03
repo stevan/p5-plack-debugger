@@ -825,7 +825,10 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
         if ( formatter['callback'] ) {
             formatter['callback']( this.$element, data.result )
         }
-    }  
+    } 
+    else {
+        this.$element.find('.pdb-content').html('...');
+    } 
 }
 
 // formatters for the Panel content
@@ -892,6 +895,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
         },
         'formatter' : function (data) {
             var out = '';
+
             for ( var i = 0; i < data.length; i++ ) {
                 out += '<div class="pdb-subrequest">'; 
                     out += '<div class="pdb-subrequest-details">' 
