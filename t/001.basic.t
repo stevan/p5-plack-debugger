@@ -111,12 +111,14 @@ test_psgi($app, sub {
 
             ok(-e $data_file, '... data has now been written');
 
+            my $results = $debugger->load_request_results( $UUIDS[-1] );
             is_deeply(
-                $debugger->load_request_results( $UUIDS[-1] ),
+                $results,
                 {
                     'request_uid' => $UUIDS[-1],
                     'method'      => 'GET',
                     'uri'         => 'http://localhost/',
+                    'timestamp'   => $results->{'timestamp'},
                     'results'     => [
                         {
                             title    => 'Tester',      

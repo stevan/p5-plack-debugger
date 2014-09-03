@@ -429,7 +429,7 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
             'request_uid'        : data[i].request_uid,
             'parent_request_uid' : data[i].parent_request_uid,
             'notifications'      : { 'warning' : 0, 'error' : 0, 'success' : 0 },
-            'results'            : [],
+            'results'            : []
         };
 
         for ( var j = 0; j < data[i].results.length; j++ ) {
