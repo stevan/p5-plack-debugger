@@ -842,7 +842,8 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 case Array:
                     var out = '<table class="pdb-item-list">';
                     for (var i = 0; i < data.length; i++) {
-                        out += '<tr>' 
+                        out += '<tr>'                   
+                            // FIXME: this code right below here is ugly and confusing 
                             + '<td class="pdb-item">' + this.generic_data_formatter.formatter.apply( this, [ data[i] ] ) + '</td>' 
                             + '</tr>';
                     }
@@ -852,6 +853,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                     for (key in data) {
                         out += '<tr>' 
                             + '<td class="pdb-key">' + key + '</td>' 
+                            // FIXME: this code right below here is ugly and confusing 
                             + '<td class="pdb-value">' + this.generic_data_formatter.formatter.apply( this, [ data[key] ] ) + '</td>' 
                             + '</tr>';
                     }
@@ -870,6 +872,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             for ( var i = 0; i < data.length; i += 2 ) {
                 out += '<tr>' 
                     + '<td class="pdb-key">' + data[i] + '</td>' 
+                    // FIXME: this code right below here is ugly and confusing 
                     + '<td class="pdb-value">' + this.generic_data_formatter.formatter.apply( this, [ data[ i + 1 ] ] ) + '</td>' 
                     + '</tr>';
             }
@@ -910,6 +913,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                                     + '<div class="pdb-subtitle">' + result.subtitle + '</div>'
                                 + '</div>'
                                 + '<div class="pdb-subrequest-result-data">';
+                                    // FIXME: this code right below here is ugly and confusing 
                                     if ( result.metadata && result.metadata.formatter ) {
                                         out += this[ result.metadata.formatter ].formatter.apply( this, [ result.result ] );
                                     } 
