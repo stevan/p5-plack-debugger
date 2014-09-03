@@ -11,6 +11,20 @@ sub new {
 
     $args{'title'} ||= 'Warnings';
 
+    # NOTE:
+    # This approach may be naive of me, in 
+    # most other use cases the warn signal 
+    # handler it is local-ized so that it 
+    # will be restored once the exectution 
+    # context is finished. Since we have 
+    # more distinct phases of execution here
+    # and not just a wrapping, we can't do 
+    # that. Exactly how much I need to care
+    # about this is unkwown to me, so I will
+    # just leave this as is for now.
+    # Patches welcome!
+    # - SL
+
     $args{'before'} = sub {
         my ($self, $env) = @_;
         $self->stash([]);
