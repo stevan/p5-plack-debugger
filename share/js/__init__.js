@@ -449,10 +449,11 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
                 }
             }            
             page.results.push({            
-                'title'    : data[i].results[j].title,
-                'subtitle' : data[i].results[j].subtitle,
-                'result'   : data[i].results[j].result,
-                'metadata' : data[i].results[j].metadata
+                'title'         : data[i].results[j].title,
+                'subtitle'      : data[i].results[j].subtitle,
+                'result'        : data[i].results[j].result,
+                'metadata'      : data[i].results[j].metadata,
+                'notifications' : data[i].results[j].notifications
             });
         }
 
@@ -890,7 +891,6 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             });
 
             $e.find('.pdb-subrequest-result .pdb-subrequest-header .pdb-title').click(function () {
-                $(this).siblings('.pdb-subtitle').toggle();
                 $(this).parent().siblings('.pdb-subrequest-result-data').toggle();
             });
         },
@@ -917,12 +917,19 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                         + '</div>';
                     out += '<div class="pdb-subrequest-results">';
                         for ( var j = 0; j < data[i].results.length; j++ ) {
-                            var result = data[i].results[j];
+                            var result        = data[i].results[j];
+                            var notifications = result.notifications;
                             out += 
                             '<div class="pdb-subrequest-result">' 
                                 + '<div class="pdb-subrequest-header">' 
+                                    + ((notifications) 
+                                        ?  '<div class="pdb-notifications">' 
+                                                + ((notifications.warning) ? '<div class="pdb-badge pdb-warning">' + notifications.warning + '</div>' : '')
+                                                + ((notifications.error)   ? '<div class="pdb-badge pdb-error">'   + notifications.error   + '</div>' : '')
+                                                + ((notifications.success) ? '<div class="pdb-badge pdb-success">' + notifications.success + '</div>' : '')
+                                            + '</div>'
+                                        : '')
                                     + '<div class="pdb-title">' + result.title    + '</div>'
-                                    + '<div class="pdb-subtitle">' + result.subtitle + '</div>'
                                 + '</div>'
                                 + '<div class="pdb-subrequest-result-data">';
                                     // FIXME: this code right below here is ugly and confusing 

@@ -301,6 +301,19 @@
     display: none;
 }
 
+#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-header .pdb-notifications {
+    margin-right  : 5px !important;
+}
+
+#plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-header .pdb-notifications .pdb-badge {
+    float         : right;
+    margin-top    : 3px;    
+    padding       : 2px 5px;
+    border-radius : 5px;
+    border        : 1px solid #ffffff;
+    font-size     : 0.8em;
+}
+
 #plack-debugger .pdb-panels .pdb-panel .pdb-subrequest .pdb-subrequest-results .pdb-subrequest-result {
     margin : 5px;
 }
