@@ -71,7 +71,10 @@ sub load_all_subrequest_results {
     my $dir = File::Spec->catfile( $self->data_dir, $request_uid );
     return [] unless -e $dir;
     return [
-        map {
+        sort { 
+            # order them sequentially ...
+            $b->{'timestamp'} <=> $a->{'timestamp'}
+        } map {
             $self->_load_results( $dir, (File::Spec->splitpath($_))[2] )
         } glob( File::Spec->catfile( $dir, sprintf $self->filename_fmt => '*' ) )
     ];

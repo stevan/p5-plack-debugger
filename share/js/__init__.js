@@ -424,7 +424,8 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
     for ( var i = 0; i < data.length; i++ ) {
         var page = {
             'method'             : data[i].method,
-            'uri'                : data[i].uri,                
+            'uri'                : data[i].uri,               
+            'timestamp'          : data[i].timestamp,               
             'request_uid'        : data[i].request_uid,
             'parent_request_uid' : data[i].parent_request_uid,
             'notifications'      : { 'warning' : 0, 'error' : 0, 'success' : 0 },
@@ -905,7 +906,14 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                                 + '<div class="pdb-badge pdb-success">' + data[i].notifications.success + '</div>'
                             + '</div>'
                             + '<strong>' + data[i].uri + '</strong>' 
-                            + '<small>{ request uid : ' + data[i].request_uid + ', method : ' + data[i].method + ' }</small>'
+                            + '<small>{' 
+                                + ' method : ' 
+                                    + data[i].method
+                                + ', request-UID : ' 
+                                    + data[i].request_uid 
+                                + ', timestamp : '
+                                    + data[i].timestamp
+                                + ' }</small>'
                         + '</div>';
                     out += '<div class="pdb-subrequest-results">';
                         for ( var j = 0; j < data[i].results.length; j++ ) {

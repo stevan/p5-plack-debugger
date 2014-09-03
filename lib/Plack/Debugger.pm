@@ -141,6 +141,7 @@ sub store_request_results {
         {
             'method'      => $r->method,
             'uri'         => $r->uri->as_string,
+            'timestamp'   => time(),
             'request_uid' => $r->env->{'plack.debugger.request_uid'},
             'results'     => $results 
         }
@@ -155,6 +156,7 @@ sub store_subrequest_results {
         {
             'method'             => $r->method,
             'uri'                => $r->uri->as_string,
+            'timestamp'          => time(),
             'request_uid'        => $r->env->{'plack.debugger.request_uid'},            
             'parent_request_uid' => $r->env->{'plack.debugger.parent_request_uid'},            
             'results'            => $results 
