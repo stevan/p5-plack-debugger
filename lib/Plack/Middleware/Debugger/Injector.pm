@@ -118,7 +118,7 @@ sub handle_html_content_type {
 
 sub handle_unknown_content_type {
     my ($self, $env, $resp) = @_;
-    die "I have no idea what to do with this body type";
+    die "I have no idea what to do with this body type: " . Plack::Util::header_get( $resp->[1], 'Content-Type' );
 }
 
 # ...
