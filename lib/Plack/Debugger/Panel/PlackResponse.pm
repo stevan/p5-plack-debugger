@@ -30,6 +30,7 @@ sub new {
 
 sub format_body {
     my ($self, $body) = @_;
+    return 'No Body'                    if !$body;
     return 'Streaming response($body)'  if ref $body eq 'CODE';
 
     my $length = Plack::Util::content_length( $body );
