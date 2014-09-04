@@ -16,9 +16,26 @@ sub new {
         my ($self, $env) = @_;
         $self->set_result([ 
             map { 
-                $_ => (ref $env->{ $_ } && (ref $env->{ $_ } eq 'ARRAY' || ref $env->{ $_ } eq 'HASH')
-                        ? $env->{ $_ }       # pass-through to JSON
-                        : (''.$env->{ $_ })) # stringify it
+                my $value = $env->{ $_ };
+                if ( ref $value ) {
+                    # NOTE:
+                    # break down refs in a sane way, 
+                    # but assume that nothing nests 
+                    # beyond one level, this can be 
+                    # improved later on if need be
+                    # with a simple visitor closure.
+                    # - SL
+                    if ( ref $value eq 'ARRAY' ) {
+                        $value = [ map { ($_ . '') } @$value ];
+                    } 
+                    elsif ( ref $value eq 'HASH' ) {
+                        $value = { map { $_ => ($value->{ $_ } . '') } keys %$value };
+                    }
+                    else {
+                        $value .= '';
+                    }
+                } 
+                ($_ => $value);
             } sort keys %$env # sorting keys creates predictable ordering ...
         ]);
     };
