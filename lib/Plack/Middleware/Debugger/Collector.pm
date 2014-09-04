@@ -35,8 +35,10 @@ sub call {
     # and a callback to finalize the 
     # request as well
     push @{ $env->{'psgix.cleanup.handlers'} } => (
-        sub { $self->debugger->run_cleanup_phase( $env ) },
-        sub { $self->debugger->finalize_request( $env )  },
+        sub { 
+            $self->debugger->run_cleanup_phase( $env );
+            $self->debugger->finalize_request( $env );
+        },
     ) if $env->{'psgix.cleanup'};
 
     $self->response_cb(
