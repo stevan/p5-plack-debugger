@@ -51,6 +51,8 @@ sub make_injector_middleware {
     my $middlware = Plack::Util::load_class('Plack::Middleware::Debugger::Injector');
     my $content   = sub {
         my $env = shift;
+        die "Unable to locate the debugger request-uid, cannot inject the debugger application"
+            unless exists $env->{'plack.debugger.request_uid'};
         sprintf '<script id="plack-debugger-js-init" type="text/javascript" src="%s#%s"></script>' => ( 
             File::Spec::Unix->canonpath(join "" => $self->base_url, $self->static_url, $self->js_init_url), 
             $env->{'plack.debugger.request_uid'} 
