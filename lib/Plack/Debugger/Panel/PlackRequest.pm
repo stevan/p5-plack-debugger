@@ -35,6 +35,9 @@ sub new {
                         $value .= '';
                     }
                 } 
+                else {
+                    $value .= '';
+                }
                 ($_ => $value);
             } sort keys %$env # sorting keys creates predictable ordering ...
         ]);
