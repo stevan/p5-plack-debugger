@@ -64,11 +64,22 @@ sub handle_no_content_type {
     die "No content type specified in the request, I cannot tell what to do!";
 }
 
+sub pass_through_content_type {
+    my ($self, $env, $resp) = @_;
+    # many responses really can't 
+    # get injected into so we 
+    # just ignore and pass them 
+    # through
+    return $resp;
+}
+
 sub handle_json_content_type {
     my ($self, $env, $resp) = @_;
     # application/json responses really 
     # can't get injected into so we 
-    # just ignore it for now
+    # just ignore it for now, but we 
+    # specifically handle this one
+    # just in case ...
     return $resp;
 }
 
@@ -141,12 +152,21 @@ sub call {
             if ( !$content_type ) {
                 return $self->handle_no_content_type( $env, $resp );
             }
+            # be more specific 
+            elsif ( $content_type =~ m!^(?:text/html|application/xhtml\+xml)! ) {
+                return $self->handle_html_content_type( $env, $resp );
+            } 
             elsif ( $content_type =~ m!^(?:application/json)! ) {
                 return $self->handle_json_content_type( $env, $resp );
             }
-            elsif ( $content_type =~ m!^(?:text/html|application/xhtml\+xml)! ) {
-                return $self->handle_html_content_type( $env, $resp );
-            }   
+            # now be less specific
+            elsif ( $content_type =~ m!^(?:text/)! ) {
+                return $self->pass_through_content_type( $env, $resp );
+            }
+            elsif ( $content_type =~ m!^(?:image/)! ) {
+                return $self->pass_through_content_type( $env, $resp );
+            } 
+            # ... final wrapup   
             else {
                 return $self->handle_unknown_content_type( $env, $resp );
             }
