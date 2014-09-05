@@ -3,6 +3,7 @@ package Plack::Debugger::Panel::PlackResponse;
 use strict;
 use warnings;
 
+use HTTP::Status qw[ is_error status_message ];
 use Scalar::Util qw[ blessed ];
 
 use parent 'Plack::Debugger::Panel';
@@ -17,7 +18,8 @@ sub new {
     $args{'after'} = sub {
         my ($self, $env, $resp) = @_;
 
-        $self->notify( $resp->[0] >= 400 ? 'error' : 'success' );
+        $self->notify( is_error( $resp->[0] ) ? 'error' : 'success' );
+        $self->set_subtitle( sprintf 'Status: %d %s' => $resp->[0], status_message( $resp->[0] ) );
 
         my @headers;
         Plack::Util::header_iter( $resp->[1], sub { push @headers, @_ } );
