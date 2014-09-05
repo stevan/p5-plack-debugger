@@ -568,6 +568,7 @@ Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
     var button = new Plack.Debugger.UI.Toolbar.Button( this.$element.find('.pdb-buttons') );
     button.trigger( 'plack-debugger.ui.toolbar.button:update', data );
     this.buttons.push( button );
+    return button;
 }
 
 // ------------------------------------------------------------------
@@ -678,6 +679,7 @@ Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
     var panel = new Plack.Debugger.UI.Panels.Panel( this.$element );
     panel.trigger( 'plack-debugger.ui.panels.panel:update', data );
     this.panels.push( panel );
+    return panel;
 }
 
 Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
