@@ -417,6 +417,7 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
     // the panel content.
 
     var all = { 
+        'subtitle'      : 'Number of AJAX requests made: ' + data.length,
         'notifications' : { 'warning' : 0, 'error' : 0, 'success' : 0 },
         'result'        : []
     };
