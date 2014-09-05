@@ -393,8 +393,8 @@ Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
     // load the data into the various places 
     for ( var i = 0; i < data.length; i++ ) {
 
-        this.toolbar.add_button( data[i] );
-        this.panels.add_panel( data[i] );
+        var button = this.toolbar.add_button( data[i] );
+        var panel  = this.panels.add_panel( data[i] );
 
         // handle metadata ...
         if ( data[i].metadata ) {
