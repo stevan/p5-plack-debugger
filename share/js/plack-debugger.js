@@ -842,7 +842,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     // basic formatter ...
     generic_data_formatter : {
         'formatter' : function (data) {
-            if (!data) return "...";
+            if (!data) return "undef";
             switch ( data.constructor ) {
                 case String:
                 case Number:
@@ -913,6 +913,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
         },
         'formatter' : function ( data ) {
             var visitor = function ( d ) {
+                if (!d) return "undef";
                 switch ( d.constructor ) {
                     case String:
                         return '"' + d + '"';
