@@ -350,6 +350,39 @@
 
 }
 
+#plack-debugger ul.pdb-ulist {
+    list-style-type: none;
+}
+
+#plack-debugger ul.pdb-ulist li.pdb-ulist-item {
+    margin-left : 25px;
+}
+
+#plack-debugger ul.pdb-ulist li.pdb-ulist-item span.pdb-key {
+    color  : #ffffff;
+    cursor : pointer;
+}
+
+#plack-debugger ul.pdb-ulist li.pdb-ulist-item span.pdb-key:after {
+    content      : '=';
+    margin-left  : 5px;
+    margin-right : 5px;
+}
+
+#plack-debugger ul.pdb-ulist li.pdb-ulist-item span.pdb-value {
+
+}
+
+#plack-debugger ul.pdb-ulist li.pdb-ulist-item span.pdb-value:before {
+    content : '{';
+    margin-right: 3px;
+}
+
+#plack-debugger ul.pdb-ulist li.pdb-ulist-item span.pdb-value:after {
+    content : '}';
+    margin-left: 3px;
+}
+
 /* generic */
 
 #plack-debugger .pdb-badge span {

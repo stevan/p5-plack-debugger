@@ -828,7 +828,7 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
         );
 
         if ( formatter['callback'] ) {
-            formatter['callback']( this.$element, data.result )
+            formatter['callback'].apply( this.formatters, [ this.$element, data.result ] )
         }
     } 
     else {
@@ -885,6 +885,58 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                     + '</tr>';
             }
             return out + '</table>'; 
+        }
+    },
+    ordered_keys_with_nested_data : {
+        'callback' : function ( $e, data ) {
+            // delegate ...
+            this.nested_data.callback.apply( this, [ $e, data ] );
+        },
+        'formatter' : function ( data ) {
+            if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'ordered_nested_data' expected an Array");
+            if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] 'ordered_nested_data' expected an even length Array");
+            var out = '<ul class="pdb-ulist">';
+            for ( var i = 0; i < data.length; i += 2 ) {
+                out += '<li class="pdb-ulist-item">'
+                        + '<span class="pdb-key">' + data[i] + '</span>' 
+                        + '<span class="pdb-value">' + this.nested_data.formatter.apply( this, [ data[i + 1] ] ) + '</span>' 
+                    + '</li>';
+            }
+            return out + '</ul>'; 
+        }
+    },
+    nested_data : {
+        'callback' : function ( $e, data ) {
+            $e.find('.pdb-key').click(function () {
+                $(this).siblings('.pdb-value').find('.pdb-ulist').toggle();
+            });
+        },
+        'formatter' : function ( data ) {
+            var visitor = function ( d ) {
+                switch ( d.constructor ) {
+                    case String:
+                        return '"' + d + '"';
+                    case Number:
+                        return d;
+                    case Array:
+                        if (d.length == 0) return '';
+                        var out = '<ul class="pdb-ulist">';
+                        for ( var i = 0; i < d.length; i += 1 ) {
+                            out += '<li class="pdb-ulist-item">' + visitor( d[i] ) + '</li>';
+                        }
+                        return out + '</ul>';
+                    case Object: 
+                        if (Object.keys(d).length == 0) return '';
+                        var out = '<ul class="pdb-ulist">';
+                        for ( var k in d ) {
+                            out += '<li class="pdb-ulist-item"><span class="pdb-key">' + k + '</span><span class="pdb-value">' + visitor( d[k] ) + '</span></li>';
+                        }
+                        return out + '</ul>';
+                    default:
+                        throw new Error("[Bad Formatter Args] 'nested_data' expected type { String,Number,Array,Object }");
+                }
+            };
+            return visitor( data );
         }
     },
     subrequest_formatter : {

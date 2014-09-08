@@ -12,7 +12,7 @@ sub new {
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
     $args{'title'}     ||= 'Request Parameters';
-    $args{'formatter'} ||= 'ordered_key_value_pairs';
+    $args{'formatter'} ||= 'ordered_keys_with_nested_data';
 
     $args{'after'} = sub {
         my $self = shift;
