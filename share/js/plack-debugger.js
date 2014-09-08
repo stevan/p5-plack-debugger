@@ -908,7 +908,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     nested_data : {
         'callback' : function ( $e, data ) {
             $e.find('.pdb-key').click(function () {
-                $(this).siblings('.pdb-value').find('.pdb-ulist').toggle();
+                $(this).siblings('.pdb-value').find('.pdb-ulist').first().toggle();
             });
         },
         'formatter' : function ( data ) {
