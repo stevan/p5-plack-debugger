@@ -399,7 +399,7 @@
     border-bottom-right-radius : 4px;
 }
 
-#plack-debugger .pdb-controls .pdb-control {
+#plack-debugger .pdb-controls button.pdb-control {
     border-width  : 1px;
     border-style  : solid;
     border-radius : 0px;
