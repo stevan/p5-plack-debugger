@@ -949,6 +949,27 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             $e.find('.pdb-subrequest-result .pdb-subrequest-header .pdb-title').click(function () {
                 $(this).parent().siblings('.pdb-subrequest-result-data').toggle();
             });
+
+            for ( var i = 0; i < data.length; i++ ) {
+                for ( var j = 0; j < data[i].results.length; j++ ) {
+                    var result = data[i].results[j];
+                    if ( result.metadata && result.metadata.formatter ) {
+                        var sub_formatter  = this[ result.metadata.formatter ];
+                        if ( sub_formatter.callback ) {
+                            sub_formatter.callback.apply(
+                                this, 
+                                [
+                                    $e.find('.pdb-content .pdb-subrequest')
+                                            .eq( i )
+                                            .find('.pdb-subrequest-results .pdb-subrequest-result')
+                                            .eq( j ),
+                                    result
+                                ]
+                            )
+                        }
+                    }
+                }
+            }
         },
         'formatter' : function (data) {
             var out = '';
