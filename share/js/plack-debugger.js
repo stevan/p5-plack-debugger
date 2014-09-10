@@ -828,7 +828,7 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
         );
 
         if ( formatter['callback'] ) {
-            formatter['callback'].apply( this.formatters, [ this.$element, data.result ] )
+            formatter['callback'].apply( this.formatters, [ this.$element.find('.pdb-content'), data.result ] )
         }
     } 
     else {
@@ -907,6 +907,26 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     },
     nested_data : {
         'callback' : function ( $e, data ) {
+            
+            $e.prepend(
+                '<div class="pdb-controls">' 
+                    + '<button class="pdb-control pdb-open" disabled="true">open</button>'
+                    + '<button class="pdb-control pdb-close">close</button>'
+                + '</div>'
+            );
+
+            $e.find('.pdb-controls .pdb-open').click(function () {
+                $e.find('.pdb-value > .pdb-ulist').show();
+                $(this).attr('disabled', true);
+                $(this).siblings('.pdb-close').attr('disabled', false);
+            });
+
+            $e.find('.pdb-controls .pdb-close').click(function () {
+                $e.find('.pdb-value > .pdb-ulist').hide();
+                $(this).attr('disabled', true);
+                $(this).siblings('.pdb-open').attr('disabled', false);
+            });
+
             $e.find('.pdb-key').click(function () {
                 $(this).siblings('.pdb-value').find('.pdb-ulist').first().toggle();
             });
@@ -959,10 +979,11 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                             sub_formatter.callback.apply(
                                 this, 
                                 [
-                                    $e.find('.pdb-content .pdb-subrequest')
+                                    $e.find('.pdb-subrequest')
                                             .eq( i )
                                             .find('.pdb-subrequest-results .pdb-subrequest-result')
-                                            .eq( j ),
+                                            .eq( j )
+                                            .find('.pdb-subrequest-result-data'),
                                     result
                                 ]
                             )
