@@ -401,12 +401,19 @@
 }
 
 #plack-debugger .pdb-controls button.pdb-control {
-    border-width  : 1px;
-    border-style  : solid;
     border-radius : 0px;
     margin-left   : -1px;
-    font-weight   : bold;
     cursor        : pointer; 
+    padding       : 2px 5px;
+    border        : 1px solid #999999;
+    color         : #cccccc;
+    background    : #666666;    
+}
+
+#plack-debugger .pdb-controls button.pdb-control:disabled {
+    border        : 1px solid #999999;
+    color         : #000000;
+    background    : #666666;
 }
 
 #plack-debugger .pdb-badge span {
