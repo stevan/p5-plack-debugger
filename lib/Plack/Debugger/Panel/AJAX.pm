@@ -16,10 +16,7 @@ sub new {
         my ($self, $env) = @_;
         # if it is a subrequest already,
         # then we can just disable it
-        $self->disable if 
-            exists $env->{'HTTP_X_PLACK_DEBUGGER_PARENT_REQUEST_UID'} 
-                || 
-            exists $env->{'plack.debugger.parent_request_uid'};
+        $self->disable if $self->is_subrequest( $env );
     };
 
     my $self = $class->SUPER::new( \%args );

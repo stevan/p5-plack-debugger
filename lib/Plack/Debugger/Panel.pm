@@ -106,6 +106,15 @@ sub add_metadata {
     $self->{'_metadata'}->{ $key } = $data;
 }
 
+# check if we are in a sub-request ...
+
+sub is_subrequest {
+    my ($self, $env) = @_;
+    exists $env->{'HTTP_X_PLACK_DEBUGGER_PARENT_REQUEST_UID'} 
+        || 
+    exists $env->{'plack.debugger.parent_request_uid'};
+}
+
 # turning it on and off ...
 
 sub is_disabled { (shift)->{'_is_enabled'} == 0 }
