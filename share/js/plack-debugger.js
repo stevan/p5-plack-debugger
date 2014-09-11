@@ -25,17 +25,7 @@ Plack.Debugger.prototype._init_config = function () {
 
 Plack.Debugger.prototype.ready = function ( callback ) {
     var self           = this;
-    var ready_callback = function ( $jQuery ) { 
-        // NOTE:
-        // We need a jQuery newer then 1.7 so that 
-        // we can assure stable event handling 
-        // - SL
-        if ( self._is_jQuery_acceptable( $jQuery, '1.7' ) ) {
-            self._ready( $jQuery, callback ) 
-        } else {
-            throw new Error('[Bad jQuery version] The version of jQuery loaded (' + $jQuery().jquery + ') is not supported')
-        }
-    };
+    var ready_callback = function ( $jQuery ) { self._ready( $jQuery, callback ) };
 
     if ( typeof jQuery == 'undefined' ) {
 
@@ -67,46 +57,9 @@ Plack.Debugger.prototype.ready = function ( callback ) {
     return self;
 }
 
-// NOTE:
-// adapted this from here:
-//    http://stackoverflow.com/questions/6832596/how-to-compare-software-version-number-using-js-only-number/6832721#6832721
-// and made it more specific
-// to my usage.
-// - SL
-Plack.Debugger.prototype._is_jQuery_acceptable = function ( $jQuery, min_version ) {
-    var v1 = ('' + $jQuery().jquery).split('.');
-    var v2 = ('' + min_version).split('.');
-
-    var min_length = Math.min(v1.length, v2.length);
-
-    for( var i = 0; i < min_length; i++ ) {
-        var p1 = parseInt( v1[i], 10 );
-        var p2 = parseInt( v2[i], 10 );
-
-        if ( isNaN(p1) ) p1 = v1[i];
-        if ( isNaN(p2) ) p2 = v2[i];
-        
-        if ( p1 == p2 ) continue;
-        if ( p1 >  p2 ) return true;
-        if ( p1 <  p2 ) return false;
-
-        throw new Error(
-            '[Bad jQuery version] Cannot compare jQuery versions, got: [' 
-            + $jQuery().jquery 
-            + ', ' 
-            + min_version 
-            + ']'
-        );
-    }
-    
-    if (v1.length === v2.length) return true;
-
-    return (v1.length < v2.length) ? true : false;
-}
-
 Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
-    this.UI       = new Plack.Debugger.UI( $jQuery(document.body) );
-    this.resource = new Plack.Debugger.Resource( $jQuery, this.UI );
+    this.UI       = new Plack.Debugger.UI( $jQuery(document.body), this, "resource" );
+    this.resource = new Plack.Debugger.Resource( $jQuery, this, "UI" );
 
     // YAGNI (yet):
     // It might be useful to be able to capture AJAX calls
@@ -149,41 +102,66 @@ Plack.Debugger.Abstract = {};
 // ----------------------------------------------------------------
 // basic event handling object
 
-Plack.Debugger.Abstract.Eventful = function () {
-    this.$element = null;
-}
+Plack.Debugger.Abstract.Eventful = function () {}
 
 Plack.Debugger.Abstract.Eventful.prototype.register = function () { 
     throw new Error('[Abstract Method] you must define a `register` method'); 
 }
 
-Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data ) { 
-    if ( this.$element != null ) {
-        this.$element.trigger( e, [ data ] );
+Plack.Debugger.Abstract.Eventful.prototype.setup_target = function ( $parent, $target ) { 
+    this.$parent = $parent;
+    this.$target = $target;
+}
+
+Plack.Debugger.Abstract.Eventful.prototype.locate_target = function ( $parent, $target ) { 
+    if ( this.$parent &&  this.$target ) return this.$parent[ this.$target ];
+    if ( this.$parent && !this.$target ) return this.$parent;
+    throw new Error("Cannot locate the $target");
+}
+
+Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options ) { 
+    //console.log([ "... triggering " + e + " on ", this, data, options ]);
+    //console.trace();
+    if ( this._callbacks      == undefined ) return; // handle no events (yet)
+    if ( this._callbacks[ e ] == undefined ) {
+        //console.log(["... attempting to bubble " + e + " on ", this, data ]);
+        // not handling this specific event, so ...
+        if ( options != undefined && options.bubble ) {
+            // ... attempt to bubble the event to the target 
+            this.locate_target().trigger( e, data, options );
+        }
+        else {
+            throw new Error("[Unhandled event] This object does not handle event(" + e + ") ... and bubbling was not requested");
+        }
+    }
+    else {
+        // otherwise we know we can handle this event, so do it ...
+        var cbs = this._callbacks[ e ];     
+        for ( var i = 0; i < cbs.length; i++ ) {
+            cbs[i].apply( this, [ data ] )
+        }
     }
 }
 
 // register events ...
 
 Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) { 
-    if ( this.$element != null ) {
-        this.$element.on( e, cb );
+    if ( this._callbacks      == undefined ) this._callbacks = {};
+    if ( this._callbacks[ e ] == undefined ) this._callbacks[ e ] = [];
+    //console.log([ "registering event: " + e + " on ", this, cb ]);
+    this._callbacks[ e ].push( cb );
+    if ( this._callbacks[ e ].length > 1 ) {
+        throw new Error ("Got more than one event registered for: " + e);
     }
 }
 
 // unregister events ...
 
 Plack.Debugger.Abstract.Eventful.prototype.off = function ( e ) { 
-    if ( this.$element != null ) {
-        this.$element.off( e );
-    }
-}
-
-Plack.Debugger.Abstract.Eventful.prototype.cancel = function ( e ) { 
-    if ( this.$element != null ) {
-        this.off( e );
-        this.on( e, function ( _e ) { _e.stopPropagation() } );
-    }
+    if ( this._callbacks      == undefined ) return;
+    if ( this._callbacks[ e ] == undefined ) return;
+    //console.log(["un-registering event: " + e + " on ", this ]);
+    delete this._callbacks[ e ];
 }
 
 // ----------------------------------------------------------------
@@ -196,33 +174,24 @@ Plack.Debugger.Abstract.UI = function () {
 Plack.Debugger.Abstract.UI.prototype = new Plack.Debugger.Abstract.Eventful();
 
 Plack.Debugger.Abstract.UI.prototype.is_hidden = function ( e ) { 
+    if (this.$element == null) {
+        throw new Error("It is not possible to know if a null $element is hidden, stop asking!");
+    }
     return this.$element.is(':hidden');
 }
 
-Plack.Debugger.Abstract.UI.prototype.hide = function ( e, duration ) { 
-    e.stopPropagation(); 
+Plack.Debugger.Abstract.UI.prototype.hide = function ( duration ) {  
     if ( this.$element != null ) this.$element.hide( duration );
 }
 
-Plack.Debugger.Abstract.UI.prototype.show = function ( e, duration ) { 
-    e.stopPropagation(); 
+Plack.Debugger.Abstract.UI.prototype.show = function ( duration ) {  
     if ( this.$element != null ) this.$element.show( duration );
 }
 
 /* =============================================================== */
 
-Plack.Debugger.Resource = function ( $jQuery, $target ) {
-    this.$jQuery = $jQuery;
-    this.$target = $target;
-
-    // we need a place to listen 
-    // for events and it has to 
-    // be above the $target on 
-    // the DOM tree, so we create
-    // that level here.
-    this.$element = $target.$element.wrap(
-        '<div class="pdb-listener"></div>'
-    ).parent();
+Plack.Debugger.Resource = function ( $jQuery, $parent, $target ) {
+    this.$jQuery = $jQuery; // the root jQuery object, for Ajax stuff
 
     this._request          = null;
     this._subrequests      = [];
@@ -230,6 +199,7 @@ Plack.Debugger.Resource = function ( $jQuery, $target ) {
     this._AJAX_tracking    = false;
 
     this.register();
+    this.setup_target( $parent, $target );
 }
 
 Plack.Debugger.Resource.prototype = new Plack.Debugger.Abstract.Eventful();
@@ -252,8 +222,7 @@ Plack.Debugger.Resource.prototype.is_AJAX_tracking_enabled = function () {
 
 // ... events handlers
 
-Plack.Debugger.Resource.prototype._load_request = function ( e ) {
-    e.stopPropagation();
+Plack.Debugger.Resource.prototype._load_request = function () {
     this.$jQuery.ajax({
         'dataType' : 'json',
         'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + Plack.Debugger.$CONFIG.current_request_uid),
@@ -263,8 +232,7 @@ Plack.Debugger.Resource.prototype._load_request = function ( e ) {
     });
 }
 
-Plack.Debugger.Resource.prototype._load_subrequests = function ( e ) {
-    e.stopPropagation();
+Plack.Debugger.Resource.prototype._load_subrequests = function () {
     this.$jQuery.ajax({
         'dataType' : 'json',
         'url'      : (
@@ -280,22 +248,22 @@ Plack.Debugger.Resource.prototype._load_subrequests = function ( e ) {
 }
 
 Plack.Debugger.Resource.prototype._update_target_on_request_success = function ( response, status, xhr ) {
-    this.$target.trigger( 'plack-debugger.ui:load-request', response.data.results );
+    this.trigger( 'plack-debugger.ui:load-request', response.data.results, { bubble : true } );
 
     // once the target is updated, we can 
     // just start to ignore the event 
-    this.cancel( 'plack-debugger.resource.request:load' );
+    this.off( 'plack-debugger.resource.request:load' );
 
     this._request = response;
 }
 
 Plack.Debugger.Resource.prototype._update_target_on_subrequest_success = function ( response, status, xhr ) {
-    this.$target.trigger( 'plack-debugger.ui:load-subrequests', response.data );
+    this.trigger( 'plack-debugger.ui:load-subrequests', response.data, { bubble : true } );
     this._subrequests = response;
 }
 
 Plack.Debugger.Resource.prototype._update_target_on_error = function ( xhr, status, error ) {
-    this.$target.trigger( 'plack-debugger.ui:load-error', error );
+    this.trigger( 'plack-debugger.ui:load-error', error, { bubble : true } );
 }
 
 // NOTE:
@@ -350,28 +318,35 @@ Plack.Debugger.Resource.prototype._handle_ajax_complete = function ( e ) {
 
 /* =============================================================== */
 
-Plack.Debugger.UI = function ( $parent ) {
-    this.$element = $parent.append(
+Plack.Debugger.UI = function ( $jQuery, $parent, $target ) {
+    this.$element = $jQuery.append(
         '<style type="text/css">' 
             + '@import url(' + Plack.Debugger.$CONFIG.static_url + '/css/plack-debugger.css);' 
         + '</style>' 
         + '<div id="plack-debugger"></div>'
     ).find('#plack-debugger');
 
-    this.collapsed = new Plack.Debugger.UI.Collapsed( this.$element );
-    this.toolbar   = new Plack.Debugger.UI.Toolbar( this.$element );
-    this.panels    = new Plack.Debugger.UI.Panels( this.$element );
+    this.collapsed = new Plack.Debugger.UI.Collapsed( this.$element, this );
+    this.toolbar   = new Plack.Debugger.UI.Toolbar( this.$element, this );
+    this.panels    = new Plack.Debugger.UI.Panels( this.$element, this );
     
     this.register();   
+    this.setup_target( $parent, $target );
 }
 
 Plack.Debugger.UI.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.prototype.register = function () {
     // fire events
-    this.$element.parent().keyup( 
-        this._toggle_toolbar_with_escape_key.bind( this )
-    );
+    var self = this;
+    this.$element.parent().keyup(function ( e ) {
+        if (e.keyCode == 27) { 
+            e.stopPropagation();
+            (self.toolbar.is_hidden()) 
+                ? self._open_toolbar()
+                : self._close_toolbar();
+        }
+    });
 
     // register for events we handle 
     this.on( 'plack-debugger.ui:load-request',     this._load_request.bind( this ) );
@@ -388,8 +363,7 @@ Plack.Debugger.UI.prototype.register = function () {
     this.on( 'plack-debugger.ui._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
 }
 
-Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
-    e.stopPropagation();
+Plack.Debugger.UI.prototype._load_request = function ( data ) {
     // load the data into the various places 
     for ( var i = 0; i < data.length; i++ ) {
 
@@ -401,15 +375,14 @@ Plack.Debugger.UI.prototype._load_request = function ( e, data ) {
 
             // turn on AJAX tracking ...
             if ( data[i].metadata.track_subrequests ) {
-                this.trigger( 'plack-debugger._:ajax-tracking-enable' );
+                this.trigger( 'plack-debugger._:ajax-tracking-enable', null, { bubble : true } );
             }
 
         }
     }
 }
 
-Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
-    e.stopPropagation();
+Plack.Debugger.UI.prototype._load_subrequests = function ( data ) {
 
     // collect and collate some information on 
     // all the subrequests that have been fired
@@ -470,13 +443,11 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( e, data ) {
     });    
 }
 
-Plack.Debugger.UI.prototype._load_data_error = function ( e, error ) {
-    e.stopPropagation();
+Plack.Debugger.UI.prototype._load_data_error = function ( error ) {
     alert("Sorry, we are unable to load the debugging data at the moment, please try again in a few moments.");
 }
 
-Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
-    e.stopPropagation();
+Plack.Debugger.UI.prototype._open_toolbar = function () {
     this.collapsed.trigger('plack-debugger.ui._:hide');
     this.toolbar.trigger('plack-debugger.ui._:show');
     if ( this.panels.active_panel ) {
@@ -484,51 +455,39 @@ Plack.Debugger.UI.prototype._open_toolbar = function ( e ) {
     }
 }
 
-Plack.Debugger.UI.prototype._close_toolbar = function ( e ) {
-    e.stopPropagation();
+Plack.Debugger.UI.prototype._close_toolbar = function () {
     this.panels.trigger('plack-debugger.ui._:hide');
     this.toolbar.trigger('plack-debugger.ui._:hide');
     this.collapsed.trigger('plack-debugger.ui._:show');
 }
 
-Plack.Debugger.UI.prototype._toggle_toolbar_with_escape_key = function ( e ) {
-    if (e.keyCode == 27) { 
-        e.stopPropagation();
-        if ( this.toolbar.is_hidden() ) {
-            this._open_toolbar( e );
-        }
-        else {
-            this._close_toolbar( e );
-        }
-    }
-}
-
-Plack.Debugger.UI.prototype._open_panels = function ( e, index ) {
-    e.stopPropagation();
+Plack.Debugger.UI.prototype._open_panels = function ( index ) {
     this.panels.trigger('plack-debugger.ui.panels.panel:open', index);
 }
 
-Plack.Debugger.UI.prototype._close_panels = function ( e, index ) {
-    e.stopPropagation();
+Plack.Debugger.UI.prototype._close_panels = function ( index ) {
     this.panels.trigger('plack-debugger.ui.panels.panel:close', index);
 }
 
 /* =============================================================== */
 
-Plack.Debugger.UI.Collapsed = function ( $parent ) {
-    this.$element = $parent.append(
+Plack.Debugger.UI.Collapsed = function ( $jQuery, $parent ) {
+    this.$element = $jQuery.append(
         '<div class="pdb-collapsed"><div class="pdb-open-button">&#9776;</div></div>'
     ).find('.pdb-collapsed');
     this.register();
+    this.setup_target( $parent );
 }
 
 Plack.Debugger.UI.Collapsed.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Collapsed.prototype.register = function () {
     // fire events
-    this.$element.find('.pdb-open-button').click( 
-        this.trigger.bind( this, 'plack-debugger.ui.toolbar:open' ) 
-    );
+    var self = this;
+    this.$element.find('.pdb-open-button').click(function (e) {
+        e.stopPropagation()
+        self.trigger( 'plack-debugger.ui.toolbar:open', null, { bubble : true } );
+    });
 
     // register for events we handle
     this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
@@ -537,8 +496,8 @@ Plack.Debugger.UI.Collapsed.prototype.register = function () {
 
 /* =============================================================== */
 
-Plack.Debugger.UI.Toolbar = function ( $parent ) {
-    this.$element = $parent.append(
+Plack.Debugger.UI.Toolbar = function ( $jQuery, $parent ) {
+    this.$element = $jQuery.append(
         '<div class="pdb-toolbar">' 
             + '<div class="pdb-header">'
                 + '<div class="pdb-close-button">&#9776;</div>'
@@ -547,6 +506,7 @@ Plack.Debugger.UI.Toolbar = function ( $parent ) {
         + '</div>'
     ).find('.pdb-toolbar');
     this.register();
+    this.setup_target( $parent );
 
     this.buttons = [];
 }
@@ -555,9 +515,11 @@ Plack.Debugger.UI.Toolbar.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Toolbar.prototype.register = function () {
     // fire events
-    this.$element.find('.pdb-header .pdb-close-button').click( 
-        this.trigger.bind( this, 'plack-debugger.ui.toolbar:close' ) 
-    );
+    var self = this;
+    this.$element.find('.pdb-header .pdb-close-button').click(function ( e ) { 
+        e.stopPropagation();
+        self.trigger( 'plack-debugger.ui.toolbar:close', null, { bubble : true } ) 
+    });
 
     // register for events we handle
     this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
@@ -565,7 +527,7 @@ Plack.Debugger.UI.Toolbar.prototype.register = function () {
 }
 
 Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
-    var button = new Plack.Debugger.UI.Toolbar.Button( this.$element.find('.pdb-buttons') );
+    var button = new Plack.Debugger.UI.Toolbar.Button( this.$element.find('.pdb-buttons'), this );
     button.trigger( 'plack-debugger.ui.toolbar.button:update', data );
     this.buttons.push( button );
     return button;
@@ -573,8 +535,8 @@ Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
 
 // ------------------------------------------------------------------
 
-Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
-    this.$element = $parent.append(
+Plack.Debugger.UI.Toolbar.Button = function ( $jQuery, $parent ) {
+    this.$element = $jQuery.append(
         '<div class="pdb-button">'
             + '<div class="pdb-notifications">'
                 + '<div class="pdb-badge pdb-warning"></div>'
@@ -588,15 +550,18 @@ Plack.Debugger.UI.Toolbar.Button = function ( $parent ) {
 
     this._metadata = {};
     this.register();
+    this.setup_target( $parent );
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
     // fire events
-    this.$element.click( 
-        this.trigger.bind( this, 'plack-debugger.ui.panels:open', this.$element.index() ) 
-    );
+    var self = this;
+    this.$element.click(function ( e ) { 
+        e.stopPropagation();
+        self.trigger( 'plack-debugger.ui.panels:open', $(this).index(), { bubble : true } ) 
+    });
 
     // register for events we handle
     this.on( 'plack-debugger.ui.toolbar.button:update', this._update.bind( this ) );
@@ -610,8 +575,7 @@ Plack.Debugger.UI.Toolbar.Button.prototype.is_tracking_subrequests = function ()
     return this._metadata.track_subrequests ? true : false
 }
 
-Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
-    e.stopPropagation();
+Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( data ) {
 
     if ( data.title ) {
         this.$element.find('.pdb-title').html( data.title );
@@ -654,11 +618,12 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( e, data ) {
 
 /* =============================================================== */
 
-Plack.Debugger.UI.Panels = function ( $parent ) {
-    this.$element = $parent.append(
+Plack.Debugger.UI.Panels = function ( $jQuery, $parent ) {
+    this.$element = $jQuery.append(
         '<div class="pdb-panels"></div>'
     ).find('.pdb-panels');
     this.register();
+    this.setup_target( $parent );
 
     this.panels       = [];
     this.active_panel = null;
@@ -676,14 +641,13 @@ Plack.Debugger.UI.Panels.prototype.register = function () {
 }
 
 Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
-    var panel = new Plack.Debugger.UI.Panels.Panel( this.$element );
+    var panel = new Plack.Debugger.UI.Panels.Panel( this.$element, this );
     panel.trigger( 'plack-debugger.ui.panels.panel:update', data );
     this.panels.push( panel );
     return panel;
 }
 
-Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
-    e.stopPropagation();
+Plack.Debugger.UI.Panels.prototype._open_panel = function ( index ) {
     if ( this.active_panel ) {
         // close the last active panel ...
         this.active_panel.trigger( 'plack-debugger.ui._:hide' );
@@ -696,8 +660,7 @@ Plack.Debugger.UI.Panels.prototype._open_panel = function ( e, index ) {
     this.active_panel.trigger( 'plack-debugger.ui._:show' );
 }
 
-Plack.Debugger.UI.Panels.prototype._close_panel = function ( e, index ) {
-    e.stopPropagation();
+Plack.Debugger.UI.Panels.prototype._close_panel = function ( index ) {
     this.trigger( 'plack-debugger.ui._:hide' );
     if ( this.active_panel ) {
         this.active_panel.trigger( 'plack-debugger.ui._:hide' );    
@@ -709,8 +672,8 @@ Plack.Debugger.UI.Panels.prototype._close_panel = function ( e, index ) {
 
 // ------------------------------------------------------------------
 
-Plack.Debugger.UI.Panels.Panel = function ( $parent ) {
-    this.$element = $parent.append(
+Plack.Debugger.UI.Panels.Panel = function ( $jQuery, $parent ) {
+    this.$element = $jQuery.append(
         '<div class="pdb-panel">'
             + '<div class="pdb-header">'
                 + '<div class="pdb-close-button">&#9746;</div>'
@@ -728,15 +691,18 @@ Plack.Debugger.UI.Panels.Panel = function ( $parent ) {
 
     this._metadata = {};
     this.register();
+    this.setup_target( $parent );
 }
 
 Plack.Debugger.UI.Panels.Panel.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
     // fire events
-    this.$element.find('.pdb-header .pdb-close-button').click( 
-        this.trigger.bind( this, 'plack-debugger.ui.panels:close', this.$element.index() ) 
-    );
+    var self = this;
+    this.$element.find('.pdb-header .pdb-close-button').click(function ( e ) {
+        e.stopPropagation();
+        self.trigger( 'plack-debugger.ui.panels:close', $(this).index(), { bubble : true } ) 
+    });
 
     // register for events we handle
     this.on( 'plack-debugger.ui.panels.panel:update', this._update.bind( this ) );
@@ -753,8 +719,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.is_tracking_subrequests = function () {
     return this._metadata.track_subrequests ? true : false
 }
 
-Plack.Debugger.UI.Panels.Panel.prototype._update = function ( e, data ) {
-    e.stopPropagation();
+Plack.Debugger.UI.Panels.Panel.prototype._update = function ( data ) {
 
     if ( data.title ) {
         this.$element.find('.pdb-header .pdb-title').html( data.title );
@@ -874,6 +839,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     // some specialities ...
     ordered_key_value_pairs : {
         'formatter' : function (data) {
+            //console.log( data );
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an Array");
             if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an even length Array");
             var out = '<table class="pdb-key-value-pairs">';

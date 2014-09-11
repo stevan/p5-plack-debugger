@@ -127,13 +127,13 @@ builder {
                             <script type="text/javascript">
                                 $(document).ready(function () {
                                     $("#ajax-test").click(function () {
-                                        $.getJSON("/api").then(function (data) {
+                                        $.get("/api", function (data) {
                                             console.log(data);
                                         });
                                     });
 
                                     $("#ajax-test-2").click(function () {
-                                        $.getJSON("/api/v2").then(function (data) {
+                                        $.get("/api/v2", function (data) {
                                             console.log(data);
                                         });
                                     });
