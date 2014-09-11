@@ -874,6 +874,30 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             return out + '</table>'; 
         }
     },
+    multiple_data_table : {
+        'formatter' : function (data) {
+            if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'multiple_data_table' expected an Array");
+            var out = '';
+            for ( var i = 0; i < data.length; i += 2 ) {
+                out += '<h1>' + data[i] + '</h1>';
+                out += this.simple_data_table.formatter.apply( this, [ data[ i + 1 ] ] );
+                out += '<br/>'; 
+            }
+            return out;
+        }
+    },
+    multiple_data_table_w_headers : {
+        'formatter' : function (data) {
+            if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'multiple_data_table' expected an Array");
+            var out = '';
+            for ( var i = 0; i < data.length; i += 2 ) {
+                out += '<h1>' + data[i] + '</h1>';
+                out += this.simple_data_table_w_headers.formatter.apply( this, [ data[ i + 1 ] ] );
+                out += '<br/>'; 
+            }
+            return out;
+        }
+    },
     ordered_key_value_pairs : {
         'formatter' : function (data) {
             //console.log( data );

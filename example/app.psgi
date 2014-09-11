@@ -100,7 +100,35 @@ my $debugger = Plack::Debugger->new(
                     map { [ 0 .. 5 ] } 0 .. 10 
                 ]); 
             }
-        )    
+        ),
+        Plack::Debugger::Panel->new(
+            title     => 'Multiple Data Table Test',
+            formatter => 'multiple_data_table',
+            after     => sub { 
+                my ($self, $env) = @_;
+                $self->set_result([
+                    'Test Header (1)' => [ map { [ 0 .. 5 ] } 0 .. 10 ],
+                    'Test Header (2)' => [ map { [ 0 .. 3 ] } 0 .. 10  ]
+                ]); 
+            }
+        ),
+        Plack::Debugger::Panel->new(
+            title     => 'Multiple Data Table w/headers Test',
+            formatter => 'multiple_data_table_w_headers',
+            after     => sub { 
+                my ($self, $env) = @_;
+                $self->set_result([ 
+                    'Test Header (1)' => [ 
+                        [ 'Zero', 'One', 'Two', 'Three', 'Four', 'Five'], 
+                        map { [ 0 .. 5 ] } 0 .. 10 
+                    ],
+                    'Test Header (2)' => [ 
+                        [ 'Zero', 'One', 'Two', 'Three'], 
+                        map { [ 0 .. 3 ] } 0 .. 10 
+                    ]
+                ]); 
+            }
+        )   
     ]
 );
 

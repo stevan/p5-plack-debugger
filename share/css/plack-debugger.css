@@ -237,6 +237,11 @@
     padding-top    : 80px;
 }
 
+#plack-debugger .pdb-panels .pdb-panel .pdb-content h1 {
+    padding   : 5px;
+    font-size : 1.5em;
+}
+
 #plack-debugger .pdb-panels .pdb-panel .pdb-content table {
     margin : 0px;
     border : 1px solid #666666;
