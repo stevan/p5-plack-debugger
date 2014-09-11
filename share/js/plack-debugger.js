@@ -837,6 +837,20 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
         },
     },
     // some specialities ...
+    simple_data_table : {
+        'formatter' : function (data) {
+            if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'simple_data_table' expected an Array");
+            var out = '<table>';
+            for ( var i = 0; i < data.length; i++ ) {
+                out += '<tr>';
+                for ( var j = 0; j < data[i].length; j++ ) {
+                    out += '<td>' + data[i][j] + '</td>';
+                }
+                out += '</tr>';
+            }
+            return out + '</table>'; 
+        }
+    },
     ordered_key_value_pairs : {
         'formatter' : function (data) {
             //console.log( data );

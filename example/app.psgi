@@ -81,6 +81,14 @@ my $debugger = Plack::Debugger->new(
                     </script>
                 }); 
             }
+        ),
+        Plack::Debugger::Panel->new(
+            title     => 'Data Table Test',
+            formatter => 'simple_data_table',
+            after     => sub { 
+                my ($self, $env) = @_;
+                $self->set_result([ map { [ 0 .. 5 ] } 0 .. 10 ]); 
+            }
         )    
     ]
 );
