@@ -89,6 +89,17 @@ my $debugger = Plack::Debugger->new(
                 my ($self, $env) = @_;
                 $self->set_result([ map { [ 0 .. 5 ] } 0 .. 10 ]); 
             }
+        ),  
+        Plack::Debugger::Panel->new(
+            title     => 'Data Table w/headers Test',
+            formatter => 'simple_data_table_w_headers',
+            after     => sub { 
+                my ($self, $env) = @_;
+                $self->set_result([ 
+                    [ 'Zero', 'One', 'Two', 'Three', 'Four', 'Five'], 
+                    map { [ 0 .. 5 ] } 0 .. 10 
+                ]); 
+            }
         )    
     ]
 );

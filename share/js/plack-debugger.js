@@ -840,7 +840,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     simple_data_table : {
         'formatter' : function (data) {
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'simple_data_table' expected an Array");
-            var out = '<table>';
+            var out = '<table class="pdb-data-table">';
             for ( var i = 0; i < data.length; i++ ) {
                 out += '<tr>';
                 for ( var j = 0; j < data[i].length; j++ ) {
@@ -848,6 +848,29 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 }
                 out += '</tr>';
             }
+            return out + '</table>'; 
+        }
+    },
+    simple_data_table_w_headers : {
+        'formatter' : function (data) {
+            if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'simple_data_table' expected an Array");
+            var out = '<table class="pdb-data-table">';
+                out += '<thead>';
+                    out += '<tr>';
+                    for ( var j = 0; j < data[0].length; j++ ) {
+                        out += '<th>' + data[0][j] + '</th>';
+                    }
+                    out += '</tr>';
+                out += '</thead>';
+                out += '<tbody>';
+                for ( var i = 1; i < data.length; i++ ) {
+                    out += '<tr>';
+                    for ( var j = 0; j < data[i].length; j++ ) {
+                        out += '<td>' + data[i][j] + '</td>';
+                    }
+                    out += '</tr>';
+                }
+                out += '</tbody>';
             return out + '</table>'; 
         }
     },

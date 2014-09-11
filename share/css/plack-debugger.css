@@ -351,6 +351,33 @@
 
 }
 
+#plack-debugger table.pdb-data-table {
+    margin : 0px;
+    border : 5px solid #555555 !important;
+}
+
+#plack-debugger table.pdb-data-table > thead > tr > th {
+    font-weight : bold;
+    color       : #ffffff;
+    background  : #666666;
+    padding     : 3px;
+    text-align  : center;
+}
+
+#plack-debugger table.pdb-data-table td {
+    
+}
+
+#plack-debugger table.pdb-item-list {
+    margin : 0px;
+    border : 5px solid #555555 !important;
+}
+
+#plack-debugger table.pdb-item-list td.pdb-item {
+
+}
+
+
 #plack-debugger ul.pdb-ulist {
     list-style-type: none;
 }
