@@ -80,6 +80,11 @@
     text-align     : left;
 }
 
+#plack-debugger code,
+#plack-debugger pre {
+    font-family : monospace;
+}
+
 /* Collapsed Toolbar */
 
 #plack-debugger .pdb-collapsed {
