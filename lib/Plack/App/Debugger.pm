@@ -49,12 +49,13 @@ sub static_asset_dir { (shift)->{'static_asset_dir'} } # the directory that the 
 sub make_injector_middleware {
     my $self      = shift;
     my $middlware = Plack::Util::load_class('Plack::Middleware::Debugger::Injector');
+    my $js_url    = File::Spec::Unix->canonpath(join "" => $self->base_url, $self->static_url, $self->js_init_url);
     my $content   = sub {
         my $env = shift;
         die "Unable to locate the debugger request-uid, cannot inject the debugger application"
             unless exists $env->{'plack.debugger.request_uid'};
         sprintf '<script id="plack-debugger-js-init" type="text/javascript" src="%s#%s"></script>' => ( 
-            File::Spec::Unix->canonpath(join "" => $self->base_url, $self->static_url, $self->js_init_url), 
+            $js_url, 
             $env->{'plack.debugger.request_uid'} 
         );
     };
