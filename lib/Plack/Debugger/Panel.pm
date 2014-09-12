@@ -145,8 +145,19 @@ sub set_result {
 
 sub reset {
     my $self = shift;
-    undef $self->{'_stash'};
-    undef $self->{'_result'};
+    foreach my $slot ( qw[ _stash _result ]) {
+        if ( my $data = $self->{ $slot } ) {
+            if ( ref $data ) {
+                if ( ref $data eq 'ARRAY' ) {
+                    @$data = ();
+                }
+                elsif ( ref $data eq 'HASH' ) {
+                    %$data = ();
+                }
+            }
+            undef $self->{ $slot };
+        }
+    }
     $self->{'_is_enabled'} = 1;
     $self->{'_notifications'}->{ $_ } = 0 foreach @{ NOTIFICATION_LEVELS() };
 }
