@@ -13,7 +13,7 @@ sub new {
 
     $args{'title'} ||= 'Perl Config';
 
-    $args{'before'} = sub { (shift)->set_result( \%Config ) };
+    $args{'before'} = sub { (shift)->set_result( { %Config } ) };
 
     $class->SUPER::new( \%args );
 }
