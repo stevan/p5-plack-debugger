@@ -27,6 +27,12 @@ sub debugger { (shift)->{'debugger'} } # a reference to the Plack::Debugger
 sub call {
     my ($self, $env) = @_;
 
+    # NOTE:
+    # we needed to weaken the $env 
+    # reference here since we are 
+    # stuffing it into at least two 
+    # closures here and it was leaking,
+    # so be careful with this.
     weaken( $env );
 
     $self->debugger->initialize_request( $env );
