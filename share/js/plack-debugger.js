@@ -877,6 +877,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     multiple_data_table : {
         'formatter' : function (data) {
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'multiple_data_table' expected an Array");
+            if ( data.length      == 2     ) throw new Error("[Bad Formatter Args] 'multiple_data_table' expected an Array w/ length of 2");
             var out = '';
             for ( var i = 0; i < data.length; i += 2 ) {
                 out += '<h1>' + data[i] + '</h1>';
@@ -888,7 +889,8 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     },
     multiple_data_table_w_headers : {
         'formatter' : function (data) {
-            if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'multiple_data_table' expected an Array");
+            if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'multiple_data_table_w_headers' expected an Array");
+            if ( data.length      == 2     ) throw new Error("[Bad Formatter Args] 'multiple_data_table_w_headers' expected an Array w/ length of 2");
             var out = '';
             for ( var i = 0; i < data.length; i += 2 ) {
                 out += '<h1>' + data[i] + '</h1>';
