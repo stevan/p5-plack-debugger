@@ -137,6 +137,7 @@ sub handle_unknown_content_type {
 sub call {
     my ($self, $env) = @_;
 
+    Scalar::Util::weaken( $self );
     $self->response_cb(
         $self->app->( $env ), 
         sub { 

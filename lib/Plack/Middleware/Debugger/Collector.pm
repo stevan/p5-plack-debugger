@@ -27,6 +27,9 @@ sub debugger { (shift)->{'debugger'} } # a reference to the Plack::Debugger
 sub call {
     my ($self, $env) = @_;
 
+    Scalar::Util::weaken( $self );
+    Scalar::Util::weaken( $env );
+
     $self->debugger->initialize_request( $env );
     $self->debugger->run_before_phase( $env );
 
