@@ -29,6 +29,9 @@ sub new {
         unless blessed $args{'debugger'} 
             && $args{'debugger'}->isa('Plack::Debugger');
 
+    die "Could not locate the static asssets needed for the Plack::Debugger at (" . $args{'static_asset_dir'} . ")"
+        unless -d $args{'static_asset_dir'};
+
     # ... private data 
     $args{'_static_app'} = Plack::App::File->new( root => $args{'static_asset_dir'} )->to_app;
     $args{'_JSON'}       = JSON::XS->new->utf8->pretty;
