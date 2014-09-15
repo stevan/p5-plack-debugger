@@ -6,7 +6,6 @@ use warnings;
 use Try::Tiny;
 use Scalar::Util qw[ blessed ];
 
-use JSON::XS;
 use File::ShareDir;
 use File::Spec::Unix ();
 
@@ -34,7 +33,7 @@ sub new {
 
     # ... private data 
     $args{'_static_app'} = Plack::App::File->new( root => $args{'static_asset_dir'} )->to_app;
-    $args{'_JSON'}       = JSON::XS->new->utf8->pretty;
+    $args{'_serializer'} = $args{'debugger'}->storage->serializer;
 
     $class->SUPER::new( %args );
 }
@@ -147,7 +146,7 @@ sub _create_error_response {
 
 sub _create_JSON_response {
     my ($self, $status, $data) = @_;
-    my $json = $self->{'_JSON'}->encode( $data );
+    my $json = $self->{'_serializer'}->( $data );
     return [ $status, [ 'Content-Type' => 'application/json', 'Content-Length' => length $json ], [ $json ] ]
 }
 
