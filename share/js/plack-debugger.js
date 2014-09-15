@@ -804,12 +804,15 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( data ) {
 // formatters for the Panel content
 
 Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
+    // no formatter at all 
+    pass_through : { 'formatter' : function (data) { return data } },
     // basic formatter ...
     generic_data_formatter : {
         'formatter' : function (data) {
             if (!data) return "undef";
             switch ( data.constructor ) {
                 case String:
+                    return data.replace(/>/g, "&gt;").replace(/</g, "&lt;")
                 case Number:
                     return data;
                 case Array:
@@ -844,7 +847,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             for ( var i = 0; i < data.length; i++ ) {
                 out += '<tr>';
                 for ( var j = 0; j < data[i].length; j++ ) {
-                    out += '<td>' + data[i][j] + '</td>';
+                    out += '<td>' + ((data[i][j].constructor == String) ? data[i][j].replace(/>/g, "&gt;").replace(/</g, "&lt;") : data[i][j]) + '</td>';
                 }
                 out += '</tr>';
             }
@@ -866,7 +869,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 for ( var i = 1; i < data.length; i++ ) {
                     out += '<tr>';
                     for ( var j = 0; j < data[i].length; j++ ) {
-                        out += '<td>' + data[i][j] + '</td>';
+                        out += '<td>' + ((data[i][j].constructor == String) ? data[i][j].replace(/>/g, "&gt;").replace(/</g, "&lt;") : data[i][j]) + '</td>';
                     }
                     out += '</tr>';
                 }
@@ -965,7 +968,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 if (!d) return "undef";
                 switch ( d.constructor ) {
                     case String:
-                        return '"' + d + '"';
+                        return '"' + d.replace(/>/g, "&gt;").replace(/</g, "&lt;") + '"';
                     case Number:
                         return d;
                     case Array:

@@ -57,8 +57,9 @@ my $debugger = Plack::Debugger->new(
         Plack::Debugger::Panel::Memory->new,
         Plack::Debugger::Panel::Warnings->new,
         Plack::Debugger::Panel->new(
-            title => 'HTML Result Passthrough',
-            after => sub { 
+            title     => 'HTML Result Passthrough',
+            formatter => 'pass_through',
+            after     => sub { 
                 my ($self, $env) = @_;
                 $self->set_result(q{
                     <script>
