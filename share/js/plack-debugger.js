@@ -847,7 +847,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             for ( var i = 0; i < data.length; i++ ) {
                 out += '<tr>';
                 for ( var j = 0; j < data[i].length; j++ ) {
-                    out += '<td>' + ((data[i][j].constructor == String) ? data[i][j].replace(/>/g, "&gt;").replace(/</g, "&lt;") : data[i][j]) + '</td>';
+                    out += '<td>' + data[i][j] + '</td>';
                 }
                 out += '</tr>';
             }
@@ -869,7 +869,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 for ( var i = 1; i < data.length; i++ ) {
                     out += '<tr>';
                     for ( var j = 0; j < data[i].length; j++ ) {
-                        out += '<td>' + ((data[i][j].constructor == String) ? data[i][j].replace(/>/g, "&gt;").replace(/</g, "&lt;") : data[i][j]) + '</td>';
+                        out += '<td>' + data[i][j] + '</td>';
                     }
                     out += '</tr>';
                 }
