@@ -141,6 +141,8 @@ builder {
  
     mount $DEBUGGER_URL => $debugger_application->to_app;
 
+    mount '/redirect' => sub { [ 302, [ Location => '/' ], [] ] },
+
     mount '/' => builder {
         enable $debugger_application->make_injector_middleware;
         enable $debugger->make_collector_middleware;

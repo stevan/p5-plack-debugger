@@ -39,6 +39,9 @@ sub has_no_body {
     my ($self, $env, $resp) = @_;
     # if no body, there is nothing to inject ...
     Plack::Util::status_with_no_entity_body( $resp->[0] )
+        ||
+    # if we have a redirect, then there is nothing to inject ...
+    ($resp->[0] < 400 && $resp->[0] >= 300 && Plack::Util::header_exists( $resp->[1], 'Location' ))
 }
 
 sub has_parent_request_uid {
