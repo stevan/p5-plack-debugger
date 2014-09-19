@@ -97,6 +97,28 @@ Plack.Debugger.prototype._handle_AJAX_complete = function (e, xhr, options) {
 
 /* =============================================================== */
 
+// NOTE:
+// as we find more and more silly jQUery back-compat issues
+// this is the namespace to put the shims we need to fix 
+// them and move on with our lives.
+// - SL
+
+Plack.Debugger.Util = {
+    index_of : function ( $element, array ) {
+        var idx      = -1; 
+        var $siblings = $element.parent().children();
+        for ( var i = 0; i < $siblings.length; i++ ) {
+            if ( $siblings[i] === $element[0] ) {
+                idx = i;
+                break;
+            }
+        }
+        return idx;
+    }
+};
+
+/* =============================================================== */
+
 Plack.Debugger.Abstract = {};
 
 // ----------------------------------------------------------------
@@ -546,7 +568,7 @@ Plack.Debugger.UI.Toolbar.Button = function ( $jQuery, $parent ) {
             + '<div class="pdb-title"></div>'
             + '<div class="pdb-subtitle"></div>'
         + '</div>'
-    ).find('.pdb-button').last();
+    ).find('.pdb-button').slice(-1);
 
     this._metadata = {};
     this.register();
@@ -560,7 +582,9 @@ Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
     var self = this;
     this.$element.click(function ( e ) { 
         e.stopPropagation();
-        self.trigger( 'plack-debugger.ui.panels:open', $(this).index(), { bubble : true } ) 
+        var idx = Plack.Debugger.Util.index_of( $(this) );
+        if ( idx == -1 ) throw new Error("Could not find the index of this element");
+        self.trigger( 'plack-debugger.ui.panels:open', idx, { bubble : true } ) 
     });
 
     // register for events we handle
@@ -687,7 +711,7 @@ Plack.Debugger.UI.Panels.Panel = function ( $jQuery, $parent ) {
             + '</div>'
             + '<div class="pdb-content"></div>'
         + '</div>'
-    ).find('.pdb-panel').last();
+    ).find('.pdb-panel').slice(-1);
 
     this._metadata = {};
     this.register();
@@ -701,7 +725,9 @@ Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
     var self = this;
     this.$element.find('.pdb-header .pdb-close-button').click(function ( e ) {
         e.stopPropagation();
-        self.trigger( 'plack-debugger.ui.panels:close', $(this).index(), { bubble : true } ) 
+        var idx = Plack.Debugger.Util.index_of( $(this) );
+        if ( idx == -1 ) throw new Error("Could not find the index of this element");
+        self.trigger( 'plack-debugger.ui.panels:close', idx, { bubble : true } ) 
     });
 
     // register for events we handle
@@ -960,7 +986,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             });
 
             $e.find('.pdb-key').click(function () {
-                $(this).siblings('.pdb-value').find('.pdb-ulist').first().toggle();
+                $(this).siblings('.pdb-value').find('.pdb-ulist').eq(0).toggle();
             });
         },
         'formatter' : function ( data ) {
