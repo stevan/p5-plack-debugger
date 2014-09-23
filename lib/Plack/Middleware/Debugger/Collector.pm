@@ -35,33 +35,67 @@ sub call {
     # so be careful with this.
     weaken( $env );
 
-    $self->debugger->initialize_request( $env );
-    $self->debugger->run_before_phase( $env );
+    $self->setup_before_phase( $env );
+    $self->setup_cleanup_phase( $env );
 
+    $self->response_cb(
+        $self->app->( $env ), 
+        $self->setup_after_phase( $env )
+    );
+}
+
+# init/finalize
+
+sub initialize_request { (shift)->debugger->initialize_request( @_ ) }
+sub finalize_request   { (shift)->debugger->finalize_request( @_ )   }
+
+# before ...
+
+sub setup_before_phase {
+    my ($self, $env) = @_;
+    $self->initialize_request( $env );
+    $self->run_before_phase( $env );
+}
+
+sub run_before_phase { (shift)->debugger->run_before_phase( @_ ) }
+
+# after ...
+
+sub setup_after_phase {
+    my ($self, $env) = @_;
+    return sub { 
+        my $resp = shift;
+        $self->run_after_phase( $env, $resp );
+    };
+}
+
+sub run_after_phase { 
+    my ($self, $env, $resp) = @_;
+    $self->debugger->run_after_phase( $env, $resp );
+    # if cleanup is not supported 
+    # then it is best to finalize
+    # at this point
+    $self->finalize_request( $env )
+        unless $env->{'psgix.cleanup'};
+}
+
+# cleanup ...
+
+sub setup_cleanup_phase {
+    my ($self, $env) = @_;
     # if we have cleanup capabilities
     # then we should register that phase
     # and a callback to finalize the 
     # request as well
     push @{ $env->{'psgix.cleanup.handlers'} } => (
-        sub { 
-            $self->debugger->run_cleanup_phase( $env );
-            $self->debugger->finalize_request( $env );
-        },
+        sub { $self->run_cleanup_phase( $env ) },
     ) if $env->{'psgix.cleanup'};
+}
 
-    $self->response_cb(
-        $self->app->( $env ), 
-        sub { 
-            my $resp = shift;
-            $self->debugger->run_after_phase( $env, $resp );
-
-            # if cleanup is not supported 
-            # then it is best to finalize
-            # at this point
-            $self->debugger->finalize_request( $env )
-                unless $env->{'psgix.cleanup'};
-        }
-    );
+sub run_cleanup_phase {
+    my ($self, $env) = @_;
+    $self->debugger->run_cleanup_phase( $env );
+    $self->finalize_request( $env );
 }
 
 1;
