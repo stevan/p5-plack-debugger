@@ -6,6 +6,9 @@ use warnings;
 use Scalar::Util qw[ blessed ];
 use POSIX        qw[ strftime ];
 
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
 use Plack::Request;
 use Plack::Debugger::Panel;
 

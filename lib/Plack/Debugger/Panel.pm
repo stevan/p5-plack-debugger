@@ -5,6 +5,9 @@ use warnings;
 
 use Scalar::Util qw[ refaddr ];
 
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
 use constant NOTIFICATION_LEVELS => [ qw[ error warning success ] ];
 
 sub new {

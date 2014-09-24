@@ -3,6 +3,9 @@ package Plack::Debugger::Panel::Memory;
 use strict;
 use warnings;
 
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
 use parent 'Plack::Debugger::Panel';
 
 sub new {

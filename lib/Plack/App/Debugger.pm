@@ -11,6 +11,9 @@ use File::Spec::Unix ();
 
 use Plack::App::File;
 
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
 use parent 'Plack::Component';
 
 use constant DEFAULT_BASE_URL => '/debugger';

@@ -3,6 +3,9 @@ package Plack::Debugger::Storage;
 use strict;
 use warnings;
 
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
 use File::Spec;
 
 sub new {

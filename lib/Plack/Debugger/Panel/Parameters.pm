@@ -5,6 +5,9 @@ use warnings;
 
 use Plack::Request;
 
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
 use parent 'Plack::Debugger::Panel';
 
 sub new {

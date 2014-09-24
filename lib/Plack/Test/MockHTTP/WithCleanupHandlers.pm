@@ -5,6 +5,9 @@ use warnings;
 
 use Try::Tiny;
 
+our $VERSION   = '0.01';
+our $AUTHORITY = 'cpan:STEVAN';
+
 use parent 'Plack::Test::MockHTTP';
  
 sub request {
