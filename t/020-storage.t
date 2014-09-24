@@ -33,6 +33,8 @@ my $DATA_DIR = dir('./t/tmp/');
     ok($storage->serializer,   '... got a serializer as expected');
     ok($storage->deserializer, '... got a deserializer as expected');
 
+    ok(!-e $DATA_DIR->file('1234.json'), '... the data file does not exist (yet)');
+
     my $request_uid     = '1234';
     my $request_results = { testing => [ 1, 2, 3, 4 ] };
 
@@ -43,6 +45,8 @@ my $DATA_DIR = dir('./t/tmp/');
         undef, 
         '... stored request results successfully'
     );
+
+    ok(-e $DATA_DIR->file('1234.json'), '... the data file does exist now');
 
     my $stored_results;
     is(
