@@ -61,3 +61,19 @@ sub request {
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Plack::Test::Debugger::MockHTTP::WithCleanupHandlers - HTTP Mocking to support psgix.cleanup
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut
+
+

@@ -18,3 +18,18 @@ our @EXPORT = qw[ test_psgi ];
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Plack::Test::Debugger - A subclass of Plack::Test suitable for testing the debugger
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut
+

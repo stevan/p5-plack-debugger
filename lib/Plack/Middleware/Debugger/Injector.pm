@@ -182,3 +182,21 @@ sub call {
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Plack::Middleware::Debugger::Injector - Middleware for injecting the debugger into a web request
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut
+
+
+
+

@@ -165,3 +165,20 @@ sub reset {
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Plack::Debugger::Panel - Base class for the debugger panels
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut
+
+
+

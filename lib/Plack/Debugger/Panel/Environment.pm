@@ -24,3 +24,17 @@ sub new {
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Plack::Debugger::Panel::Environment - Debug panel for inspecting $ENV
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut

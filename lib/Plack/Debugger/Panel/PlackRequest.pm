@@ -49,3 +49,18 @@ sub new {
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Plack::Debugger::Panel::PlackRequest - Debug panel for inspecting the Plack $env
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut
+

@@ -187,3 +187,21 @@ sub load_all_subrequest_results {
 1;
 
 __END__
+
+
+=pod
+
+=head1 NAME
+
+Plack::Debugger - Debugging tool for Plack web applications
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut
+
+
+

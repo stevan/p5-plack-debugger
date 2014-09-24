@@ -162,3 +162,20 @@ sub _create_link {
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Plack::App::Debugger - The web service backend for the debugger
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut
+
+
+
