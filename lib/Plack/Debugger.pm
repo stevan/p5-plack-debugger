@@ -176,7 +176,12 @@ sub load_subrequest_results {
 
 sub load_all_subrequest_results {
     my ($self, $request_uid) = @_;
-    $self->storage->load_all_subrequest_results( $request_uid );
+    return [
+        sort { 
+            # order them sequentially ...
+            $b->{'timestamp'} <=> $a->{'timestamp'}
+        } @{ $self->storage->load_all_subrequest_results( $request_uid ) }
+    ];
 }
 
 1;
