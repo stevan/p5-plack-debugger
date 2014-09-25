@@ -166,6 +166,9 @@ sub call {
                 return $self->handle_json_content_type( $env, $resp );
             }
             # now be less specific
+            elsif ( $content_type =~ m!^(?:application/)! ) {
+                return $self->pass_through_content_type( $env, $resp );
+            }
             elsif ( $content_type =~ m!^(?:text/)! ) {
                 return $self->pass_through_content_type( $env, $resp );
             }
@@ -190,9 +193,113 @@ __END__
 
 =head1 NAME
 
-Plack::Middleware::Debugger::Injector - Middleware for injecting the debugger into a web request
+Plack::Middleware::Debugger::Injector - Middleware for injecting content into a web request
 
 =head1 DESCRIPTION
+
+This middleware is used to inject some content into the body of a 
+given web request right before the closing C<<body>> tag. Its 
+primary use-case is to inject a C<<script>> tag which will then 
+create the L<Plack::Debugger> debugging UI. 
+
+Since this middleware will run on every request it has to decide
+if injection is sensible or not. It does this by checking the
+HTTP status code, some HTTP headers and finally the content-type
+of the response. 
+
+=head2 Status codes
+
+Some status codes are indicators that the body of the request will 
+either be empty or can safely be ignored, we detect this using the 
+L<Plack::Util::status_with_no_entity_body> function and then we do 
+not inject the content.
+
+Pages with redirect status codes (3XX) may have bodies, but in 
+many cases these are ignored by the browser in favor of just 
+performing the redirection. If we find a response with a 3XX 
+status B<and> a corresponding C<Location> header, we will not try 
+to inject into the body. 
+
+=head2 Headers
+
+Currently we only handle one header, C<X-Plack-Debugger-Parent-Request-UID>, 
+which is a custom header that we add into AJAX requests that are 
+associated with a given request. If we see this header, we will 
+not bother injecting content since we can assume that it is meant
+to be debugged via the parent page.
+
+=head2 Content-Types
+
+The following content-types are handled in the following order:
+
+=over 4
+
+=item No content-type specified
+
+This currently throws an exception, perhaps this is not sensible, but
+then again not specifying your content-type is not very sensible either.
+
+=item C<text/html>, C<application/xhtml>, etc.
+
+Given a content-type that looks like HTML, this will PSGI responses in 
+the most sensible way possible.
+
+If we detect a PSGI response which is an array of strings, we will process 
+it (in reverse) looking for the closing C<<body>> tag and inject the 
+content accordingly. 
+
+All other PSGI responses will be handled as if they are streaming 
+responses, in which case we simple return a C<CODE> reference that will
+process the stream and if a closing C<<body>> tag is found, inject 
+accordingly.
+
+=item C<application/json>
+
+While we have a specific handler for this content-type, we do not do 
+anything but just let it pass through. This is handled in this way 
+specifically in case someone decides it is sensible to inject some 
+kind of data into a JSON response. 
+
+It is left as an exercise to the reader to decide if this is sensible 
+or not.
+
+=item C<application/*>, C<text/*>, C<image/*>
+
+These three content types are fairly common, but there is no obvious way
+to inject content into them. So instead of guessing, we just let them pass 
+through without modification. If there is any need to inject data into 
+these response types it is simply a matter of overriding the 
+C<pass_through_content_type> method in a subclass and then doing your own 
+content-type dispatching.
+
+=item Unknown content-type
+
+If none of these content-types match then we throw an exception and complain
+that we are not use what to actually do. Again, as with the lack of a 
+content-type, this may not be sensible, if you disagree please give me a 
+use case.
+
+=back
+
+=head1 TODO
+
+The following is a list of things this module might want to try and 
+do, but which currently are not important to me. If one or more of these
+features would be useful to you, please feel free to send patches.
+
+=over 4
+
+=item Detect User-Agents where injection is not sensible.
+
+Injecting Javascript code into pages being viewed by browsers like Lynx 
+or tools like c<cURL> or C<wget> would not make any sense.
+
+=item Better handling of more HTTP status codes
+
+Currently we handle only a couple HTTP status codes, expanding this 
+might make sense, then again, maybe it wont, hard to tell.
+
+=back
 
 =head1 ACKNOWLEDGEMENTS
 

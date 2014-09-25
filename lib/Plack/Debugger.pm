@@ -198,7 +198,138 @@ __END__
 
 Plack::Debugger - Debugging tool for Plack web applications
 
+=head1 SYNOPSIS
+
+  use Plack::Builder;
+  
+  use JSON;
+  
+  use Plack::Debugger;
+  use Plack::Debugger::Storage;
+  
+  use Plack::App::Debugger;
+  
+  use Plack::Debugger::Panel::Timer;
+  use Plack::Debugger::Panel::AJAX;
+  use Plack::Debugger::Panel::Memory;
+  use Plack::Debugger::Panel::Warnings;
+  
+  my $debugger = Plack::Debugger->new(
+      storage => Plack::Debugger::Storage->new(
+          data_dir     => '/tmp/debugger_panel',
+          serializer   => sub { encode_json( shift ) },
+          deserializer => sub { decode_json( shift ) },
+          filename_fmt => "%s.json",
+      ),
+      panels => [
+          Plack::Debugger::Panel::Timer->new,     
+          Plack::Debugger::Panel::AJAX->new, 
+          Plack::Debugger::Panel::Memory->new,
+          Plack::Debugger::Panel::Warnings->new   
+      ]
+  );
+  
+  my $debugger_app = Plack::App::Debugger->new( debugger => $debugger );
+  
+  builder {
+      mount $debugger_app->base_url => $debugger_app->to_app;
+  
+      mount '/' => builder {
+          enable $debugger_app->make_injector_middleware;
+          enable $debugger->make_collector_middleware;
+          $app;
+      }
+  };
+
 =head1 DESCRIPTION
+
+This is a rethinking of the excellent L<Plack::Middleware::Debug> 
+module, with the specific intent of providing more flexibility and 
+supporting capture of debugging data in as many places as possible.
+Specifically we support the following features not I<easily> handled
+in the previous module. 
+
+=head2 Capturing AJAX requests
+
+This module is able to capture AJAX requests that are performed 
+on a page and then associate them with the current request. 
+
+B<NOTE:> This is currently done using jQuery's global AJAX handlers
+which means it will only capture AJAX requests made through jQuery.
+This is not a limitation, it is possible to capture non-jQuery AJAX
+requests too, but given the ubiquity of jQuery it is unlikely that 
+will be needed. That said, patches are most welcome :) 
+
+=head2 Capturing post-request data
+
+Not all debugging data may be available during the normal lifecycle
+of a request, some data is better captured and collated in some kind
+of post-request cleanup phase. This module allows you to specify that
+code can be run in the C<psgix.cleanup> phase, which - if your server
+supports it - will happens after the request has been sent to the 
+browser. 
+
+=head2 Just capturing data
+
+This module has been designed such that it is possible to just 
+collect debugging data and not use the provided javascript UI. 
+This will allow data to be collected and viewed using some other 
+type of mechanism, for instance it would be possible to collect 
+data on a web browsing session and view it in aggregate instead 
+of just per-page. 
+
+B<NOTE:> While we currently do not provide any code to do this, 
+the possibilities are pretty endless if you think about it.
+
+=head1 ARCHITECTURE
+
+=head2 L<Plack::Debugger>
+
+This is the main component of this system, just about every other 
+component either uses information from this component or uses the
+actual component itself as a delegate. 
+
+The primary responsibilities of this component are to coordinate
+the capture of data using the L<Plack::Debugger::Panel> objects 
+and to store this data using L<Plack::Debugger::Storage>. 
+
+=head2 L<Plack::Middleware::Debugger::Collector>
+
+This is a simple middleware that wraps your L<Plack> application and
+runs all the phases of the L<Plack::Debugger> to collect data upon 
+the current request. 
+
+=head2 L<Plack::Middleware::Debugger::Injector>
+
+This is middleware that attempts to sensibly inject a single HTML 
+C<<script>> tag into the body of a web request. It analyzes a 
+combination of the HTTP status code, headers and the response 
+content-type to try and make a sensible decision about injecting 
+or not. See the documentation in the module for a more detailed 
+description.
+
+=head2 L<Plack::App::Debugger>
+
+This is a small web-service which has two basic responsibilities. The
+first is to supply the necessary javascript and CSS for the debugging
+UI. The second is to provide a small REST style JSON web-service that
+serves up the debugging data. 
+
+=head2 C<Plack.Debugger>
+
+This is the javascript end of this application which powers the UI 
+for the debugger. This component uses jQuery heavily and so if there 
+is not already a jQuery instance loaded it will pull in its own copy
+and use that. 
+
+=head3 Note about jQuery usage
+
+This module ships with the latest jQuery (2.1.1), but the javascript
+code used by the Plack.Debugger object has been tested against very 
+old versions of jQuery (~1.2.6) to insure that it still functions. 
+If you need to support older versions of jQuery, patches are welcome, 
+but the author reserves the right to draw a line as to how old is 
+too old. 
 
 =head1 ACKNOWLEDGEMENTS
 
