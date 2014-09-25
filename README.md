@@ -2,7 +2,7 @@
 
 # Plack::Debugger
 
-## Debugging tool for Plack web applications
+## A new debugging tool for Plack web applications
 
 This is a rethinking of the excellent Plack::Middleware::Debug
 module, with the specific intent of providing more flexibility and 
@@ -15,11 +15,11 @@ in the previous module.
 This module is able to capture AJAX requests that are performed 
 on a page and then associate them with the current request. 
 
-**NOTE:** This is currently done using jQuery's global AJAX handlers
-which means it will only capture AJAX requests made through jQuery.
-This is not a limitation, it is possible to capture non-jQuery AJAX
-requests too, but given the ubiquity of jQuery it is unlikely that 
-will be needed. That said, patches are most welcome :) 
+> **NOTE:** This is currently done using jQuery's global AJAX handlers
+> which means it will only capture AJAX requests made through jQuery.
+> This is not a limitation, it is possible to capture non-jQuery AJAX
+> requests too, but given the ubiquity of jQuery it is unlikely that 
+> will be needed. That said, patches are most welcome :) 
 
 ### Capturing post-request data
 
@@ -39,12 +39,12 @@ type of mechanism, for instance it would be possible to collect
 data on a web browsing session and view it in aggregate instead 
 of just per-page. 
 
-**NOTE:** While we currently do not provide any code to do this, 
-the possibilities are pretty endless if you think about it.
+> **NOTE:** While we currently do not provide any code to do this, 
+> the possibilities are pretty endless if you think about it.
 
 ## Example Usage
 
-```
+```perl
 use Plack::Builder;
 
 use JSON;
