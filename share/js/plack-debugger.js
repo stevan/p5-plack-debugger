@@ -701,7 +701,8 @@ Plack.Debugger.UI.Panels.prototype._open_panel = function ( index ) {
 Plack.Debugger.UI.Panels.prototype._close_panel = function ( index ) {
     this.trigger( 'plack-debugger.ui._:hide' );
     if ( this.active_panel ) {
-        this.active_panel.trigger( 'plack-debugger.ui._:hide' );    
+        this.active_panel.trigger( 'plack-debugger.ui._:hide' ); 
+        this.active_panel = null;   
     }
     else {
         throw new Error('This should never happen!');
