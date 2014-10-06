@@ -167,10 +167,14 @@ Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options
     }
     else {
         // otherwise we know we can handle this event, so do it ...
-        var cbs = this._callbacks[ e ];     
-        for ( var i = 0; i < cbs.length; i++ ) {
-            cbs[i].apply( this, [ data ] )
-        }
+        var self = this;
+        // and do it asynchronously ... 
+        setTimeout(function () {
+            var cbs = self._callbacks[ e ];     
+            for ( var i = 0; i < cbs.length; i++ ) {
+                cbs[i].apply( self, [ data ] )
+            }
+        }, 0);
     }
 }
 
