@@ -88,11 +88,16 @@ Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
 
 Plack.Debugger.prototype._handle_AJAX_send = function (e, xhr, options) {
     xhr.setRequestHeader( 'X-Plack-Debugger-Parent-Request-UID', Plack.Debugger.$CONFIG.current_request_uid );
-    this.resource.trigger('plack-debugger._:ajax-send');
+    // don't send events if they are not tracking them
+    if ( this.resource.is_AJAX_tracking_enabled() ) {
+        this.resource.trigger('plack-debugger._:ajax-send');
+    }
 }
 
 Plack.Debugger.prototype._handle_AJAX_complete = function (e, xhr, options) {
-    this.resource.trigger('plack-debugger._:ajax-complete');
+    if ( this.resource.is_AJAX_tracking_enabled() ) {
+        this.resource.trigger('plack-debugger._:ajax-complete');
+    }
 }
 
 /* =============================================================== */
@@ -146,13 +151,17 @@ Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options
     //console.trace();
     if ( this._callbacks      == undefined ) return; // handle no events (yet)
     if ( this._callbacks[ e ] == undefined ) {
-        //console.log(["... attempting to bubble " + e + " on ", this, data ]);
+        //console.log(["... attempting to bubble " + e + " on ", this, data, options ]);
         // not handling this specific event, so ...
         if ( options != undefined && options.bubble ) {
             // ... attempt to bubble the event to the target 
             this.locate_target().trigger( e, data, options );
         }
         else {
+            //for (var x in this._callbacks) {
+            //    console.log( "... we have " + x + " in callback set" );
+            //}
+            //console.trace();
             throw new Error("[Unhandled event] This object does not handle event(" + e + ") ... and bubbling was not requested");
         }
     }
@@ -951,6 +960,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
             this.nested_data.callback.apply( this, [ $e, data ] );
         },
         'formatter' : function ( data ) {
+            if (!data) return '';
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'ordered_nested_data' expected an Array");
             if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] 'ordered_nested_data' expected an even length Array");
             var out = '<ul class="pdb-ulist">';
