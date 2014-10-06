@@ -376,7 +376,8 @@ Plack.Debugger.UI.prototype.register = function () {
     var self = this;
     this.$element.parent().keyup(function ( e ) {
         if (e.keyCode == 27) { 
-            e.stopPropagation();
+            // do not do this, it is rude!
+            //e.stopPropagation(); 
             (self.toolbar.is_hidden()) 
                 ? self._open_toolbar()
                 : self._close_toolbar();
