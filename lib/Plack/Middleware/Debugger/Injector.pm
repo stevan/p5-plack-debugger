@@ -38,13 +38,19 @@ sub get_content_to_insert {
 
 # predicates to check
 
-sub has_no_body {
+sub should_ignore_status {
     my ($self, $env, $resp) = @_;
-    # if no body, there is nothing to inject ...
-    Plack::Util::status_with_no_entity_body( $resp->[0] )
+    # if it is in the 1xx - Informational range, we can ignore it 
+    ($resp->[0] < 200)
         ||
-    # if we have a redirect, then there is nothing to inject ...
-    ($resp->[0] < 400 && $resp->[0] >= 300 && Plack::Util::header_exists( $resp->[1], 'Location' ))
+    # within the 2xx - Success range we have the 204 No Content, which we should ignore 
+    ($resp->[0] == 204)
+        ||
+    # within the 3xx - Redirection range we are unlikely to have a body, so we can ignore it
+    ($resp->[0] < 400 && $resp->[0] >= 300)
+        ||
+    # pretty much ignore anything within the 4xx & 5xx Error ranges ...
+    ($resp->[0] >= 400)
 }
 
 sub has_parent_request_uid {
@@ -149,7 +155,7 @@ sub call {
             my $resp = shift;
 
             # check some basic predicates 
-            return $resp if $self->has_no_body( $env, $resp );
+            return $resp if $self->should_ignore_status( $env, $resp );
             return $resp if $self->has_parent_request_uid( $env, $resp );
 
             # now check the content-type headers ...
