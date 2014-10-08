@@ -521,7 +521,7 @@ Plack.Debugger.UI.Collapsed.prototype.register = function () {
     // fire events
     var self = this;
     this.$element.find('.pdb-open-button').click(function (e) {
-        e.stopPropagation()
+        e.stopPropagation();
         self.trigger( 'plack-debugger.ui.toolbar:open', null, { bubble : true } );
     });
 
