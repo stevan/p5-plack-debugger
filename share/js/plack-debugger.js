@@ -263,7 +263,7 @@ Plack.Debugger.Resource.prototype._load_request = function () {
         'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + Plack.Debugger.$CONFIG.current_request_uid),
         'global'   : false,
         'success'  : this._update_target_on_request_success.bind( this ),
-        'error'    : this._update_target_on_error.bind( this ),
+        'error'    : this._update_target_on_error.bind( this )
     });
 }
 
@@ -278,7 +278,7 @@ Plack.Debugger.Resource.prototype._load_subrequests = function () {
         ),
         'global'   : false,
         'success'  : this._update_target_on_subrequest_success.bind( this ),
-        'error'    : this._update_target_on_error.bind( this ),
+        'error'    : this._update_target_on_error.bind( this )
     });
 }
 
@@ -878,7 +878,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 default:
                     throw new Error("[Bad Formatter Args] 'generic_data_formatter' expected type { String,Number,Array,Object }");
             }
-        },
+        }
     },
     // some specialities ...
     simple_data_table : {
