@@ -1,9 +1,10 @@
 /* =============================================================== */
 
-if ( Plack == undefined ) var Plack = {};
+var Plack;
+if (Plack === undefined) Plack = {};
 
 Plack.Debugger = function () {
-    if ( Plack.Debugger.$CONFIG == undefined ) {
+    if ( Plack.Debugger.$CONFIG === undefined ) {
         Plack.Debugger.$CONFIG = this._init_config();
     }
 }
@@ -149,8 +150,8 @@ Plack.Debugger.Abstract.Eventful.prototype.locate_target = function ( $parent, $
 Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options ) { 
     //console.log([ "... triggering " + e + " on ", this, data, options ]);
     //console.trace();
-    if ( this._callbacks      == undefined ) return; // handle no events (yet)
-    if ( this._callbacks[ e ] == undefined ) {
+    if ( this._callbacks      === undefined ) return; // handle no events (yet)
+    if ( this._callbacks[ e ] === undefined ) {
         //console.log(["... attempting to bubble " + e + " on ", this, data, options ]);
         // not handling this specific event, so ...
         if ( options != undefined && options.bubble ) {
@@ -181,8 +182,8 @@ Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options
 // register events ...
 
 Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) { 
-    if ( this._callbacks      == undefined ) this._callbacks = {};
-    if ( this._callbacks[ e ] == undefined ) this._callbacks[ e ] = [];
+    if ( this._callbacks      === undefined ) this._callbacks = {};
+    if ( this._callbacks[ e ] === undefined ) this._callbacks[ e ] = [];
     //console.log([ "registering event: " + e + " on ", this, cb ]);
     this._callbacks[ e ].push( cb );
     if ( this._callbacks[ e ].length > 1 ) {
@@ -193,8 +194,8 @@ Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) {
 // unregister events ...
 
 Plack.Debugger.Abstract.Eventful.prototype.off = function ( e ) { 
-    if ( this._callbacks      == undefined ) return;
-    if ( this._callbacks[ e ] == undefined ) return;
+    if ( this._callbacks      === undefined ) return;
+    if ( this._callbacks[ e ] === undefined ) return;
     //console.log(["un-registering event: " + e + " on ", this ]);
     delete this._callbacks[ e ];
 }
