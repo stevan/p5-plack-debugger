@@ -215,16 +215,10 @@ of the response.
 
 =head2 Status codes
 
-Some status codes are indicators that the body of the request will 
-either be empty or can safely be ignored, we detect this using the 
-L<Plack::Util::status_with_no_entity_body> function and then we do 
-not inject the content.
-
-Pages with redirect status codes (3XX) may have bodies, but in 
-many cases these are ignored by the browser in favor of just 
-performing the redirection. If we find a response with a 3XX 
-status B<and> a corresponding C<Location> header, we will not try 
-to inject into the body. 
+Most status codes not in the C<2xx> range are ignored since they
+rarely contain a body that is of consequence to this module. The 
+only exception being C<204 - No Content>, which will not have a 
+body and so is ignored. 
 
 =head2 Headers
 
