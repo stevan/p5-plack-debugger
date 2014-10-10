@@ -8,13 +8,14 @@ use Scalar::Util qw[ refaddr ];
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use constant DEBUGGER_PHASES     => [ qw[ before after cleanup  ] ];
 use constant NOTIFICATION_LEVELS => [ qw[ error warning success ] ];
 
 sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    foreach my $phase (qw( before after cleanup )) {
+    foreach my $phase ( @{ DEBUGGER_PHASES } ) {
         if (defined $args{$phase}) {
             die "The '$phase' argument must be a CODE ref, not a " . ref($args{$phase}) . " ref"
                 unless ref $args{$phase} 
