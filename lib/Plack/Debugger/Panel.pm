@@ -15,7 +15,7 @@ sub new {
     my $class = shift;
     my %args  = @_ == 1 && ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    foreach my $phase ( @{ DEBUGGER_PHASES } ) {
+    foreach my $phase ( @{ DEBUGGER_PHASES() } ) {
         if (defined $args{$phase}) {
             die "The '$phase' argument must be a CODE ref, not a " . ref($args{$phase}) . " ref"
                 unless ref $args{$phase} 
