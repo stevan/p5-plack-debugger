@@ -11,7 +11,7 @@ use Plack::Builder;
 use Plack::Test::Debugger;   
 use HTTP::Request::Common qw[ GET ];
 use Path::Class           qw[ dir ];
-use Data::Dumper          qw[ Dumper ];
+use JSON::XS;
 
 BEGIN {
     use_ok('Plack::Debugger');
@@ -20,6 +20,7 @@ BEGIN {
     use_ok('Plack::App::Debugger');    
 }
 
+my $JSON     = JSON::XS->new->utf8->pretty;
 my $DATA_DIR = dir('./t/tmp/');
 
 # cleanup tmp dir
@@ -29,9 +30,8 @@ my $debugger_application = Plack::App::Debugger->new(
     debugger => Plack::Debugger->new(
         storage => Plack::Debugger::Storage->new(
             data_dir     => $DATA_DIR,
-            # quick and dirty serializer, DO NOT USE THIS FOR REAL!
-            serializer   => sub { Dumper( shift ) },
-            deserializer => sub { eval( shift )   },
+            serializer   => sub { $JSON->encode( shift ) },
+            deserializer => sub { $JSON->decode( shift ) },
         )
     )
 );

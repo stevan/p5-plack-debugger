@@ -22,7 +22,6 @@ BEGIN {
 
 # testing stuff ...
 my @UUIDS;
-my $FILE_ID  = 0;
 my $JSON     = JSON::XS->new->utf8->pretty;
 
 # data the Debugger needs
