@@ -86,21 +86,21 @@ sub initialize_request {
 sub run_before_phase {
     my ($self, $env) = @_;
     foreach my $panel ( @{ $self->panels } ) {
-        $panel->before->( $panel, $env ) if $panel->has_before;
+        $panel->run_before_phase( $env );
     }
 }
 
 sub run_after_phase {
     my ($self, $env, $resp) = @_;
     foreach my $panel ( @{ $self->panels } ) {
-        $panel->after->( $panel, $env, $resp ) if $panel->has_after;
+        $panel->run_after_phase( $env, $resp );
     }
 }
 
 sub run_cleanup_phase {
     my ($self, $env) = @_;
     foreach my $panel ( @{ $self->panels } ) {
-        $panel->cleanup->( $panel, $env ) if $panel->has_cleanup;
+        $panel->run_cleanup_phase( $env );
     }
 }
 

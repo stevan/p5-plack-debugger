@@ -3,6 +3,7 @@ package Plack::Debugger::Panel;
 use strict;
 use warnings;
 
+use Try::Tiny;
 use Scalar::Util qw[ refaddr ];
 
 our $VERSION   = '0.01';
@@ -34,6 +35,7 @@ sub new {
         _stash         => undef,
         _is_enabled    => 1,
         _notifications => { map { $_ => 0 } @{ NOTIFICATION_LEVELS() } },
+        _has_phase_run => { map { $_ => 0 } @{ DEBUGGER_PHASES()     } },
         _metadata      => { 
             (exists $args{'formatter'} 
                 ? (formatter => $args{'formatter'}) 
@@ -57,6 +59,62 @@ sub set_subtitle {
     my $self     = shift;
     my $subtitle = shift // die "Must supply a value for subtitle";
     $self->{'subtitle'} = $subtitle;
+}
+
+# phase runners 
+
+sub run_before_phase {
+    my ($self, $env) = @_;
+    try {
+        $self->before->( $self, $env ) if $self->has_before;
+        $self->mark_phase_as_run('before');
+    } catch {
+        warn 'Got an exception in during the `begin` phase of `' . $self->title . '` Plack::Debugger panel: ' . $_;
+    };
+}
+
+sub run_after_phase {
+    my ($self, $env, $resp) = @_;
+    # Do NOT run the after if the corresponding before has not run ...
+    return unless $self->have_phases_run('before');
+    try {
+        $self->after->( $self, $env, $resp ) if $self->has_after;
+        $self->mark_phase_as_run('after');
+    } catch {
+        warn 'Got an exception in during the `after` phase of `' . $self->title . '` Plack::Debugger panel: ' . $_;
+    };
+}
+
+sub run_cleanup_phase {
+    my ($self, $env) = @_;
+    # Do NOT run the cleanup if the corresponding before & after have not run ...
+    return unless $self->have_phases_run('before', 'after');
+    try {
+        $self->cleanup->( $self, $env ) if $self->has_cleanup;
+        $self->mark_phase_as_run('cleanup');
+    } catch {
+        warn 'Got an exception in during the `cleanup` phase of `' . $self->title . '` Plack::Debugger panel: ' . $_;
+    };
+}
+
+# phase runner tracking
+
+sub have_phases_run {
+    my ($self, @phases) = @_;
+    die 'You need to pass `@phases` argument' if scalar @phases == 0;
+    (scalar @phases) == (scalar grep { $self->{'_has_phase_run'}->{ $_ } } @phases);
+}
+
+sub mark_phase_as_run {
+    my ($self, $phase) = @_;
+    die 'You need to pass a `phase` argument' unless $phase;
+    $self->{'_has_phase_run'}->{ $phase } = 1;
+}
+
+sub mark_phase_as_not_run {
+    my ($self, $phase) = @_;
+    die 'You need to pass a `phase` argument' unless $phase;
+    $self->{'_has_phase_run'}->{ $phase } = 0;
 }
 
 # phase handlers
@@ -141,7 +199,7 @@ sub get_result { (shift)->{'_result'} }
 sub set_result {
     my $self    = shift;
     my $results = shift || die 'You must provide a results';
-    
+
     $self->{'_result'} = $results;
 }
 
@@ -164,6 +222,7 @@ sub reset {
     }
     $self->{'_is_enabled'} = 1;
     $self->{'_notifications'}->{ $_ } = 0 foreach @{ NOTIFICATION_LEVELS() };
+    $self->{'_has_phase_run'}->{ $_ } = 0 foreach @{ DEBUGGER_PHASES()     };
 }
 
 1;
