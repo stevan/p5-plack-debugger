@@ -120,6 +120,14 @@ Plack.Debugger.Util = {
             }
         }
         return idx;
+    },
+    object_keys : function ( o ) {
+        if ( Object.keys ) return Object.keys( o );
+        var keys = [];
+        for ( var p in o ) {
+            if ( o.hasOwnProperty( p ) ) keys.push( p );
+        }
+        return keys;
     }
 };
 
@@ -867,6 +875,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                     }
                     return out + '</table>'; 
                 case Object:
+                    if ( Plack.Debugger.Util.object_keys( data ).length == 0 ) return '';
                     var out = '<table class="pdb-key-value-pairs">';
                     for (key in data) {
                         out += '<tr>' 
