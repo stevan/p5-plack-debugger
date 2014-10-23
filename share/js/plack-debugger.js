@@ -329,7 +329,7 @@ Plack.Debugger.Resource.prototype._update_target_on_request_error = function ( x
     // don't just throw an error right away, 
     // do a few retries first, the server 
     // might just be a little slow.
-    if ( this._request_error_count <= Plack.Debugger.MAX_RETRIES ) {
+    if ( this._request_error_count < Plack.Debugger.MAX_RETRIES ) {
         this._request_error_count++;
         var self = this;
         setTimeout(function () {
@@ -355,7 +355,7 @@ Plack.Debugger.Resource.prototype._update_target_on_subrequest_error = function 
     // don't just throw an error right away, 
     // do a few retries first, the server 
     // might just be a little slow.
-    if ( this._subrequest_error_count <= Plack.Debugger.MAX_RETRIES ) {
+    if ( this._subrequest_error_count < Plack.Debugger.MAX_RETRIES ) {
         this._subrequest_error_count++;
         var self = this;
         setTimeout(function () {
