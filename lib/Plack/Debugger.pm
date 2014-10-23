@@ -12,6 +12,8 @@ our $AUTHORITY = 'cpan:STEVAN';
 use Plack::Request;
 use Plack::Debugger::Panel;
 
+use constant DEBUG => $ENV{'PLACK_DEBUGGER_DEBUG'} ? 1 : 0;
+
 our $UID_SEQ = 0;
 
 sub new {

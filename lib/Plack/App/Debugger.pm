@@ -95,6 +95,10 @@ sub call {
         return $self->_create_error_response( 400 => 'Bad Request' )
             unless $request_uid;
 
+        # some debugging help to make sure the UI is robust
+        return $self->_create_error_response( 500 => 'I AM THE CHAOS MONKEY, HEAR ME ROAR!!!!!' ) 
+            if Plack::Debugger::DEBUG && (rand() <= 0.70);
+
         # if no subrequests requested, get the base request
         if ( !$get_subrequests ) {
             return $self->_create_JSON_response(
