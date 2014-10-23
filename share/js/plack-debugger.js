@@ -866,6 +866,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 case Number:
                     return data;
                 case Array:
+                    if ( data.length == 0 ) return '';
                     var out = '<table class="pdb-item-list">';
                     for (var i = 0; i < data.length; i++) {
                         out += '<tr>'                   
@@ -893,6 +894,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     // some specialities ...
     simple_data_table : {
         'formatter' : function (data) {
+            if ( data.length == 0 ) return '';
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'simple_data_table' expected an Array");
             var out = '<table class="pdb-data-table">';
             for ( var i = 0; i < data.length; i++ ) {
@@ -907,6 +909,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     },
     simple_data_table_w_headers : {
         'formatter' : function (data) {
+            if ( data.length == 0 ) return '';
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'simple_data_table' expected an Array");
             var out = '<table class="pdb-data-table">';
                 out += '<thead>';
@@ -930,6 +933,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     },
     multiple_data_table : {
         'formatter' : function (data) {
+            if ( data.length == 0 ) return '';
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'multiple_data_table' expected an Array");
             if ( data.length      == 2     ) throw new Error("[Bad Formatter Args] 'multiple_data_table' expected an Array w/ length of 2");
             var out = '';
@@ -943,6 +947,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     },
     multiple_data_table_w_headers : {
         'formatter' : function (data) {
+            if ( data.length == 0 ) return '';
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'multiple_data_table_w_headers' expected an Array");
             if ( data.length      == 2     ) throw new Error("[Bad Formatter Args] 'multiple_data_table_w_headers' expected an Array w/ length of 2");
             var out = '';
@@ -957,6 +962,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     ordered_key_value_pairs : {
         'formatter' : function (data) {
             //console.log( data );
+            if ( data.length == 0 ) return '';
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an Array");
             if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] 'ordered_key_value_pairs' expected an even length Array");
             var out = '<table class="pdb-key-value-pairs">';
@@ -977,6 +983,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
         },
         'formatter' : function ( data ) {
             if (!data) return '';
+            if ( data.length == 0 ) return '';
             if ( data.constructor != Array ) throw new Error("[Bad Formatter Args] 'ordered_nested_data' expected an Array");
             if ( ( data.length % 2 ) != 0  ) throw new Error("[Bad Formatter Args] 'ordered_nested_data' expected an even length Array");
             var out = '<ul class="pdb-ulist">';
@@ -1024,14 +1031,14 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                     case Number:
                         return d;
                     case Array:
-                        if (d.length == 0) return '';
+                        if ( d.length == 0 ) return '';
                         var out = '<ul class="pdb-ulist">';
                         for ( var i = 0; i < d.length; i += 1 ) {
                             out += '<li class="pdb-ulist-item">' + visitor( d[i] ) + '</li>';
                         }
                         return out + '</ul>';
                     case Object: 
-                        if (Object.keys(d).length == 0) return '';
+                        if ( Plack.Debugger.Util.object_keys(d).length == 0 ) return '';
                         var out = '<ul class="pdb-ulist">';
                         for ( var k in d ) {
                             out += '<li class="pdb-ulist-item"><span class="pdb-key">' + k + '</span><span class="pdb-value">' + visitor( d[k] ) + '</span></li>';
