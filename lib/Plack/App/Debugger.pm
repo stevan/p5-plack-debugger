@@ -8,6 +8,7 @@ use Scalar::Util qw[ blessed ];
 
 use File::ShareDir;
 use File::Spec::Unix ();
+use JSON::XS         ();
 
 use Plack::App::File;
 
@@ -17,6 +18,8 @@ our $AUTHORITY = 'cpan:STEVAN';
 use parent 'Plack::Component';
 
 use constant DEFAULT_BASE_URL => '/debugger';
+
+our $JSON = JSON::XS->new->utf8;
 
 sub new {
     my $class = shift;
@@ -36,7 +39,7 @@ sub new {
 
     # ... private data 
     $args{'_static_app'} = Plack::App::File->new( root => $args{'static_asset_dir'} )->to_app;
-    $args{'_serializer'} = $args{'debugger'}->storage->serializer;
+    $args{'_JSON'}       = $JSON;
 
     $class->SUPER::new( %args );
 }
@@ -153,7 +156,7 @@ sub _create_error_response {
 
 sub _create_JSON_response {
     my ($self, $status, $data) = @_;
-    my $json = $self->{'_serializer'}->( $data );
+    my $json = $self->{'_JSON'}->encode( $data );
     return [ $status, [ 'Content-Type' => 'application/json', 'Content-Length' => length $json ], [ $json ] ]
 }
 
