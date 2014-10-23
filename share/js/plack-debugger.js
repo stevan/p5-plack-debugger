@@ -70,17 +70,17 @@ Plack.Debugger.prototype._ready = function ( $jQuery, callback ) {
     // there is a need, it could be done.
     // - SL
 
-    $jQuery(document).ajaxSend( this._handle_AJAX_send.bind( this ) );
-    $jQuery(document).ajaxComplete( this._handle_AJAX_complete.bind( this ) );
+    $jQuery(document).ajaxSend( Plack.Debugger.Util.bind_function( this._handle_AJAX_send, this ) );
+    $jQuery(document).ajaxComplete( Plack.Debugger.Util.bind_function( this._handle_AJAX_complete, this ) );
 
     // NOTE:
     // Not sure I see the need for any of this yet, but 
     // we can just leave them here for now.
     // - SL
-    // $jQuery(document).ajaxError( this._handle_AJAX_error.bind( this ) );    
-    // $jQuery(document).ajaxSuccess( this._handle_AJAX_success.bind( this ) );
-    // $jQuery(document).ajaxStart( this._handle_AJAX_start.bind( this ) );
-    // $jQuery(document).ajaxStop( this._handle_AJAX_stop.bind( this ) );
+    // $jQuery(document).ajaxError( Plack.Debugger.Util.bind_function( this._handle_AJAX_error, this ) );    
+    // $jQuery(document).ajaxSuccess( Plack.Debugger.Util.bind_function( this._handle_AJAX_success, this ) );
+    // $jQuery(document).ajaxStart( Plack.Debugger.Util.bind_function( this._handle_AJAX_start, this ) );
+    // $jQuery(document).ajaxStop( Plack.Debugger.Util.bind_function( this._handle_AJAX_stop, this ) );
 
     this.resource.trigger( 'plack-debugger.resource.request:load' );
 
@@ -133,6 +133,16 @@ Plack.Debugger.Util = {
             if ( o.hasOwnProperty( p ) ) keys.push( p );
         }
         return keys;
+    },
+    // NOTE:
+    // This polyfill should be sufficient for 
+    // our usage (which is very specialized), 
+    // but just in case we run into issues, 
+    // use this:
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+    bind_function : function ( f, o ) {
+        if ( Function.prototype.bind ) return Function.prototype.bind.apply( f, [ o ] );
+        return function () { return f.apply( o, Array.prototype.slice.call(arguments) ) };
     }
 };
 
@@ -255,14 +265,14 @@ Plack.Debugger.Resource.prototype = new Plack.Debugger.Abstract.Eventful();
 
 Plack.Debugger.Resource.prototype.register = function () {
     // register for events we handle 
-    this.on( 'plack-debugger.resource.request:load',     this._load_request.bind( this ) );
-    this.on( 'plack-debugger.resource.subrequests:load', this._load_subrequests.bind( this ) );
+    this.on( 'plack-debugger.resource.request:load',     Plack.Debugger.Util.bind_function( this._load_request, this ) );
+    this.on( 'plack-debugger.resource.subrequests:load', Plack.Debugger.Util.bind_function( this._load_subrequests, this ) );
 
     // also catch these global events
     // ... see NOTE below by the registered 
     //     event handler functions themselves
-    this.on( 'plack-debugger._:ajax-tracking-enable',  this._enable_AJAX_tracking.bind( this ) );
-    this.on( 'plack-debugger._:ajax-tracking-disable', this._disable_AJAX_tracking.bind( this ) );    
+    this.on( 'plack-debugger._:ajax-tracking-enable',  Plack.Debugger.Util.bind_function( this._enable_AJAX_tracking, this ) );
+    this.on( 'plack-debugger._:ajax-tracking-disable', Plack.Debugger.Util.bind_function( this._disable_AJAX_tracking, this ) );    
 }
 
 Plack.Debugger.Resource.prototype.is_AJAX_tracking_enabled = function () {
@@ -276,8 +286,8 @@ Plack.Debugger.Resource.prototype._load_request = function () {
         'dataType' : 'json',
         'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + Plack.Debugger.$CONFIG.current_request_uid),
         'global'   : false,
-        'success'  : this._update_target_on_request_success.bind( this ),
-        'error'    : this._update_target_on_error.bind( this )
+        'success'  : Plack.Debugger.Util.bind_function( this._update_target_on_request_success, this ),
+        'error'    : Plack.Debugger.Util.bind_function( this._update_target_on_error, this )
     });
 }
 
@@ -291,8 +301,8 @@ Plack.Debugger.Resource.prototype._load_subrequests = function () {
             + '/subrequest'
         ),
         'global'   : false,
-        'success'  : this._update_target_on_subrequest_success.bind( this ),
-        'error'    : this._update_target_on_error.bind( this )
+        'success'  : Plack.Debugger.Util.bind_function( this._update_target_on_subrequest_success, this ),
+        'error'    : Plack.Debugger.Util.bind_function( this._update_target_on_error, this )
     });
 }
 
@@ -334,8 +344,8 @@ Plack.Debugger.Resource.prototype._update_target_on_error = function ( xhr, stat
 
 Plack.Debugger.Resource.prototype._enable_AJAX_tracking = function ( e ) {
     if ( !this._AJAX_tracking ) { // don't do silly things ...
-        this.on( 'plack-debugger._:ajax-send',     this._handle_ajax_send.bind( this ) );
-        this.on( 'plack-debugger._:ajax-complete', this._handle_ajax_complete.bind( this ) );        
+        this.on( 'plack-debugger._:ajax-send',     Plack.Debugger.Util.bind_function( this._handle_ajax_send, this ) );
+        this.on( 'plack-debugger._:ajax-complete', Plack.Debugger.Util.bind_function( this._handle_ajax_complete, this ) );        
         this._AJAX_tracking = true;  
     }  
 }
@@ -399,15 +409,15 @@ Plack.Debugger.UI.prototype.register = function () {
     });
 
     // register for events we handle 
-    this.on( 'plack-debugger.ui:load-request',     this._load_request.bind( this ) );
-    this.on( 'plack-debugger.ui:load-subrequests', this._load_subrequests.bind( this ) );
-    this.on( 'plack-debugger.ui:load-error',       this._load_data_error.bind( this ) );
+    this.on( 'plack-debugger.ui:load-request',     Plack.Debugger.Util.bind_function( this._load_request, this ) );
+    this.on( 'plack-debugger.ui:load-subrequests', Plack.Debugger.Util.bind_function( this._load_subrequests, this ) );
+    this.on( 'plack-debugger.ui:load-error',       Plack.Debugger.Util.bind_function( this._load_data_error, this ) );
 
-    this.on( 'plack-debugger.ui.toolbar:open',     this._open_toolbar.bind( this ) );
-    this.on( 'plack-debugger.ui.toolbar:close',    this._close_toolbar.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar:open',     Plack.Debugger.Util.bind_function( this._open_toolbar, this ) );
+    this.on( 'plack-debugger.ui.toolbar:close',    Plack.Debugger.Util.bind_function( this._close_toolbar, this ) );
 
-    this.on( 'plack-debugger.ui.panels:open',      this._open_panels.bind( this ) );
-    this.on( 'plack-debugger.ui.panels:close',     this._close_panels.bind( this ) );
+    this.on( 'plack-debugger.ui.panels:open',      Plack.Debugger.Util.bind_function( this._open_panels, this ) );
+    this.on( 'plack-debugger.ui.panels:close',     Plack.Debugger.Util.bind_function( this._close_panels, this ) );
 
     this.on( 'plack-debugger.ui._:hide', function () { throw new Error("You cannot hide() the Plack.Debugger.UI itself") } );
     this.on( 'plack-debugger.ui._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
@@ -540,8 +550,8 @@ Plack.Debugger.UI.Collapsed.prototype.register = function () {
     });
 
     // register for events we handle
-    this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
-    this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
+    this.on( 'plack-debugger.ui._:hide', Plack.Debugger.Util.bind_function( this.hide, this ) );
+    this.on( 'plack-debugger.ui._:show', Plack.Debugger.Util.bind_function( this.show, this ) );
 }
 
 /* =============================================================== */
@@ -572,8 +582,8 @@ Plack.Debugger.UI.Toolbar.prototype.register = function () {
     });
 
     // register for events we handle
-    this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
-    this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
+    this.on( 'plack-debugger.ui._:hide', Plack.Debugger.Util.bind_function( this.hide, this ) );
+    this.on( 'plack-debugger.ui._:show', Plack.Debugger.Util.bind_function( this.show, this ) );
 }
 
 Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
@@ -616,7 +626,7 @@ Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
     });
 
     // register for events we handle
-    this.on( 'plack-debugger.ui.toolbar.button:update', this._update.bind( this ) );
+    this.on( 'plack-debugger.ui.toolbar.button:update', Plack.Debugger.Util.bind_function( this._update, this ) );
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype.metadata = function ( key ) {
@@ -685,11 +695,11 @@ Plack.Debugger.UI.Panels.prototype = new Plack.Debugger.Abstract.UI();
 
 Plack.Debugger.UI.Panels.prototype.register = function () {
     // register for events we handle
-    this.on( 'plack-debugger.ui.panels.panel:open',  this._open_panel.bind( this )  );
-    this.on( 'plack-debugger.ui.panels.panel:close', this._close_panel.bind( this ) );
+    this.on( 'plack-debugger.ui.panels.panel:open',  Plack.Debugger.Util.bind_function( this._open_panel, this )  );
+    this.on( 'plack-debugger.ui.panels.panel:close', Plack.Debugger.Util.bind_function( this._close_panel, this ) );
 
-    this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
-    this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
+    this.on( 'plack-debugger.ui._:hide', Plack.Debugger.Util.bind_function( this.hide, this ) );
+    this.on( 'plack-debugger.ui._:show', Plack.Debugger.Util.bind_function( this.show, this ) );
 }
 
 Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
@@ -760,10 +770,10 @@ Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
     });
 
     // register for events we handle
-    this.on( 'plack-debugger.ui.panels.panel:update', this._update.bind( this ) );
+    this.on( 'plack-debugger.ui.panels.panel:update', Plack.Debugger.Util.bind_function( this._update, this ) );
 
-    this.on( 'plack-debugger.ui._:hide', this.hide.bind( this ) );
-    this.on( 'plack-debugger.ui._:show', this.show.bind( this ) );
+    this.on( 'plack-debugger.ui._:hide', Plack.Debugger.Util.bind_function( this.hide, this ) );
+    this.on( 'plack-debugger.ui._:show', Plack.Debugger.Util.bind_function( this.show, this ) );
 }
 
 Plack.Debugger.UI.Panels.Panel.prototype.metadata = function ( key ) {
