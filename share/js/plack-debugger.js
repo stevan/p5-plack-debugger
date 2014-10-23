@@ -104,7 +104,7 @@ Plack.Debugger.prototype._handle_AJAX_complete = function (e, xhr, options) {
 /* =============================================================== */
 
 // NOTE:
-// as we find more and more silly jQUery back-compat issues
+// as we find more and more silly jQuery back-compat issues
 // this is the namespace to put the shims we need to fix 
 // them and move on with our lives.
 // - SL
