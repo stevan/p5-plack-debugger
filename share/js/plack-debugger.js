@@ -121,6 +121,11 @@ Plack.Debugger.Util = {
         }
         return idx;
     },
+    // NOTE:
+    // This polyfill should be sufficient for 
+    // our usage (which is minimal), but just 
+    // in case we run into issues, use this:
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
     object_keys : function ( o ) {
         if ( Object.keys ) return Object.keys( o );
         var keys = [];
