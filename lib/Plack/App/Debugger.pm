@@ -19,7 +19,18 @@ use parent 'Plack::Component';
 
 use constant DEFAULT_BASE_URL => '/debugger';
 
-our $JSON = JSON::XS->new->utf8;
+# Be *extremely* lax about our JSON, this
+# might be overkill for simple cases, but 
+# for non-simple cases, it just makes sense.
+our $JSON = JSON::XS
+                ->new
+                ->utf8
+                #->pretty(1)
+                #->canonical(1)
+                ->allow_blessed(1)
+                ->convert_blessed(1)
+                ->allow_nonref(1)
+                ->allow_unknown(1);
 
 sub new {
     my $class = shift;
