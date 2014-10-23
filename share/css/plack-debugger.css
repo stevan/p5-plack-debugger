@@ -140,6 +140,14 @@
     color  : #ffffff;
 }
 
+#plack-debugger .pdb-toolbar .pdb-loading {
+    color       : #ffffff;
+    font-size   : 1.2em;
+    text-align  : center;
+    font-style  : oblique;
+    font-weight : normal !important;
+}
+
 #plack-debugger .pdb-toolbar .pdb-buttons .pdb-button {
     background    : #333333;
     border-bottom : 1px solid #ffffff;

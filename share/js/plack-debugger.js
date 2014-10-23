@@ -9,6 +9,9 @@ Plack.Debugger = function () {
     }
 }
 
+Plack.Debugger.MAX_RETRIES              = 5;
+Plack.Debugger.RETRY_BACKOFF_MULTIPLIER = 1000;
+
 Plack.Debugger.prototype._init_config = function () {
     var init_url = document.getElementById('plack-debugger-js-init').src;
 
@@ -257,6 +260,9 @@ Plack.Debugger.Resource = function ( $jQuery, $parent, $target ) {
     this._subrequest_count = 0;
     this._AJAX_tracking    = false;
 
+    this._request_error_count    = 0;
+    this._subrequest_error_count = 0;
+
     this.register();
     this.setup_target( $parent, $target );
 }
@@ -287,7 +293,7 @@ Plack.Debugger.Resource.prototype._load_request = function () {
         'url'      : (Plack.Debugger.$CONFIG.root_url + '/' + Plack.Debugger.$CONFIG.current_request_uid),
         'global'   : false,
         'success'  : Plack.Debugger.Util.bind_function( this._update_target_on_request_success, this ),
-        'error'    : Plack.Debugger.Util.bind_function( this._update_target_on_error, this )
+        'error'    : Plack.Debugger.Util.bind_function( this._update_target_on_request_error, this )
     });
 }
 
@@ -302,9 +308,11 @@ Plack.Debugger.Resource.prototype._load_subrequests = function () {
         ),
         'global'   : false,
         'success'  : Plack.Debugger.Util.bind_function( this._update_target_on_subrequest_success, this ),
-        'error'    : Plack.Debugger.Util.bind_function( this._update_target_on_error, this )
+        'error'    : Plack.Debugger.Util.bind_function( this._update_target_on_subrequest_error, this )
     });
 }
+
+// request ...
 
 Plack.Debugger.Resource.prototype._update_target_on_request_success = function ( response, status, xhr ) {
     this.trigger( 'plack-debugger.ui:load-request', response.data.results, { bubble : true } );
@@ -313,16 +321,51 @@ Plack.Debugger.Resource.prototype._update_target_on_request_success = function (
     // just start to ignore the event 
     this.off( 'plack-debugger.resource.request:load' );
 
-    this._request = response;
+    this._request             = response;
+    this._request_error_count = 0;
 }
+
+Plack.Debugger.Resource.prototype._update_target_on_request_error = function ( xhr, status, error ) {
+    // don't just throw an error right away, 
+    // do a few retries first, the server 
+    // might just be a little slow.
+    if ( this._request_error_count <= Plack.Debugger.MAX_RETRIES ) {
+        this._request_error_count++;
+        var self = this;
+        setTimeout(function () {
+            self._load_request();
+        }, (this._request_error_count * Plack.Debugger.RETRY_BACKOFF_MULTIPLIER));
+        this.trigger( 'plack-debugger.ui:load-request-error-retry', this._request_error_count, { bubble : true } );
+    }
+    else {
+        this.trigger( 'plack-debugger.ui:load-request-error', error, { bubble : true } );
+    }
+}
+
+// subrequest ...
 
 Plack.Debugger.Resource.prototype._update_target_on_subrequest_success = function ( response, status, xhr ) {
     this.trigger( 'plack-debugger.ui:load-subrequests', response.data, { bubble : true } );
-    this._subrequests = response;
+
+    this._subrequests            = response;
+    this._subrequest_error_count = 0
 }
 
-Plack.Debugger.Resource.prototype._update_target_on_error = function ( xhr, status, error ) {
-    this.trigger( 'plack-debugger.ui:load-error', error, { bubble : true } );
+Plack.Debugger.Resource.prototype._update_target_on_subrequest_error = function ( xhr, status, error ) {
+    // don't just throw an error right away, 
+    // do a few retries first, the server 
+    // might just be a little slow.
+    if ( this._subrequest_error_count <= Plack.Debugger.MAX_RETRIES ) {
+        this._subrequest_error_count++;
+        var self = this;
+        setTimeout(function () {
+            self._load_subrequests();
+        }, (this._subrequest_error_count * Plack.Debugger.RETRY_BACKOFF_MULTIPLIER));
+        this.trigger( 'plack-debugger.ui:load-subrequests-error-retry', this._subrequest_error_count, { bubble : true } );
+    }
+    else {
+        this.trigger( 'plack-debugger.ui:load-subrequests-error', error, { bubble : true } );
+    }
 }
 
 // NOTE:
@@ -409,19 +452,25 @@ Plack.Debugger.UI.prototype.register = function () {
     });
 
     // register for events we handle 
-    this.on( 'plack-debugger.ui:load-request',     Plack.Debugger.Util.bind_function( this._load_request, this ) );
-    this.on( 'plack-debugger.ui:load-subrequests', Plack.Debugger.Util.bind_function( this._load_subrequests, this ) );
-    this.on( 'plack-debugger.ui:load-error',       Plack.Debugger.Util.bind_function( this._load_data_error, this ) );
+    this.on( 'plack-debugger.ui:load-request',             Plack.Debugger.Util.bind_function( this._load_request,             this ) );
+    this.on( 'plack-debugger.ui:load-request-error',       Plack.Debugger.Util.bind_function( this._load_request_error,       this ) );
+    this.on( 'plack-debugger.ui:load-request-error-retry', Plack.Debugger.Util.bind_function( this._load_request_error_retry, this ) );
 
-    this.on( 'plack-debugger.ui.toolbar:open',     Plack.Debugger.Util.bind_function( this._open_toolbar, this ) );
-    this.on( 'plack-debugger.ui.toolbar:close',    Plack.Debugger.Util.bind_function( this._close_toolbar, this ) );
+    this.on( 'plack-debugger.ui:load-subrequests',             Plack.Debugger.Util.bind_function( this._load_subrequests,             this ) );
+    this.on( 'plack-debugger.ui:load-subrequests-error',       Plack.Debugger.Util.bind_function( this._load_subrequests_error,       this ) );
+    this.on( 'plack-debugger.ui:load-subrequests-error-retry', Plack.Debugger.Util.bind_function( this._load_subrequests_error_retry, this ) );
 
-    this.on( 'plack-debugger.ui.panels:open',      Plack.Debugger.Util.bind_function( this._open_panels, this ) );
-    this.on( 'plack-debugger.ui.panels:close',     Plack.Debugger.Util.bind_function( this._close_panels, this ) );
+    this.on( 'plack-debugger.ui.toolbar:open',  Plack.Debugger.Util.bind_function( this._open_toolbar,  this ) );
+    this.on( 'plack-debugger.ui.toolbar:close', Plack.Debugger.Util.bind_function( this._close_toolbar, this ) );
+
+    this.on( 'plack-debugger.ui.panels:open',   Plack.Debugger.Util.bind_function( this._open_panels,  this ) );
+    this.on( 'plack-debugger.ui.panels:close',  Plack.Debugger.Util.bind_function( this._close_panels, this ) );
 
     this.on( 'plack-debugger.ui._:hide', function () { throw new Error("You cannot hide() the Plack.Debugger.UI itself") } );
     this.on( 'plack-debugger.ui._:show', function () { throw new Error("You cannot show() the Plack.Debugger.UI itself") }  );
 }
+
+// requests ...
 
 Plack.Debugger.UI.prototype._load_request = function ( data ) {
     var has_warnings = false;
@@ -448,6 +497,8 @@ Plack.Debugger.UI.prototype._load_request = function ( data ) {
         }
     }
 
+    this.toolbar.trigger( 'plack-debugger.ui.toolbar:request-loaded' );
+
     if ( has_warnings && !has_errors ) {
         // if we have warnings, but no errors
         this.collapsed.trigger( 'plack-debugger.ui.collapsed:show-warnings' );
@@ -459,6 +510,16 @@ Plack.Debugger.UI.prototype._load_request = function ( data ) {
         this.toolbar.trigger( 'plack-debugger.ui.toolbar:show-errors' );
     }
 }
+
+Plack.Debugger.UI.prototype._load_request_error = function ( error ) {
+    alert("Sorry, we are unable to load the debugging data from the server, please check your server error log.\n\nError : '" + error + "'");
+}
+
+Plack.Debugger.UI.prototype._load_request_error_retry = function ( retry_count ) {
+    this.toolbar.trigger( 'plack-debugger.ui.toolbar:request-retry', retry_count );
+}
+
+// subrequests ...
 
 Plack.Debugger.UI.prototype._load_subrequests = function ( data ) {
 
@@ -524,17 +585,34 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( data ) {
     }
 
     $.each( this.toolbar.buttons, function (i, b) { 
-        if ( b.is_tracking_subrequests() ) b.trigger( 'plack-debugger.ui.toolbar.button:update', all ) 
+        if ( b.is_tracking_subrequests() ) {
+            b.trigger( 'plack-debugger.ui.toolbar.button:update', all );
+        } 
     });
 
     $.each( this.panels.panels, function (i, p) { 
-        if ( p.is_tracking_subrequests() ) p.trigger( 'plack-debugger.ui.panels.panel:update', all )
+        if ( p.is_tracking_subrequests() ) {
+            p.trigger( 'plack-debugger.ui.panels.panel:update', all );
+        }
     });    
 }
 
-Plack.Debugger.UI.prototype._load_data_error = function ( error ) {
-    alert("Sorry, we are unable to load the debugging data at the moment, please try again in a few moments.");
+Plack.Debugger.UI.prototype._load_subrequests_error = function ( error ) {
+    alert("Sorry, we are unable to load the AJAX debugging data from the server, please check your server error log.\n\nError : '" + error + "'");
 }
+
+Plack.Debugger.UI.prototype._load_subrequests_error_retry = function ( retry_count ) {
+    // NOTE:
+    // Leaving this here for now, will fix it 
+    // more when I have a plan for this.
+    // - SL
+    //this.toolbar.trigger( 'plack-debugger.ui.toolbar:subrequest-retry', retry_count );
+    if (console && console.log) {
+        console.log("failed to load subrequests, ... retrying again (" + retry_count + ")");
+    }
+}
+
+// toolbar ...
 
 Plack.Debugger.UI.prototype._open_toolbar = function () {
     if ( this.toolbar.is_hidden() ) {
@@ -616,6 +694,7 @@ Plack.Debugger.UI.Toolbar = function ( $jQuery, $parent ) {
             + '<div class="pdb-header">'
                 + '<div class="pdb-close-button">&#9776;</div>'
             + '</div>'
+            + '<div class="pdb-loading">Currently loading debug data.<br/>Please be patient.<br/><span></span></div>' 
             + '<div class="pdb-buttons"></div>'
         + '</div>'
     ).find('.pdb-toolbar');
@@ -639,8 +718,11 @@ Plack.Debugger.UI.Toolbar.prototype.register = function () {
     this.on( 'plack-debugger.ui._:hide', Plack.Debugger.Util.bind_function( this.hide, this ) );
     this.on( 'plack-debugger.ui._:show', Plack.Debugger.Util.bind_function( this.show, this ) );
 
-    this.on( 'plack-debugger.ui.toolbar:show-warnings', Plack.Debugger.Util.bind_function( this._show_warnings, this ) );
-    this.on( 'plack-debugger.ui.toolbar:show-errors',  Plack.Debugger.Util.bind_function( this._show_errors, this ) );
+    this.on( 'plack-debugger.ui.toolbar:show-warnings',  Plack.Debugger.Util.bind_function( this._show_warnings, this ) );
+    this.on( 'plack-debugger.ui.toolbar:show-errors',    Plack.Debugger.Util.bind_function( this._show_errors, this ) );
+
+    this.on( 'plack-debugger.ui.toolbar:request-retry',  Plack.Debugger.Util.bind_function( this._request_retry, this ) );
+    this.on( 'plack-debugger.ui.toolbar:request-loaded', Plack.Debugger.Util.bind_function( this._request_loaded, this ) );    
 }
 
 Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
@@ -648,6 +730,16 @@ Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
     button.trigger( 'plack-debugger.ui.toolbar.button:update', data );
     this.buttons.push( button );
     return button;
+}
+
+Plack.Debugger.UI.Toolbar.prototype._request_loaded = function () {
+    this.$element.find('.pdb-loading').hide();
+}
+
+Plack.Debugger.UI.Toolbar.prototype._request_retry = function ( retry_count ) {
+    this.$element.find('.pdb-loading>span').html(
+        "[ retry #(" + retry_count + "), next retry in " + (retry_count * Plack.Debugger.RETRY_BACKOFF_MULTIPLIER) + " ms ]"
+    );
 }
 
 Plack.Debugger.UI.Toolbar.prototype._show_warnings = function () {
