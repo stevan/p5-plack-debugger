@@ -465,6 +465,16 @@
     color      : #ffffff;
 }
 
+#plack-debugger .pdb-has-warnings {
+    background : #f0ad4e !important;
+    color      : #ffffff !important;
+ }
+
+#plack-debugger .pdb-has-errors {
+    background : #d9534f !important;
+    color      : #ffffff !important;
+}
+
 #plack-debugger .pdb-success {
     background : #5cb85c;
     color      : #ffffff;

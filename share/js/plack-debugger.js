@@ -424,6 +424,9 @@ Plack.Debugger.UI.prototype.register = function () {
 }
 
 Plack.Debugger.UI.prototype._load_request = function ( data ) {
+    var has_warnings = false;
+    var has_errors   = false;
+
     // load the data into the various places 
     for ( var i = 0; i < data.length; i++ ) {
 
@@ -432,13 +435,28 @@ Plack.Debugger.UI.prototype._load_request = function ( data ) {
 
         // handle metadata ...
         if ( data[i].metadata ) {
-
             // turn on AJAX tracking ...
             if ( data[i].metadata.track_subrequests ) {
                 this.trigger( 'plack-debugger._:ajax-tracking-enable', null, { bubble : true } );
             }
-
         }
+
+        // handle warnings/errors ...
+        if ( data[i].notifications ) {
+            if ( data[i].notifications.warning ) has_warnings = true;
+            if ( data[i].notifications.error   ) has_errors = true;
+        }
+    }
+
+    if ( has_warnings && !has_errors ) {
+        // if we have warnings, but no errors
+        this.collapsed.trigger( 'plack-debugger.ui.collapsed:show-warnings' );
+        this.toolbar.trigger( 'plack-debugger.ui.toolbar:show-warnings' );
+    }
+    else if ( has_errors ) {
+        // if we have errors
+        this.collapsed.trigger( 'plack-debugger.ui.collapsed:show-errors' );
+        this.toolbar.trigger( 'plack-debugger.ui.toolbar:show-errors' );
     }
 }
 
@@ -494,6 +512,17 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( data ) {
         all.result.push( page );
     }
 
+    if (all.notifications.warning > 0 && all.notifications.error == 0) {
+        // if we have warnings, but no errors
+        this.collapsed.trigger( 'plack-debugger.ui.collapsed:show-warnings' );
+        this.toolbar.trigger( 'plack-debugger.ui.toolbar:show-warnings' );
+    }
+    else if (all.notifications.error > 0) {
+        // if we have errors
+        this.collapsed.trigger( 'plack-debugger.ui.collapsed:show-errors' );
+        this.toolbar.trigger( 'plack-debugger.ui.toolbar:show-errors' );
+    }
+
     $.each( this.toolbar.buttons, function (i, b) { 
         if ( b.is_tracking_subrequests() ) b.trigger( 'plack-debugger.ui.toolbar.button:update', all ) 
     });
@@ -508,14 +537,17 @@ Plack.Debugger.UI.prototype._load_data_error = function ( error ) {
 }
 
 Plack.Debugger.UI.prototype._open_toolbar = function () {
-    this.collapsed.trigger('plack-debugger.ui._:hide');
-    this.toolbar.trigger('plack-debugger.ui._:show');
-    if ( this.panels.active_panel ) {
-        this.panels.trigger('plack-debugger.ui._:show');
+    if ( this.toolbar.is_hidden() ) {
+        this.collapsed.trigger('plack-debugger.ui._:hide');
+        this.toolbar.trigger('plack-debugger.ui._:show');
+        if ( this.panels.active_panel ) {
+            this.panels.trigger('plack-debugger.ui._:show');
+        }
     }
 }
 
 Plack.Debugger.UI.prototype._close_toolbar = function () {
+    if ( this.toolbar.is_hidden() ) return;
     this.panels.trigger('plack-debugger.ui._:hide');
     this.toolbar.trigger('plack-debugger.ui._:hide');
     this.collapsed.trigger('plack-debugger.ui._:show');
@@ -552,6 +584,28 @@ Plack.Debugger.UI.Collapsed.prototype.register = function () {
     // register for events we handle
     this.on( 'plack-debugger.ui._:hide', Plack.Debugger.Util.bind_function( this.hide, this ) );
     this.on( 'plack-debugger.ui._:show', Plack.Debugger.Util.bind_function( this.show, this ) );
+
+    this.on( 'plack-debugger.ui.collapsed:show-warnings', Plack.Debugger.Util.bind_function( this._show_warnings, this ) );
+    this.on( 'plack-debugger.ui.collapsed:show-errors',  Plack.Debugger.Util.bind_function( this._show_errors, this ) );
+}
+
+Plack.Debugger.UI.Collapsed.prototype._show_warnings = function () {
+    var $b = this.$element.find('.pdb-open-button');
+    if ( !$b.hasClass('pdb-has-warnings') && !$b.hasClass('pdb-has-errors') ) {
+        $b.addClass('pdb-has-warnings');
+    }
+    this.trigger( 'plack-debugger.ui.toolbar:open', null, { bubble : true } );
+}
+
+Plack.Debugger.UI.Collapsed.prototype._show_errors = function () {
+    var $b = this.$element.find('.pdb-open-button');
+    if ( !$b.hasClass('pdb-has-errors') ) {
+        if ( $b.hasClass('pdb-has-warnings') ) {
+            $b.removeClass('pdb-has-warnings');    
+        }
+        $b.addClass('pdb-has-errors');
+    }
+    this.trigger( 'plack-debugger.ui.toolbar:open', null, { bubble : true }  );    
 }
 
 /* =============================================================== */
@@ -584,6 +638,9 @@ Plack.Debugger.UI.Toolbar.prototype.register = function () {
     // register for events we handle
     this.on( 'plack-debugger.ui._:hide', Plack.Debugger.Util.bind_function( this.hide, this ) );
     this.on( 'plack-debugger.ui._:show', Plack.Debugger.Util.bind_function( this.show, this ) );
+
+    this.on( 'plack-debugger.ui.toolbar:show-warnings', Plack.Debugger.Util.bind_function( this._show_warnings, this ) );
+    this.on( 'plack-debugger.ui.toolbar:show-errors',  Plack.Debugger.Util.bind_function( this._show_errors, this ) );
 }
 
 Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
@@ -591,6 +648,23 @@ Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
     button.trigger( 'plack-debugger.ui.toolbar.button:update', data );
     this.buttons.push( button );
     return button;
+}
+
+Plack.Debugger.UI.Toolbar.prototype._show_warnings = function () {
+    var $b = this.$element.find('.pdb-header .pdb-close-button');
+    if ( !$b.hasClass('pdb-has-warnings') && !$b.hasClass('pdb-has-errors') ) {
+        $b.addClass('pdb-has-warnings');
+    }
+}
+
+Plack.Debugger.UI.Toolbar.prototype._show_errors = function () {
+    var $b = this.$element.find('.pdb-header .pdb-close-button');
+    if ( !$b.hasClass('pdb-has-errors') ) {
+        if ( $b.hasClass('pdb-has-warnings') ) {
+            $b.removeClass('pdb-has-warnings');    
+        }
+        $b.addClass('pdb-has-errors');
+    }
 }
 
 // ------------------------------------------------------------------
