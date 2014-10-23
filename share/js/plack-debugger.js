@@ -877,7 +877,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
                 case Object:
                     if ( Plack.Debugger.Util.object_keys( data ).length == 0 ) return '';
                     var out = '<table class="pdb-key-value-pairs">';
-                    for (key in data) {
+                    for (var key in data) {
                         out += '<tr>' 
                             + '<td class="pdb-key">' + key + '</td>' 
                             // FIXME: this code right below here is ugly and confusing 
