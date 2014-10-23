@@ -512,6 +512,7 @@ Plack.Debugger.UI.prototype._load_request = function ( data ) {
 }
 
 Plack.Debugger.UI.prototype._load_request_error = function ( error ) {
+    this.toolbar.trigger( 'plack-debugger.ui.toolbar:request-failed' );    
     alert("Sorry, we are unable to load the debugging data from the server, please check your server error log.\n\nError : '" + error + "'");
 }
 
@@ -694,7 +695,7 @@ Plack.Debugger.UI.Toolbar = function ( $jQuery, $parent ) {
             + '<div class="pdb-header">'
                 + '<div class="pdb-close-button">&#9776;</div>'
             + '</div>'
-            + '<div class="pdb-loading">Currently loading debug data.<br/>Please be patient.<br/><span></span></div>' 
+            + '<div class="pdb-loading">Loading debug data.<br/>Please be patient.<br/><span></span></div>' 
             + '<div class="pdb-buttons"></div>'
         + '</div>'
     ).find('.pdb-toolbar');
@@ -722,7 +723,8 @@ Plack.Debugger.UI.Toolbar.prototype.register = function () {
     this.on( 'plack-debugger.ui.toolbar:show-errors',    Plack.Debugger.Util.bind_function( this._show_errors, this ) );
 
     this.on( 'plack-debugger.ui.toolbar:request-retry',  Plack.Debugger.Util.bind_function( this._request_retry, this ) );
-    this.on( 'plack-debugger.ui.toolbar:request-loaded', Plack.Debugger.Util.bind_function( this._request_loaded, this ) );    
+    this.on( 'plack-debugger.ui.toolbar:request-loaded', Plack.Debugger.Util.bind_function( this._request_loaded, this ) ); 
+    this.on( 'plack-debugger.ui.toolbar:request-failed', Plack.Debugger.Util.bind_function( this._request_failed, this ) );    
 }
 
 Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
@@ -740,6 +742,10 @@ Plack.Debugger.UI.Toolbar.prototype._request_retry = function ( retry_count ) {
     this.$element.find('.pdb-loading>span').html(
         "[ retry #(" + retry_count + "), next retry in " + (retry_count * Plack.Debugger.RETRY_BACKOFF_MULTIPLIER) + " ms ]"
     );
+}
+
+Plack.Debugger.UI.Toolbar.prototype._request_failed = function () {
+    this.$element.find('.pdb-loading>span').html("[ max retries reached, loading request failed ]");
 }
 
 Plack.Debugger.UI.Toolbar.prototype._show_warnings = function () {
