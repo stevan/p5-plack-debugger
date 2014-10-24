@@ -42,7 +42,7 @@ test_psgi($app, sub {
 
         # test some errors
 
-        is($cb->(PUT '/' . $root_uid)->code, 405, '... got the expected (Method Not Allowed) error');
+        is($cb->(PUT '/1234')->code, 405, '... got the expected (Method Not Allowed) error');
         is($cb->(GET '/')->code, 400, '... got the expected (Bad Request) error');
 
     }
