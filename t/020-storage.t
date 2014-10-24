@@ -16,7 +16,7 @@ BEGIN {
 my $JSON     = JSON::XS->new->utf8->pretty;
 my $DATA_DIR = dir('./t/020-tmp-storage/');
 
-# cleanup tmp dir
+# cleanup tmp dir in the case of a bad run
 { ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 my $storage = Plack::Debugger::Storage->new(
@@ -134,6 +134,9 @@ sleep(1);
     is(scalar(@$stored_subrequest_results), 1, '... only got one subrequest result back');
     is_deeply( [ $subrequest_results ], $stored_subrequest_results, '... got the same results back' );
 }
+
+# cleanup tmp dir
+{ ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 done_testing;
 

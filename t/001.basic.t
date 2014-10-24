@@ -28,7 +28,7 @@ my $JSON     = JSON::XS->new->utf8->pretty;
 my $DATA_DIR     = dir('./t/001-tmp-basic/');
 my $DEBUGGER_URL = '/debugger';
 
-# cleanup tmp dir
+# cleanup tmp dir in the case of a bad run
 { ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 my $debugger = Plack::Debugger->new(
@@ -135,6 +135,9 @@ test_psgi($app, sub {
         }
     }
 );
+
+# cleanup tmp dir
+{ ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 done_testing;
 

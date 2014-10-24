@@ -72,6 +72,9 @@ test_psgi($app, sub {
     }
 );
 
+# cleanup tmp dir
+{ ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
+
 done_testing;
 
 
