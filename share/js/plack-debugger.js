@@ -264,7 +264,7 @@ Plack.Debugger.Resource.prototype = new Plack.Debugger.Abstract.Eventful();
 Plack.Debugger.Resource.prototype.register = function () {
     // register for events we handle 
     this.on( 'plack-debugger.resource.request:load',     Plack.Debugger.Util.bind_function( this._load_request, this ) );
-    this.on( 'plack-debugger.resource.subrequests:load', Plack.Debugger.Util.bind_function( this._load_subrequests, this ) );
+    this.on( 'plack-debugger.resource.subrequests:load', Plack.Debugger.Util.bind_function( this._load_all_subrequests, this ) );
 
     // also catch these global events
     // ... see NOTE below by the registered 
@@ -289,7 +289,7 @@ Plack.Debugger.Resource.prototype._load_request = function () {
     });
 }
 
-Plack.Debugger.Resource.prototype._load_subrequests = function () {
+Plack.Debugger.Resource.prototype._load_all_subrequests = function () {
     this.$jQuery.ajax({
         'dataType' : 'json',
         'url'      : (
@@ -351,7 +351,7 @@ Plack.Debugger.Resource.prototype._update_target_on_subrequest_error = function 
         this._subrequest_error_count++;
         var self = this;
         setTimeout(function () {
-            self._load_subrequests();
+            self._load_all_subrequests();
         }, (this._subrequest_error_count * Plack.Debugger.RETRY_BACKOFF_MULTIPLIER));
         this.trigger( 'plack-debugger.ui:load-subrequests-error-retry', this._subrequest_error_count, { bubble : true } );
     }
@@ -448,9 +448,9 @@ Plack.Debugger.UI.prototype.register = function () {
     this.on( 'plack-debugger.ui:load-request-error',       Plack.Debugger.Util.bind_function( this._load_request_error,       this ) );
     this.on( 'plack-debugger.ui:load-request-error-retry', Plack.Debugger.Util.bind_function( this._load_request_error_retry, this ) );
 
-    this.on( 'plack-debugger.ui:load-subrequests',             Plack.Debugger.Util.bind_function( this._load_subrequests,             this ) );
-    this.on( 'plack-debugger.ui:load-subrequests-error',       Plack.Debugger.Util.bind_function( this._load_subrequests_error,       this ) );
-    this.on( 'plack-debugger.ui:load-subrequests-error-retry', Plack.Debugger.Util.bind_function( this._load_subrequests_error_retry, this ) );
+    this.on( 'plack-debugger.ui:load-subrequests',             Plack.Debugger.Util.bind_function( this._load_all_subrequests,             this ) );
+    this.on( 'plack-debugger.ui:load-subrequests-error',       Plack.Debugger.Util.bind_function( this._load_all_subrequests_error,       this ) );
+    this.on( 'plack-debugger.ui:load-subrequests-error-retry', Plack.Debugger.Util.bind_function( this._load_all_subrequests_error_retry, this ) );
 
     this.on( 'plack-debugger.ui.toolbar:open',  Plack.Debugger.Util.bind_function( this._open_toolbar,  this ) );
     this.on( 'plack-debugger.ui.toolbar:close', Plack.Debugger.Util.bind_function( this._close_toolbar, this ) );
@@ -514,7 +514,7 @@ Plack.Debugger.UI.prototype._load_request_error_retry = function ( retry_count )
 
 // subrequests ...
 
-Plack.Debugger.UI.prototype._load_subrequests = function ( data ) {
+Plack.Debugger.UI.prototype._load_all_subrequests = function ( data ) {
 
     // collect and collate some information on 
     // all the subrequests that have been fired
@@ -590,11 +590,11 @@ Plack.Debugger.UI.prototype._load_subrequests = function ( data ) {
     });    
 }
 
-Plack.Debugger.UI.prototype._load_subrequests_error = function ( error ) {
+Plack.Debugger.UI.prototype._load_all_subrequests_error = function ( error ) {
     alert("Sorry, we are unable to load the AJAX debugging data from the server, please check your server error log.\n\nError : '" + error + "'");
 }
 
-Plack.Debugger.UI.prototype._load_subrequests_error_retry = function ( retry_count ) {
+Plack.Debugger.UI.prototype._load_all_subrequests_error_retry = function ( retry_count ) {
     // NOTE:
     // Leaving this here for now, will fix it 
     // more when I have a plan for this.
