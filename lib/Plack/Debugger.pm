@@ -189,6 +189,16 @@ sub load_all_subrequest_results {
     ];
 }
 
+sub load_all_subrequest_results_modified_since {
+    my ($self, $request_uid, $epoch) = @_;
+    return [
+        sort { 
+            # order them sequentially ...
+            $b->{'timestamp'} <=> $a->{'timestamp'}
+        } @{ $self->storage->load_all_subrequest_results_modified_since( $request_uid, $epoch ) }
+    ];
+}
+
 1;
 
 __END__

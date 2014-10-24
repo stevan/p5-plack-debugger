@@ -126,16 +126,20 @@ sub validate_and_prepare_request {
     return (undef, $self->_create_error_response( 500 => 'I AM THE CHAOS MONKEY, HEAR ME ROAR!!!!!' )) 
         if Plack::Debugger::DEBUG && (rand() <= 0.70);
 
+    # track the request uid
     my $req = { request_uid => $request_uid };
 
+    # if there is a specific subrequest uid
     $req->{'subrequest_uid'}  = $get_specific_subrequest 
         if $get_specific_subrequest;
 
+    # or if they just want all subrequests
     $req->{'all_subrequests'} = {} 
         if $get_subrequests && !$get_specific_subrequest;
 
-    if ( my $epoch = $r->header('X-Plack-Debugger-SubRequests-Since') ) {
-        $req->{'all_subrequests'}->{'after'} = $epoch;
+    # handle any special headers 
+    if ( my $epoch = $r->header('X-Plack-Debugger-SubRequests-Modified-Since') ) {
+        $req->{'all_subrequests'}->{'modified_since'} = $epoch;
     }
 
     return ($req, undef);
@@ -150,7 +154,15 @@ sub fetch_debug_data_for_request {
     }
     # if no specific subrequest is requested, get all the subrequests for a specific request
     elsif ( (not exists $req->{'subrequest_uid'}) && exists $req->{'all_subrequests'} ) {
-        return $self->debugger->load_all_subrequest_results( $req->{'request_uid'} )
+        if ( exists $req->{'all_subrequests'}->{'modified_since'} ) {
+            return $self->debugger->load_all_subrequest_results_modified_since( 
+                $req->{'request_uid'},
+                $req->{'all_subrequests'}->{'modified_since'} 
+            );
+        } 
+        else {
+            return $self->debugger->load_all_subrequest_results( $req->{'request_uid'} )
+        }
     }
     # if a specific subrequest is requested, return that 
     elsif ( exists $req->{'subrequest_uid'} ) {

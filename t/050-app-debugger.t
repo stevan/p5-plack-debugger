@@ -79,10 +79,32 @@ test_psgi($app, sub {
             ); 
         }
 
-        # test some errors
+        my $epoch = time;
+        diag('... sleeping for a second to ensure mtime is different enough');
+        sleep(1);
 
-        is($cb->(PUT '/' . $root_uid)->code, 405, '... got the expected (Method Not Allowed) error');
-        is($cb->(GET '/')->code, 400, '... got the expected (Bad Request) error');
+        push @sub_uids => create_child( $DATA_DIR, $root_uid );
+        {
+            my $resp = $cb->(GET '/' . $root_uid . '/subrequests', 
+                (
+                    'X-Plack-Debugger-SubRequests-Modified-Since' => $epoch
+                )
+            ); 
+
+            is_deeply(
+                $JSON->decode( $resp->content ),
+                [ result_generator( $sub_uids[-1], $root_uid ) ],
+                '... got the expected data set (for all sub-requests modified since epoch[' . $epoch . '])'
+            ); 
+        }
+        {
+            my $resp = $cb->(GET '/' . $root_uid . '/subrequests'); 
+            is_deeply(
+                $JSON->decode( $resp->content ),
+                [ map { result_generator( $_, $root_uid ) } @sub_uids ],
+                '... got the expected data set (for all (2) sub-requests)'
+            ); 
+        }
 
     }
 );

@@ -82,6 +82,8 @@ sub load_all_subrequest_results {
 
 sub load_all_subrequest_results_modified_since {
     my ($self, $request_uid, $epoch) = @_;
+    die "You must specify an epoch to check modification date against"
+        unless $epoch;
     my $dir = File::Spec->catfile( $self->data_dir, $request_uid );
     return [] unless -e $dir;
     return [
