@@ -68,3 +68,18 @@ sub create_child {
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Plack::Test::Debugger::ResultGenerator - Test utility module for generating dummy results
+
+=head1 DESCRIPTION
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Booking.com for sponsoring the writing of this module.
+
+=cut
+
