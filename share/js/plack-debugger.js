@@ -180,7 +180,7 @@ Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options
     if ( this._callbacks[ e ] === undefined ) {
         //console.log(["... attempting to bubble " + e + " on ", this, data, options ]);
         // not handling this specific event, so ...
-        if ( options != undefined && options.bubble ) {
+        if ( options !== undefined && options.bubble ) {
             // ... attempt to bubble the event to the target 
             this.locate_target().trigger( e, data, options );
         }
@@ -485,7 +485,7 @@ Plack.Debugger.UI.prototype._load_request = function ( data ) {
         // handle warnings/errors ...
         if ( data[i].notifications ) {
             if ( data[i].notifications.warning ) has_warnings = true;
-            if ( data[i].notifications.error   ) has_errors = true;
+            if ( data[i].notifications.error   ) has_errors   = true;
         }
     }
 
