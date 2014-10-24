@@ -185,9 +185,6 @@ Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options
             this.locate_target().trigger( e, data, options );
         }
         else {
-            //for (var x in this._callbacks) {
-            //    console.log( "... we have " + x + " in callback set" );
-            //}
             //console.trace();
             throw new Error("[Unhandled event] This object does not handle event(" + e + ") ... and bubbling was not requested");
         }
