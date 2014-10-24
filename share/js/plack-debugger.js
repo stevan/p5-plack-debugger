@@ -196,12 +196,7 @@ Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options
         // otherwise we know we can handle this event, so do it ...
         var self = this;
         // and do it asynchronously ... 
-        setTimeout(function () {
-            var cbs = self._callbacks[ e ];     
-            for ( var i = 0; i < cbs.length; i++ ) {
-                cbs[i].apply( self, [ data ] )
-            }
-        }, 0);
+        setTimeout(function () { self._callbacks[ e ].apply( self, [ data ] ) }, 0);
     }
 }
 
@@ -209,12 +204,9 @@ Plack.Debugger.Abstract.Eventful.prototype.trigger = function ( e, data, options
 
 Plack.Debugger.Abstract.Eventful.prototype.on = function ( e, cb ) { 
     if ( this._callbacks      === undefined ) this._callbacks = {};
-    if ( this._callbacks[ e ] === undefined ) this._callbacks[ e ] = [];
+    if ( this._callbacks[ e ] !== undefined ) throw new Error ("An event already exists for <" + e + ">");
     //console.log([ "registering event: " + e + " on ", this, cb ]);
-    this._callbacks[ e ].push( cb );
-    if ( this._callbacks[ e ].length > 1 ) {
-        throw new Error ("Got more than one event registered for: " + e);
-    }
+    this._callbacks[ e ] = cb;
 }
 
 // unregister events ...
