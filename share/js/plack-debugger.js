@@ -576,13 +576,21 @@ Plack.Debugger.UI.prototype._load_all_subrequests = function ( data ) {
 
     $.each( this.toolbar.buttons, function (i, b) { 
         if ( b.is_tracking_subrequests() ) {
-            b.trigger( 'plack-debugger.ui.toolbar.button:update', all );
+            if ( b.is_rendered() ) {
+                b.trigger( 'plack-debugger.ui.toolbar.button:update', all );
+            } else {
+                b.merge_data( all );
+            }
         } 
     });
 
     $.each( this.panels.panels, function (i, p) { 
         if ( p.is_tracking_subrequests() ) {
-            p.trigger( 'plack-debugger.ui.panels.panel:update', all );
+            if ( p.is_rendered() ) {
+                p.trigger( 'plack-debugger.ui.panels.panel:update', all );
+            } else {
+                p.merge_data( all );
+            }
         }
     });    
 }
@@ -688,6 +696,9 @@ Plack.Debugger.UI.Toolbar = function ( $jQuery, $parent ) {
             + '<div class="pdb-buttons"></div>'
         + '</div>'
     ).find('.pdb-toolbar');
+
+    this._buttons_rendered = false;
+
     this.register();
     this.setup_target( $parent );
 
@@ -716,9 +727,20 @@ Plack.Debugger.UI.Toolbar.prototype.register = function () {
     this.on( 'plack-debugger.ui.toolbar:request-failed', Plack.Debugger.Util.bind_function( this._request_failed, this ) );    
 }
 
+Plack.Debugger.UI.Toolbar.prototype.show = function () {
+    if ( !this._buttons_rendered ) {
+        for (var i = 0; i < this.buttons.length; i++) {
+            this.buttons[i].render();    
+        }
+        this._buttons_rendered = true;
+    }
+    // delegate up to parent ..
+    Plack.Debugger.Abstract.UI.prototype.show.apply( this, [] );
+}
+
 Plack.Debugger.UI.Toolbar.prototype.add_button = function ( data ) {
     var button = new Plack.Debugger.UI.Toolbar.Button( this.$element.find('.pdb-buttons'), this );
-    button.trigger( 'plack-debugger.ui.toolbar.button:update', data );
+    button.load_data( data );
     this.buttons.push( button );
     return button;
 }
@@ -769,7 +791,10 @@ Plack.Debugger.UI.Toolbar.Button = function ( $jQuery, $parent ) {
         + '</div>'
     ).find('.pdb-button').slice(-1);
 
-    this._metadata = {};
+    this._data        = null;
+    this._is_rendered = false;
+    this._metadata    = {};
+
     this.register();
     this.setup_target( $parent );
 }
@@ -790,15 +815,54 @@ Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
     this.on( 'plack-debugger.ui.toolbar.button:update', Plack.Debugger.Util.bind_function( this._update, this ) );
 }
 
+// accessors
+
+Plack.Debugger.UI.Toolbar.Button.prototype.data = function () {
+    return this._data;
+}
+
+Plack.Debugger.UI.Toolbar.Button.prototype.merge_data = function ( data ) {
+    if ( data.title         ) this._data['title']         = data.title;
+    if ( data.subtitle      ) this._data['subtitle']      = data.subtitle
+    if ( data.notifications ) this._data['notifications'] = data.notifications;
+    if ( data.metadata      ) this._metadata              = data.metadata;
+    this._is_rendered = false;
+}
+
+Plack.Debugger.UI.Toolbar.Button.prototype.load_data = function ( data ) {
+    this._data        = data;
+    this._is_rendered = false;
+    
+    if ( data.metadata ) {
+        this._metadata = data.metadata;
+    }
+}
+
 Plack.Debugger.UI.Toolbar.Button.prototype.metadata = function ( key ) {
     return this._metadata[ key ];
+}
+
+// predicates ...
+
+Plack.Debugger.UI.Toolbar.Button.prototype.is_rendered = function () {
+    return this._is_rendered;
 }
 
 Plack.Debugger.UI.Toolbar.Button.prototype.is_tracking_subrequests = function () {
     return this._metadata.track_subrequests ? true : false
 }
 
-Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( data ) {
+// ...
+
+Plack.Debugger.UI.Toolbar.Button.prototype.render = function () {
+    if ( !this._is_rendered ) {
+        this._update( this._data, true );
+    }
+}
+
+// ...
+
+Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( data, skip_merge ) {
 
     if ( data.title ) {
         this.$element.find('.pdb-title').html( data.title );
@@ -834,9 +898,25 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( data ) {
         this.$element.find('.pdb-notifications .pdb-badge').html('').hide();
     }
 
-    if ( data.metadata ) {
-        this._metadata = data.metadata;
+    // we only skip the merge when 
+    // we are being manually called
+    // via the `render` method, in 
+    // this case we want to just update
+    // the metadata
+    if ( skip_merge ) {
+        if ( data.metadata ) {
+            this._metadata = data.metadata;
+        }
+    } 
+    // if we are not skipping the merge
+    // that means we have been called via
+    // via the event mechanism and we should
+    // make sure to update the data
+    else {
+        this.merge_data( data );
     }
+
+    this._is_rendered = true;
 }
 
 /* =============================================================== */
@@ -865,7 +945,7 @@ Plack.Debugger.UI.Panels.prototype.register = function () {
 
 Plack.Debugger.UI.Panels.prototype.add_panel = function ( data ) {
     var panel = new Plack.Debugger.UI.Panels.Panel( this.$element, this );
-    panel.trigger( 'plack-debugger.ui.panels.panel:update', data );
+    panel.load_data( data );
     this.panels.push( panel );
     return panel;
 }
@@ -913,7 +993,10 @@ Plack.Debugger.UI.Panels.Panel = function ( $jQuery, $parent ) {
         + '</div>'
     ).find('.pdb-panel').slice(-1);
 
+    this._data        = null;
+    this._is_rendered = false;
     this._metadata = {};
+
     this.register();
     this.setup_target( $parent );
 }
@@ -937,15 +1020,61 @@ Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
     this.on( 'plack-debugger.ui._:show', Plack.Debugger.Util.bind_function( this.show, this ) );
 }
 
+Plack.Debugger.UI.Panels.Panel.prototype.show = function () {
+    if ( !this._is_rendered ) this.render();
+    // delegate up to parent ..
+    Plack.Debugger.Abstract.UI.prototype.show.apply( this, [] );
+}
+
+// accessors 
+
+Plack.Debugger.UI.Panels.Panel.prototype.data = function () {
+    return this._data;
+}
+
+Plack.Debugger.UI.Panels.Panel.prototype.merge_data = function ( data ) {
+    if ( data.title         ) this._data['title']         = data.title;
+    if ( data.subtitle      ) this._data['subtitle']      = data.subtitle
+    if ( data.notifications ) this._data['notifications'] = data.notifications;
+    if ( data.result        ) this._data['result']        = data.result;
+    if ( data.metadata      ) this._metadata              = data.metadata;
+    this._is_rendered = false;
+}
+
+Plack.Debugger.UI.Panels.Panel.prototype.load_data = function ( data ) {
+    this._data        = data;
+    this._is_rendered = false;
+
+    if ( data.metadata ) {
+        this._metadata = data.metadata;
+    }    
+}
+
 Plack.Debugger.UI.Panels.Panel.prototype.metadata = function ( key ) {
     return this._metadata[ key ];
+}
+
+// predicates 
+
+Plack.Debugger.UI.Panels.Panel.prototype.is_rendered = function () {
+    return this._is_rendered;
 }
 
 Plack.Debugger.UI.Panels.Panel.prototype.is_tracking_subrequests = function () {
     return this._metadata.track_subrequests ? true : false
 }
 
-Plack.Debugger.UI.Panels.Panel.prototype._update = function ( data ) {
+// ...
+
+Plack.Debugger.UI.Panels.Panel.prototype.render = function () {
+    if ( !this._is_rendered ) {
+        this._update( this._data, true );
+    }
+}
+
+// ...
+
+Plack.Debugger.UI.Panels.Panel.prototype._update = function ( data, skip_merge ) {
 
     if ( data.title ) {
         this.$element.find('.pdb-header .pdb-title').html( data.title );
@@ -1025,6 +1154,26 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( data ) {
     else {
         this.$element.find('.pdb-content').html('...');
     } 
+
+    // we only skip the merge when 
+    // we are being manually called
+    // via the `render` method, in 
+    // this case we want to just update
+    // the metadata
+    if ( skip_merge ) {
+        if ( data.metadata ) {
+            this._metadata = data.metadata;
+        }
+    } 
+    // if we are not skipping the merge
+    // that means we have been called via
+    // via the event mechanism and we should
+    // make sure to update the data
+    else {
+        this.merge_data( data );
+    }    
+
+    this._is_rendered = true;
 }
 
 // formatters for the Panel content
