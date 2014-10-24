@@ -98,63 +98,67 @@ sub call {
     } 
     else {
         # now handle the requests for results ...
+        $self->construct_debug_data_response( $r );
+    }
+}
 
-        # this only supports GET requests
-        return $self->_create_error_response( 405 => 'Method Not Allowed' )
+sub construct_debug_data_response {
+    my ($self, $r) = @_;
+    my ($req, $err) = $self->validate_and_prepare_request( $r );
+    return $err if defined $err;
+    $self->_create_JSON_response( 200 => $self->fetch_debug_data_for_request( $req ) );
+}
+
+sub validate_and_prepare_request {
+    my ($self, $r) = @_;
+
+    # this only supports GET requests    
+    return (undef, $self->_create_error_response( 405 => 'Method Not Allowed' ))
             if $r->method ne 'GET';
 
-        my ($request_uid, $get_subrequests, $get_specific_subrequest) = grep { $_ } split '/' => $r->path_info;
+    my ($request_uid, $get_subrequests, $get_specific_subrequest) = grep { $_ } split '/' => $r->path_info;
 
-        # we need to have a request-id at a minimum
-        return $self->_create_error_response( 400 => 'Bad Request' )
-            unless $request_uid;
+    # we need to have a request-id at a minimum
+    return (undef, $self->_create_error_response( 400 => 'Bad Request' ))
+        unless $request_uid;
 
-        # some debugging help to make sure the UI is robust
-        return $self->_create_error_response( 500 => 'I AM THE CHAOS MONKEY, HEAR ME ROAR!!!!!' ) 
-            if Plack::Debugger::DEBUG && (rand() <= 0.70);
+    # some debugging help to make sure the UI is robust
+    return (undef, $self->_create_error_response( 500 => 'I AM THE CHAOS MONKEY, HEAR ME ROAR!!!!!' )) 
+        if Plack::Debugger::DEBUG && (rand() <= 0.70);
 
-        # if no subrequests requested, get the base request
-        if ( !$get_subrequests ) {
-            return $self->_create_JSON_response(
-                200 => {
-                    data  => $self->debugger->load_request_results( $request_uid ),
-                    links => [
-                        $self->_create_link( 'self'           => [ $request_uid ] ),
-                        $self->_create_link( 'subrequest.all' => [ $request_uid, '/subrequest' ] ),
-                    ]
-                }
-            );
-        }
-        # if no specific subrequest is requested, get all the subrequests for a specific request
-        elsif ( !$get_specific_subrequest ) {
-            my $all_subrequests = $self->debugger->load_all_subrequest_results( $request_uid );
-            return $self->_create_JSON_response(
-                200 => {
-                    data  => $all_subrequests,
-                    links => [
-                        $self->_create_link( 'self'           => [ $request_uid, '/subrequest' ] ),
-                        $self->_create_link( 'request.parent' => [ $request_uid ] ),
-                        map {
-                            $self->_create_link( 'subrequest' => [ $request_uid, '/subrequest', $_->{'request_uid'} ] ),
-                        } @$all_subrequests
-                    ]
-                }
-            );
-        }
-        # if a specific subrequest is requested, return that 
-        else {
-            return $self->_create_JSON_response(
-                200 => {
-                    data  => $self->debugger->load_subrequest_results( $request_uid, $get_specific_subrequest ),
-                    links => [
-                        $self->_create_link( 'self'                => [ $request_uid, '/subrequest', $get_specific_subrequest ] ),
-                        $self->_create_link( 'request.parent'      => [ $request_uid ] ),
-                        $self->_create_link( 'subrequest.siblings' => [ $request_uid, '/subrequest' ] ),
-                    ]
-                }
-            );
-        }
-        
+    my $req = { request_uid => $request_uid };
+
+    $req->{'subrequest_uid'}  = $get_specific_subrequest 
+        if $get_specific_subrequest;
+
+    $req->{'all_subrequests'} = {} 
+        if $get_subrequests && !$get_specific_subrequest;
+
+    if ( my $epoch = $r->header('X-Plack-Debugger-SubRequests-Since') ) {
+        $req->{'all_subrequests'}->{'after'} = $epoch;
+    }
+
+    return ($req, undef);
+}
+
+sub fetch_debug_data_for_request {
+    my ($self, $req) = @_;
+
+    # if no subrequests requested, get the base request
+    if ( (not exists $req->{'subrequest_uid'}) && (not exists $req->{'all_subrequests'}) ) {
+        return $self->debugger->load_request_results( $req->{'request_uid'} )
+    }
+    # if no specific subrequest is requested, get all the subrequests for a specific request
+    elsif ( (not exists $req->{'subrequest_uid'}) && exists $req->{'all_subrequests'} ) {
+        return $self->debugger->load_all_subrequest_results( $req->{'request_uid'} )
+    }
+    # if a specific subrequest is requested, return that 
+    elsif ( exists $req->{'subrequest_uid'} ) {
+        return $self->debugger->load_subrequest_results( $req->{'request_uid'}, $req->{'subrequest_uid'} )
+    }
+    # should never actually get here 
+    else {
+        die 'Unknown request type';
     }
 }
 
@@ -170,15 +174,6 @@ sub _create_JSON_response {
     my $json = $self->{'_JSON'}->encode( $data );
     return [ $status, [ 'Content-Type' => 'application/json', 'Content-Length' => length $json ], [ $json ] ]
 }
-
-sub _create_link {
-    my ($self, $rel, $parts) = @_;
-    return { 
-        rel => $rel, 
-        url => File::Spec::Unix->canonpath( join '/' => $self->base_url, @$parts )
-    }
-}
-
 
 1;
 

@@ -315,7 +315,7 @@ Plack.Debugger.Resource.prototype._load_subrequests = function () {
 // request ...
 
 Plack.Debugger.Resource.prototype._update_target_on_request_success = function ( response, status, xhr ) {
-    this.trigger( 'plack-debugger.ui:load-request', response.data.results, { bubble : true } );
+    this.trigger( 'plack-debugger.ui:load-request', response.results, { bubble : true } );
 
     // once the target is updated, we can 
     // just start to ignore the event 
@@ -345,7 +345,7 @@ Plack.Debugger.Resource.prototype._update_target_on_request_error = function ( x
 // subrequest ...
 
 Plack.Debugger.Resource.prototype._update_target_on_subrequest_success = function ( response, status, xhr ) {
-    this.trigger( 'plack-debugger.ui:load-subrequests', response.data, { bubble : true } );
+    this.trigger( 'plack-debugger.ui:load-subrequests', response, { bubble : true } );
 
     this._subrequests            = response;
     this._subrequest_error_count = 0
