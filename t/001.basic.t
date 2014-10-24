@@ -25,11 +25,11 @@ my @UUIDS;
 my $JSON     = JSON::XS->new->utf8->pretty;
 
 # data the Debugger needs
-my $DATA_DIR     = dir('./t/tmp/');
+my $DATA_DIR     = dir('./t/001-tmp-basic/');
 my $DEBUGGER_URL = '/debugger';
 
 # cleanup tmp dir
-{ -f $_ && $_->remove foreach $DATA_DIR->children( no_hidden => 1 ) }
+{ ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 my $debugger = Plack::Debugger->new(
     uid_generator => sub { 

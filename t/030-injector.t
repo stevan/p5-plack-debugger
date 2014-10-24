@@ -22,10 +22,10 @@ BEGIN {
 
 
 my $JSON     = JSON::XS->new->utf8->pretty;
-my $DATA_DIR = dir('./t/tmp/');
+my $DATA_DIR = dir('./t/030-tmp-injector/');
 
 # cleanup tmp dir
-{ -f $_ && $_->remove foreach $DATA_DIR->children( no_hidden => 1 ) }
+{ ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 my $debugger_application = Plack::App::Debugger->new( 
     debugger => Plack::Debugger->new(
@@ -33,6 +33,7 @@ my $debugger_application = Plack::App::Debugger->new(
             data_dir     => $DATA_DIR,
             serializer   => sub { $JSON->encode( shift ) },
             deserializer => sub { $JSON->decode( shift ) },
+            filename_fmt => "%s.json",
         )
     )
 );

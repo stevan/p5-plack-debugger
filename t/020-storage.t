@@ -14,10 +14,10 @@ BEGIN {
 }
 
 my $JSON     = JSON::XS->new->utf8->pretty;
-my $DATA_DIR = dir('./t/tmp/');
+my $DATA_DIR = dir('./t/020-tmp-storage/');
 
 # cleanup tmp dir
-{ -f $_ && $_->remove foreach $DATA_DIR->children( no_hidden => 1 ) }
+{ ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 
 {
     my $storage = Plack::Debugger::Storage->new(
