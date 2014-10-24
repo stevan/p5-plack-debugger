@@ -80,6 +80,19 @@ sub load_all_subrequest_results {
     ];
 }
 
+sub load_all_subrequest_results_modified_since {
+    my ($self, $request_uid, $epoch) = @_;
+    my $dir = File::Spec->catfile( $self->data_dir, $request_uid );
+    return [] unless -e $dir;
+    return [
+        map {
+            $self->_load_results( $dir, (File::Spec->splitpath($_))[2] )
+        } grep {
+            (stat( $_ ))[9] > $epoch
+        } glob( File::Spec->catfile( $dir, sprintf $self->filename_fmt => '*' ) )
+    ];
+}
+
 # private utils ...
 
 sub _store_results {
