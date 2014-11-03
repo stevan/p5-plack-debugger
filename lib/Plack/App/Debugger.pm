@@ -124,7 +124,7 @@ sub validate_and_prepare_request {
 
     # some debugging help to make sure the UI is robust
     return (undef, $self->_create_error_response( 500 => 'I AM THE CHAOS MONKEY, HEAR ME ROAR!!!!!' )) 
-        if Plack::Debugger::DEBUG && (rand() <= 0.70);
+        if Plack::Debugger::DEBUG && (rand() <= $ENV{'PLACK_DEBUGGER_CHAOS_MONKEY_LEVEL'});
 
     # track the request uid
     my $req = { request_uid => $request_uid };
