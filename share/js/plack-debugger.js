@@ -806,7 +806,7 @@ Plack.Debugger.UI.Toolbar.Button.prototype.register = function () {
     var self = this;
     this.$element.click(function ( e ) { 
         e.stopPropagation();
-        var idx = Plack.Debugger.Util.index_of( $(this) );
+        var idx = Plack.Debugger.Util.index_of( jQuery(this) );
         if ( idx == -1 ) throw new Error("Could not find the index of this element");
         self.trigger( 'plack-debugger.ui.panels:open', idx, { bubble : true } ) 
     });
@@ -1008,7 +1008,7 @@ Plack.Debugger.UI.Panels.Panel.prototype.register = function () {
     var self = this;
     this.$element.find('.pdb-header .pdb-close-button').click(function ( e ) {
         e.stopPropagation();
-        var idx = Plack.Debugger.Util.index_of( $(this) );
+        var idx = Plack.Debugger.Util.index_of( jQuery(this) );
         if ( idx == -1 ) throw new Error("Could not find the index of this element");
         self.trigger( 'plack-debugger.ui.panels:close', idx, { bubble : true } ) 
     });
@@ -1333,18 +1333,18 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
 
             $e.find('.pdb-controls .pdb-open').click(function () {
                 $e.find('.pdb-value > .pdb-ulist').show();
-                $(this).attr('disabled', true);
-                $(this).siblings('.pdb-close').attr('disabled', false);
+                jQuery(this).attr('disabled', true);
+                jQuery(this).siblings('.pdb-close').attr('disabled', false);
             });
 
             $e.find('.pdb-controls .pdb-close').click(function () {
                 $e.find('.pdb-value > .pdb-ulist').hide();
-                $(this).attr('disabled', true);
-                $(this).siblings('.pdb-open').attr('disabled', false);
+                jQuery(this).attr('disabled', true);
+                jQuery(this).siblings('.pdb-open').attr('disabled', false);
             });
 
             $e.find('.pdb-key').click(function () {
-                $(this).siblings('.pdb-value').find('.pdb-ulist').eq(0).toggle();
+                jQuery(this).siblings('.pdb-value').find('.pdb-ulist').eq(0).toggle();
             });
         },
         'formatter' : function ( data ) {
@@ -1379,11 +1379,11 @@ Plack.Debugger.UI.Panels.Panel.prototype.formatters = {
     subrequest_formatter : {
         'callback' : function ( $e , data ) {
             $e.find('.pdb-subrequest-details').click(function () {
-                $(this).siblings('.pdb-subrequest-results').toggle();
+                jQuery(this).siblings('.pdb-subrequest-results').toggle();
             });
 
             $e.find('.pdb-subrequest-result .pdb-subrequest-header .pdb-title').click(function () {
-                $(this).parent().siblings('.pdb-subrequest-result-data').toggle();
+                jQuery(this).parent().siblings('.pdb-subrequest-result-data').toggle();
             });
 
             for ( var i = 0; i < data.length; i++ ) {
