@@ -12,6 +12,8 @@ use JSON::XS         ();
 
 use Plack::App::File;
 
+use Plack::Debugger;
+
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
