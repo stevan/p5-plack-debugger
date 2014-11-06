@@ -14,6 +14,11 @@ use Path::Class           qw[ dir ];
 use JSON::XS;
 
 BEGIN {
+    delete $ENV{'PLACK_DEBUGGER_DEBUG'};
+    delete $ENV{'PLACK_DEBUGGER_CHAOS_MONKEY_LEVEL'};
+}
+
+BEGIN {
     use_ok('Plack::Debugger');
     use_ok('Plack::Debugger::Storage');
 
