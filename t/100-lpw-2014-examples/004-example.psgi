@@ -14,6 +14,13 @@ use Plack::Debugger::Panel::PlackResponse;
 use Plack::Debugger::Panel::Warnings;
 use Plack::Debugger::Panel::AJAX;
 
+my @panels = ( Plack::Debugger::Panel::AJAX->new );
+
+push @panels => Plack::Debugger::Panel::PlackResponse->new
+    if $ENV{'PLACK_DEBUGGER_LPW_EXAMPLE_004_ADD_PLACK_RESPONSE'};
+push @panels => Plack::Debugger::Panel::Warnings->new
+    if $ENV{'PLACK_DEBUGGER_LPW_EXAMPLE_004_ADD_WARNINGS'};
+
 my $debugger = Plack::Debugger->new(
     storage => Plack::Debugger::Storage->new( 
         data_dir     => './t/100-lpw-2014-examples/tmp/',
@@ -21,11 +28,7 @@ my $debugger = Plack::Debugger->new(
         deserializer => sub { $Plack::App::Debugger::JSON->decode( $_[0] ) },
         filename_fmt => "%s.json",
     ),
-    panels  => [ 
-        Plack::Debugger::Panel::PlackResponse->new,
-        Plack::Debugger::Panel::Warnings->new,
-        Plack::Debugger::Panel::AJAX->new,
-    ]
+    panels  => \@panels
 );
 
 my $debugger_app = Plack::App::Debugger->new( debugger => $debugger );
