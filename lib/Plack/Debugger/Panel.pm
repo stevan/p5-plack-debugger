@@ -37,9 +37,8 @@ sub new {
         _notifications => { map { $_ => 0 } @{ NOTIFICATION_LEVELS() } },
         _has_phase_run => { map { $_ => 0 } @{ DEBUGGER_PHASES()     } },
         _metadata      => { 
-            (exists $args{'formatter'} 
-                ? (formatter => $args{'formatter'}) 
-                : ()) 
+            (exists $args{'formatter'} ? (formatter => $args{'formatter'}) : ()),
+            (exists $args{'metadata'}  ? %{$args{'metadata'}} : ()),
         },
     } => $class;
 

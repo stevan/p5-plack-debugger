@@ -44,9 +44,10 @@ sub new {
         $self->set_result( $self->stash ); 
     };
 
-    my $self = $class->SUPER::new( \%args );
-    $self->add_metadata( highlight_on_warnings => 1 );
-    $self;
+    $args{'metadata'} = +{ exists $args{'metadata'} ? %{ $args{'metadata'} } : () };
+    $args{'metadata'}->{'highlight_on_warnings'} = 1;
+
+    $class->SUPER::new( \%args );
 }
 
 
