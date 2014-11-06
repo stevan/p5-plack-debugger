@@ -41,7 +41,7 @@ sub format_body {
     my $length = Plack::Util::content_length( $body );
     return "IO::Object [ $body ] with length [ $length ]" if blessed $body;
     return "Filehandle [ $body ] with length [ $length ]" if Plack::Util::is_real_fh( $body );
-    return "String [ $body ] with length [ $length ]"     if ref $body eq 'ARRAY';
+    return "String [ @$body ] with length [ $length ]"    if ref $body eq 'ARRAY';
     return "Unknown [ $body ]";
 }
 
