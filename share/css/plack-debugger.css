@@ -492,11 +492,13 @@
     font-size    : 1.5em;
     padding-left : 10px;
     padding-top  : 2px;
+    color        : inherit;
 }
 
 #plack-debugger .pdb-subtitle {
     font-size    : 0.9em;
     font-style   : oblique;
     padding-left : 20px;
+    color        : inherit;
 }
 

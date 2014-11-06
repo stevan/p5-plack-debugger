@@ -916,6 +916,17 @@ Plack.Debugger.UI.Toolbar.Button.prototype._update = function ( data, skip_merge
         this.merge_data( data );
     }
 
+    // handle highlighting ...
+    this.$element.removeClass('pdb-has-warnings');    
+    this.$element.removeClass('pdb-has-errors');    
+
+    if ( this._metadata.highlight_on_errors && data.notifications && data.notifications.error > 0 ) {
+        this.$element.addClass('pdb-has-errors'); 
+    }
+    else if ( this._metadata.highlight_on_warnings && (data.notifications && data.notifications.warning > 0) ) { 
+        this.$element.addClass('pdb-has-warnings');    
+    }
+
     this._is_rendered = true;
 }
 
@@ -1172,6 +1183,19 @@ Plack.Debugger.UI.Panels.Panel.prototype._update = function ( data, skip_merge )
     else {
         this.merge_data( data );
     }    
+
+    // handle highlighting ...
+    var $header = this.$element.find('.pdb-header');
+    $header.removeClass('pdb-has-warnings');    
+    $header.removeClass('pdb-has-errors');    
+
+    if ( this._metadata.highlight_on_errors && data.notifications && data.notifications.error > 0 ) {
+        $header.addClass('pdb-has-errors'); 
+    }
+    else if ( this._metadata.highlight_on_warnings && (data.notifications && data.notifications.warning > 0) ) { 
+        $header.addClass('pdb-has-warnings');    
+    }
+
 
     this._is_rendered = true;
 }

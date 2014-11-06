@@ -44,7 +44,9 @@ sub new {
         $self->set_result( $self->stash ); 
     };
 
-    $class->SUPER::new( \%args );
+    my $self = $class->SUPER::new( \%args );
+    $self->add_metadata( highlight_on_warnings => 1 );
+    $self;
 }
 
 

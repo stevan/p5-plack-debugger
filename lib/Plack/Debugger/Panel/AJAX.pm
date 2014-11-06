@@ -23,7 +23,9 @@ sub new {
     };
 
     my $self = $class->SUPER::new( \%args );
-    $self->add_metadata( track_subrequests => 1 );
+    $self->add_metadata( track_subrequests     => 1 );
+    $self->add_metadata( highlight_on_warnings => 1 );
+    $self->add_metadata( highlight_on_errors   => 1 );
     $self;
 }
 
