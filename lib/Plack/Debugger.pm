@@ -77,6 +77,11 @@ sub initialize_request {
     # reset the panels, just in case ...
     $_->reset foreach @{ $self->panels };
 
+    if ( not $env->{'psgix.cleanup'} ) {
+        $_->has_cleanup && die 'Cannot use the <' . $_->title . '> debug panel with a `cleanup` phase, this Plack env does not support it'
+          foreach @{ $self->panels };
+    }
+
     # stash the request UID
     $env->{'plack.debugger.request_uid'} = $self->uid_generator->();
 
