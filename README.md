@@ -1,5 +1,3 @@
-
-
 # Plack::Debugger
 
 ## A new debugging tool for Plack web applications
@@ -60,36 +58,41 @@ use Plack::Debugger::Panel::Memory;
 use Plack::Debugger::Panel::Warnings;
 
 my $debugger = Plack::Debugger->new(
-  storage => Plack::Debugger::Storage->new(
-      data_dir     => '/tmp/debugger_panel',
-      serializer   => sub { encode_json( shift ) },
-      deserializer => sub { decode_json( shift ) },
-      filename_fmt => "%s.json",
-  ),
-  panels => [
-      Plack::Debugger::Panel::Timer->new,     
-      Plack::Debugger::Panel::AJAX->new, 
-      Plack::Debugger::Panel::Memory->new,
-      Plack::Debugger::Panel::Warnings->new   
-  ]
+    storage => Plack::Debugger::Storage->new(
+        data_dir     => '/tmp/debugger_panel',
+        serializer   => sub { encode_json( shift ) },
+        deserializer => sub { decode_json( shift ) },
+        filename_fmt => "%s.json",
+    ),
+    panels => [
+        Plack::Debugger::Panel::Timer->new,     
+        Plack::Debugger::Panel::AJAX->new, 
+        Plack::Debugger::Panel::Memory->new,
+        Plack::Debugger::Panel::Warnings->new   
+    ]
 );
 
 my $debugger_app = Plack::App::Debugger->new( debugger => $debugger );
 
 builder {
-  mount $debugger_app->base_url => $debugger_app->to_app;
+    mount $debugger_app->base_url => $debugger_app->to_app;
 
-  mount '/' => builder {
-      enable $debugger_app->make_injector_middleware;
-      enable $debugger->make_collector_middleware;
-      $app;
-  }
+    mount '/' => builder {
+        enable $debugger_app->make_injector_middleware;
+        enable $debugger->make_collector_middleware;
+        $app;
+    }
 };
 ```
 
-## Copyright and all that ...
+## Acknowledgement
 
-TODO
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
+## Copyright 
+
+Copyright 2014 (c) Stevan Little <stevan@cpan.org>
 
 
