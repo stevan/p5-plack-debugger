@@ -1,5 +1,7 @@
 package Plack::Middleware::Debugger::Injector;
 
+# ABSTRACT: Middleware for injecting content into a web request
+
 use strict;
 use warnings;
 
@@ -197,10 +199,6 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::Middleware::Debugger::Injector - Middleware for injecting content into a web request
-
 =head1 DESCRIPTION
 
 This middleware is used to inject some content into the body of a 
@@ -281,6 +279,68 @@ use case.
 
 =back
 
+=head1 METHODS
+
+=over 4
+
+=item C<new (%args)>
+
+This expects a C<content> key in C<%args> which is either a string or 
+a CODE reference that will accept a PSGI C<$env> as its only argument.
+
+=item C<call ($env)>
+
+This is just overriding the L<Plack::Middleware> C<call> method.
+
+=item C<get_content_to_insert ($env)>
+
+This will return the C<content> specified in C<new> and will just do 
+the appropriate thing depending on if the C<content> was a string or 
+a CODE reference.
+
+=item HTTP Request predicates
+
+The remaining methods deal with processing the HTTP request to 
+determine if we should inject the C<content> or not.
+
+=over 4
+
+=item C<should_ignore_status ($env, $resp)>
+
+This filters based on the HTTP status code, see the L<Status Codes>
+section above for more details.
+
+=item C<has_parent_request_uid ($env, $resp)>
+
+If the request has the HTTP header that indicates it is a sub-request
+(typically an AJAX call from the browser) then it should be injected
+into, this method determines this. See the L<Headers> section above 
+for more details.
+
+=back
+
+=item Content-Type handlers
+
+It only makes sense to inject the debugger C<content> into certain
+types of responses, these methods determine how and when to do this.
+See the L<Content-Types> section above for more details.
+
+=over 4
+
+=item C<handle_no_content_type ($env, $resp)>
+
+=item C<pass_through_content_type ($env, $resp)>
+
+=item C<handle_json_content_type ($env, $resp)>
+
+=item C<handle_html_content_type ($env, $resp)>
+
+=item C<handle_unknown_content_type ($env, $resp)>
+
+=back
+
+=back
+
 =head1 TODO
 
 The following is a list of things this module might want to try and 
@@ -294,19 +354,13 @@ features would be useful to you, please feel free to send patches.
 Injecting Javascript code into pages being viewed by browsers like Lynx 
 or tools like c<cURL> or C<wget> would not make any sense.
 
-=item Better handling of more HTTP status codes
-
-Currently we handle only a couple HTTP status codes, expanding this 
-might make sense, then again, maybe it wont, hard to tell.
-
 =back
 
-=head1 ACKNOWLEDGEMENTS
+=head1 ACKNOWLEDGMENT
 
-Thanks to Booking.com for sponsoring the writing of this module.
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut
-
-
-
 

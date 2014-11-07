@@ -1,5 +1,7 @@
 package Plack::Debugger::Panel;
 
+# ABSTRACT: Base class for the debugger panels
+
 use strict;
 use warnings;
 
@@ -230,15 +232,216 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::Debugger::Panel - Base class for the debugger panels
-
 =head1 DESCRIPTION
 
-=head1 ACKNOWLEDGEMENTS
+This is the base class for all the Plack::Debugger panels, most of the subclasses
+of this module will simply pass in a set of custom arguments to the constructor 
+and not much more. 
 
-Thanks to Booking.com for sponsoring the writing of this module.
+=head1 METHODS
+
+=over 4
+
+=item C<new (%args)>
+
+This will look in C<%args> for a number of values, technically there are no 
+required keys, but the code won't do very much if you don't give it anything.
+
+This accepts the C<title> key, which is a string to display on the debugger 
+UI, it will default to something generated with C<refaddr>, but it is better 
+to specify it.
+
+This accepts the C<subtitle> key, which is also displayed in the debugger UI
+and can be used to present additional data to the user, it defaults to an 
+empty string.
+
+This accepts the C<before>, C<after> and C<cleanup> callbacks and checks to 
+make sure that they are all CODE references.
+
+This accepts the C<formatter> key, this is a string that is passed to 
+the debugger UI via the C<metadata> to tell the UI how to render the data
+that is stored in the C<result> of the panel.
+
+This accepts the C<metadata> key, this is a HASH reference that is passed to 
+the debugging UI. The types of keys accepted are determined by the debugger 
+UI and what it handles. See the docs for C<metadata> below for information
+on those keys.
+
+=item C<title>
+
+Simple read accessor for the C<title>.
+
+=item C<subtitle>
+
+Simple read accessor for the C<subtitle>.
+
+=item C<set_subtitle ($subtitle)>
+
+Simple write accessor for the C<subtitle>.
+
+=item C<run_before_phase ($env)>
+
+This will run the C<before> callback and mark that phase as having
+been run. 
+
+=item C<run_after_phase ($env, $resp)>
+
+This will run the C<after> callback and mark that phase as having
+been run. This phase will only run if the C<before> phase has also
+been run, since it may have stashed data that is needed by this 
+phase.
+
+=item C<run_cleanup_phase ($env)>
+
+This will run the C<cleanup> callback and mark that phase as having
+been run. This phase will only run if the C<before> and C<after> 
+phases have also been run, since they may have stashed data that 
+is needed by this phase.
+
+=item C<mark_phase_as_run ($phase)>
+
+Marks a phase as having been run.
+
+=item C<mark_phase_as_not_run ($phase)>
+
+Marks a phase as having B<not> been run.
+
+=item C<have_phases_run (@phases)>
+
+This predicate will return true if all the C<@phases> specified have
+been marked as run.
+
+=item C<before>
+
+Simple read accessor for the C<before> callback.
+
+=item C<has_before>
+
+Simple predicate to determine if we have a C<before> callback.
+
+=item C<after>
+
+Simple read accessor for the C<after> callback.
+
+=item C<has_after>
+
+Simple predicate to determine if we have an C<after> callback.
+
+=item C<cleanup>
+
+Simple read accessor for the C<cleanup> callback.
+
+=item C<has_cleanup>
+
+Simple predicate to determine if we have a C<cleanup> callback.
+
+=item C<notify ($type, ?$inc)>
+
+This method can be used to mark a panel specific event as having happened 
+during the request and the user should be notified about. The C<$type> 
+argument must match one of the strings in the C<NOTIFICATION_LEVELS> constant, 
+which are basically; success, warning or error. The optional C<$inc> argument 
+can be used to mark more then one event of the specified C<$type> as 
+having happened. If C<$inc> is not specified then a value of 1 is assumed.
+
+=item C<has_notifications>
+
+Simple predicate to determine if we have any notifications.
+
+=item C<notifications>
+
+Simple read accessor for the notification data.
+
+=item C<add_metadata ($key, $data)>
+
+Sets the metadata C<$key> to C<$data>.
+
+=item C<has_metadata>
+
+Simple predicate to tell if we have any metadata available.
+
+=item C<metadata>
+
+Simple accessor for the metadata that is passed back to the debugger UI
+about this particular panel. There is no specific set of acceptable keys
+for this, but the UI currently only understands the following:
+
+=over 4
+
+=item C<formatter>
+
+This can be optionally specifed via the C<formatter> constructor parameter, 
+see the docs for C<new> for more details on this.
+
+=item C<track_subrequests>  
+
+This is used to tell the debugging UI that it should start tracking AJAX 
+requests.
+
+=item C<highlight_on_warnings>
+
+This is used to tell the debugging UI that it should highlight the UI elements
+associated with this panel when there are any C<warning> notifications.
+
+=item C<highlight_on_errors>
+
+This is used to tell the debugging UI that it should highlight the UI elements
+associated with this panel when there are any C<error> notifications.
+
+=back
+
+=item C<is_subrequest ($env)>
+
+This looks at the PSGI C<$env> to determine if the current request 
+is actually a sub-request. This is primarily used in panels to disable
+themselves in a subrequest if it is not appropriate for it to run.
+
+=item C<disable>
+
+This sets a flag to disable the panel for this particular request.
+
+=item C<is_disabled>
+
+Simple predicate to determine if the panel is disabled or not.
+
+=item C<enable>
+
+This sets a flag to enable the panel for this particular request.
+
+=item C<is_enabled>
+
+Simple predicate to determine if the panel is enabled or not.
+
+=item C<stash (?$data)>
+
+This is just a simple read/write accessor for a general purpose 
+C<stash> that can be used to pass data in between the various 
+phases of the panel.
+
+=item C<get_result>
+
+This is a read accessor for the final result data for the panel.
+
+=item C<set_result ($result)>
+
+This is a write accessor for the final result data for the panel.
+
+=item C<reset>
+
+This method will be called at the end of a request to reset all the 
+panel data so it can be ready for the next run. It will aggressively 
+delete the C<stash> and C<result> data to avoid the possibility of 
+leaking memory, after that it will result some internal book keeping
+data (enabled flag, notifications and list of phases that have been 
+run).
+
+=back
+
+=head1 ACKNOWLEDGMENT
+
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut
 

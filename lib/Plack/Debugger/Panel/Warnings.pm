@@ -1,5 +1,7 @@
 package Plack::Debugger::Panel::Warnings;
 
+# ABSTRACT: Debug panel for viewing warnings called during a request
+
 use strict;
 use warnings;
 
@@ -57,15 +59,22 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::Debugger::Panel::Warnings - Debug panel for viewing warnings called during a request
-
 =head1 DESCRIPTION
 
-=head1 ACKNOWLEDGEMENTS
+This is a L<Plack::Debugger::Panel> subclass that will capture any 
+warnings triggered during the request. 
 
-Thanks to Booking.com for sponsoring the writing of this module.
+=head2 CAVEAT
+
+This uses the C<$SIG{__WARN__}> handler to accomplish its task in 
+what is quite likely a naive way, if you care enough to fix this, 
+please take a look at the source and submit a patch.
+
+=head1 ACKNOWLEDGMENT
+
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut
 

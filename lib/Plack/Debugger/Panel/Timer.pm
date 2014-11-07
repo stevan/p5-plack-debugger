@@ -1,5 +1,7 @@
 package Plack::Debugger::Panel::Timer;
 
+# ABSTRACT: Debug panel for inspecting page generation timing
+
 use strict;
 use warnings;
 
@@ -60,14 +62,15 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::Debugger::Panel::Timer - Debug panel for inspecting page generation timing
-
 =head1 DESCRIPTION
 
-=head1 ACKNOWLEDGEMENTS
+This is a L<Plack::Debugger::Panel> subclass that will gather timing
+data during the request. 
 
-Thanks to Booking.com for sponsoring the writing of this module.
+=head1 ACKNOWLEDGMENT
+
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut

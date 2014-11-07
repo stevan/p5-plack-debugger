@@ -1,5 +1,7 @@
 package Plack::App::Debugger;
 
+# ABSTRACT: The web service backend for the debugger
+
 use strict;
 use warnings;
 
@@ -195,15 +197,53 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::App::Debugger - The web service backend for the debugger
-
 =head1 DESCRIPTION
 
-=head1 ACKNOWLEDGEMENTS
+This is the web API backend for the L<Plack::Debugger>, its primary 
+purpose is to deliver the recorded debugging data to the debugging 
+UI. It must be mounted as its own endpoint within your L<Plack> 
+application, by default it expects to be mounted at C</debugger> but
+this can be changed if needed.
 
-Thanks to Booking.com for sponsoring the writing of this module.
+This module is tightly coupled with the L<Plack::Middleware::Debugger::Injector>
+in the sense that what is injected by that middleware is the debugging
+UI that this module provides the backend for.
+
+=head1 API
+
+=over 4
+
+=item C</static/*>
+
+This serves the static resources (Javascript and CSS) needed by the
+debugging UI as well as the debugging UI itself.
+
+=item C</$request_uid>
+
+This will return the data associated with the specified C<$request_uid>
+as a single JSON object.
+
+=item C</$request_uid/subrequests>
+
+This will return all the subrequest data associated with the specified 
+C<$request_uid> as a JSON array or JSON objects.
+
+If the C<X-Plack-Debugger-SubRequests-Modified-Since> header is set, 
+then it will only return the subset of subrequest data that has happened
+since the epoch specified in this header.
+
+=item C</$request_uid/subrequests/$subrequest_uid>
+
+This will return the specific subrequest data associated with the  
+C<$request_uid> and C<$subrequest_uid> as a JSON object.
+
+=back
+
+=head1 ACKNOWLEDGMENT
+
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut
 

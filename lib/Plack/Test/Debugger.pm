@@ -1,5 +1,7 @@
 package Plack::Test::Debugger;
 
+# ABSTRACT: A subclass of Plack::Test suitable for testing the debugger
+
 use strict;
 use warnings;
 
@@ -24,15 +26,18 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::Test::Debugger - A subclass of Plack::Test suitable for testing the debugger
-
 =head1 DESCRIPTION
 
-=head1 ACKNOWLEDGEMENTS
+This module simply extends the L<Plack::Test> module to set the 
+C<PLACK_TEST_IMPL> variable in C<%ENV> such that L<Plack::Test>
+will use the L<Plack::Test::MockHTTP::WithCleanupHandlers> to 
+run all the tests. See the module for more information.
 
-Thanks to Booking.com for sponsoring the writing of this module.
+=head1 ACKNOWLEDGMENT
+
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut
 

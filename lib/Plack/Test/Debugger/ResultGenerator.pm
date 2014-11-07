@@ -1,5 +1,7 @@
 package Plack::Test::Debugger::ResultGenerator;
 
+# ABSTRACT: Test utility module for generating dummy results
+
 use strict;
 use warnings;
 
@@ -71,15 +73,16 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::Test::Debugger::ResultGenerator - Test utility module for generating dummy results
-
 =head1 DESCRIPTION
 
-=head1 ACKNOWLEDGEMENTS
+This is just a simple module used in the test suite to create some 
+JSON files similar to the files the Debugger generates.
 
-Thanks to Booking.com for sponsoring the writing of this module.
+=head1 ACKNOWLEDGMENT
+
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut
 

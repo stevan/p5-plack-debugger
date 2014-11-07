@@ -1,5 +1,7 @@
 package Plack::Debugger;
 
+# ABSTRACT: Debugging tool for Plack web applications
+
 use strict;
 use warnings;
 
@@ -211,10 +213,6 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::Debugger - Debugging tool for Plack web applications
-
 =head1 SYNOPSIS
 
   use Plack::Builder;
@@ -348,9 +346,11 @@ If you need to support older versions of jQuery, patches are welcome,
 but the author reserves the right to draw a line as to how old is 
 too old. 
 
-=head1 ACKNOWLEDGEMENTS
+=head1 ACKNOWLEDGMENT
 
-Thanks to Booking.com for sponsoring the writing of this module.
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut
 

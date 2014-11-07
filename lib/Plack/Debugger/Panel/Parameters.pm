@@ -1,5 +1,7 @@
 package Plack::Debugger::Panel::Parameters;
 
+# ABSTRACT: Debug panel for inspecting HTTP request parameters
+
 use strict;
 use warnings;
 
@@ -41,14 +43,18 @@ __END__
 
 =pod
 
-=head1 NAME
-
-Plack::Debugger::Panel::Parameters - Debug panel for inspecting HTTP request parameters
-
 =head1 DESCRIPTION
 
-=head1 ACKNOWLEDGEMENTS
+This is a L<Plack::Debugger::Panel> subclass that will display the 
+various parameters of the given PSGI request. It will display the 
+following; GET query parameters, request cookies, request headers 
+and POST parameters. If there is a C<psgix.session>, it will display
+that as well.
 
-Thanks to Booking.com for sponsoring the writing of this module.
+=head1 ACKNOWLEDGMENT
+
+This module was originally developed for Booking.com. With approval 
+from Booking.com, this module was generalized and published on CPAN, 
+for which the author would like to express their gratitude.
 
 =cut
