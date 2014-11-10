@@ -28,6 +28,9 @@ my $JSON     = JSON::XS->new->utf8->pretty;
 my $DATA_DIR     = dir('./t/001-tmp-basic/');
 my $DEBUGGER_URL = '/debugger';
 
+# create tmp dir if needed
+mkdir $DATA_DIR unless -e $DATA_DIR;
+
 # cleanup tmp dir in the case of a bad run
 { ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 

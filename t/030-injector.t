@@ -20,9 +20,11 @@ BEGIN {
     use_ok('Plack::App::Debugger');    
 }
 
-
 my $JSON     = JSON::XS->new->utf8->pretty;
 my $DATA_DIR = dir('./t/030-tmp-injector/');
+
+# create tmp dir if needed
+mkdir $DATA_DIR unless -e $DATA_DIR;
 
 # cleanup tmp dir
 { ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }

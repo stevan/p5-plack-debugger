@@ -28,6 +28,9 @@ BEGIN {
 my $DATA_DIR = dir('./t/050-tmp-app-debugger/');
 my $JSON     = $Plack::Test::Debugger::ResultGenerator::JSON;
 
+# create tmp dir if needed
+mkdir $DATA_DIR unless -e $DATA_DIR;
+
 # cleanup tmp dir
 { ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 

@@ -16,6 +16,9 @@ BEGIN {
 my $JSON     = JSON::XS->new->utf8->pretty;
 my $DATA_DIR = dir('./t/020-tmp-storage/');
 
+# create tmp dir if needed
+mkdir $DATA_DIR unless -e $DATA_DIR;
+
 # cleanup tmp dir in the case of a bad run
 { ((-f $_ && $_->remove) || (-d $_ && $_->rmtree)) foreach $DATA_DIR->children( no_hidden => 1 ) }
 
