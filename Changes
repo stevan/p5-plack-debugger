@@ -1,4 +1,8 @@
 Revision history for Perl extension Plack::Debugger
 
-0.01 ...
-    - First release to an unsuspecting world
+0.01 Monday, 10 November 2014
+    - First release to an unsuspecting world (well, 
+      not really unsuspecting, I promised this would
+      go out at the London Perl Workshop then took 
+      two days to do it, so really it is to a suspecting
+      world, but that doesn't sound as fun).
