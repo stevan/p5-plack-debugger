@@ -197,8 +197,6 @@ sub call {
 
 __END__
 
-=pod
-
 =head1 DESCRIPTION
 
 This middleware is used to inject some content into the body of a 
@@ -362,5 +360,5 @@ This module was originally developed for Booking.com. With approval
 from Booking.com, this module was generalized and published on CPAN, 
 for which the authors would like to express their gratitude.
 
-=cut
+
 

@@ -51,8 +51,6 @@ sub format_body {
 
 __END__
 
-=pod
-
 =head1 DESCRIPTION
 
 This is a L<Plack::Debugger::Panel> subclass that will display the 
@@ -64,4 +62,3 @@ This module was originally developed for Booking.com. With approval
 from Booking.com, this module was generalized and published on CPAN, 
 for which the authors would like to express their gratitude.
 
-=cut

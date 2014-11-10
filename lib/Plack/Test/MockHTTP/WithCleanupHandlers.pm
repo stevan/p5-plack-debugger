@@ -67,8 +67,6 @@ sub request {
 
 __END__
 
-=pod
-
 =head1 DESCRIPTION
 
 This is just a simple subclass of the L<Plack::Test::MockHTTP> 
@@ -79,7 +77,4 @@ to add support for the C<psgix.cleanup.handlers> PSGI extension.
 This module was originally developed for Booking.com. With approval 
 from Booking.com, this module was generalized and published on CPAN, 
 for which the authors would like to express their gratitude.
-
-=cut
-
 

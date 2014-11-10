@@ -230,8 +230,6 @@ sub reset {
 
 __END__
 
-=pod
-
 =head1 DESCRIPTION
 
 This is the base class for all the Plack::Debugger panels, most of the subclasses
@@ -443,7 +441,7 @@ This module was originally developed for Booking.com. With approval
 from Booking.com, this module was generalized and published on CPAN, 
 for which the authors would like to express their gratitude.
 
-=cut
+
 
 
 

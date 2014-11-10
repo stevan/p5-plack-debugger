@@ -71,8 +71,6 @@ sub create_child {
 
 __END__
 
-=pod
-
 =head1 DESCRIPTION
 
 This is just a simple module used in the test suite to create some 
@@ -84,5 +82,5 @@ This module was originally developed for Booking.com. With approval
 from Booking.com, this module was generalized and published on CPAN, 
 for which the authors would like to express their gratitude.
 
-=cut
+
 
