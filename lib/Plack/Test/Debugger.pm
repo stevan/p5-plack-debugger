@@ -37,7 +37,7 @@ run all the tests. See the module for more information.
 
 This module was originally developed for Booking.com. With approval 
 from Booking.com, this module was generalized and published on CPAN, 
-for which the author would like to express their gratitude.
+for which the authors would like to express their gratitude.
 
 =cut
 
