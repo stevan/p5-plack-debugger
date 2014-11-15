@@ -9,6 +9,9 @@ Plack.Debugger = function () {
     }
 }
 
+Plack.Debugger.VERSION   = '0.02';
+Plack.Debugger.AUTHORITY = 'cpan:STEVAN';
+
 Plack.Debugger.MAX_RETRIES              = 5;
 Plack.Debugger.RETRY_BACKOFF_MULTIPLIER = 1000;
 

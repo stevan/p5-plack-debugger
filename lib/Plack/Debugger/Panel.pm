@@ -8,7 +8,7 @@ use warnings;
 use Try::Tiny;
 use Scalar::Util qw[ refaddr ];
 
-our $VERSION   = '0.01';
+our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use constant DEBUGGER_PHASES     => [ qw[ before after cleanup  ] ];

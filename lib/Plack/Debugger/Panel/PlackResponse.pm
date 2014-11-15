@@ -8,7 +8,7 @@ use warnings;
 use HTTP::Status qw[ is_error status_message ];
 use Scalar::Util qw[ blessed ];
 
-our $VERSION   = '0.01';
+our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use parent 'Plack::Debugger::Panel';

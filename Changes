@@ -1,5 +1,9 @@
 Revision history for Perl extension Plack::Debugger
 
+0.02
+    - fixing the missing Test::Warn dependency
+    - adding VERSION and AUTHORITY to the JS file
+
 0.01 Monday, 10 November 2014
     - First release to an unsuspecting world (well, 
       not really unsuspecting, I promised this would
