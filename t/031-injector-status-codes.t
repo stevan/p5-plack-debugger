@@ -100,19 +100,19 @@ test_psgi($app, sub {
         }
 
         # Test 2xx success
-        foreach my $status ( 200, 201, 202, 203, 205, 206 ) {
+        foreach my $status ( 200, 201, 203, 205, 206 ) {
             my $resp = $cb->(GET "/ok/$status");  
             is($resp->code, $status, '... got the status (' . $status . ') we expected');
             isnt($resp->headers->header('Content-Length'), 37, '... got the expected expanded Content-Length');
             like(
                 $resp->content, 
-                qr!^<html><body>HELLO WORLD(.*)</body></html>$!, 
+                qr!^<html><body>HELLO WORLD(.+)</body></html>$!, 
                 '... got the right content'
             );
         }
 
-        # Test 204 success w/ no-content
-        foreach my $status ( 204 ) {
+        # Test 204 success & 202 accepted w/ no-content
+        foreach my $status ( 202, 204 ) {
             my $resp = $cb->(GET "/ok/$status");  
             is($resp->code, $status, '... got the status (' . $status . ') we expected');
             is($resp->headers->header('Content-Length'), 37, '... got the expected un-expanded Content-Length');

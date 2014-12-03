@@ -45,6 +45,9 @@ sub should_ignore_status {
     # if it is in the 1xx - Informational range, we can ignore it 
     ($resp->[0] < 200)
         ||
+    # within the 2xx - Success range we have the 202 Accepted, which is basically HTTP for "meh", so we should ignore it
+    ($resp->[0] == 202)        
+        ||
     # within the 2xx - Success range we have the 204 No Content, which we should ignore 
     ($resp->[0] == 204)
         ||
