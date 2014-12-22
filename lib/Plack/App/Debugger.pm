@@ -77,7 +77,7 @@ sub make_injector_middleware {
         my $env = shift;
         die "Unable to locate the debugger request-uid, cannot inject the debugger application"
             unless exists $env->{'plack.debugger.request_uid'};
-        sprintf '<script id="plack-debugger-js-init" type="text/javascript" src="%s#%s"></script>' => ( 
+        sprintf '<script id="plack-debugger-js-init" type="text/javascript" src="%s" data-uid="%s"></script>' => ( 
             $js_url, 
             $env->{'plack.debugger.request_uid'} 
         );

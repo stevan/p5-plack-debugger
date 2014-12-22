@@ -16,13 +16,13 @@ Plack.Debugger.MAX_RETRIES              = 5;
 Plack.Debugger.RETRY_BACKOFF_MULTIPLIER = 1000;
 
 Plack.Debugger.prototype._init_config = function () {
-    var init_url = document.getElementById('plack-debugger-js-init').src;
+    var script = document.getElementById('plack-debugger-js-init');
 
     var config = {
-        'current_request_uid' : init_url.split("#")[1]
+        'current_request_uid' : script.getAttribute('data-uid')
     };
 
-    var url_parts = init_url.split('/'); 
+    var url_parts = script.src.split('/');
     url_parts.pop(); config.static_js_url = url_parts.join('/');
     url_parts.pop(); config.static_url    = url_parts.join('/');
     url_parts.pop(); config.root_url      = url_parts.join('/');
