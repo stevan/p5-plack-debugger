@@ -25,7 +25,11 @@ sub new {
         $self->set_result([
             'Query String' => $r->query_parameters->as_hashref_mixed,
             'Cookies'      => $r->cookies,
-            'Headers'      => { map { $_ => $r->headers->header( $_ ) } $r->headers->header_field_names },
+            'Headers'      => {
+                map {
+                    $_ => @{[$r->headers->header($_)]} > 1 ? [$r->headers->header($_)] : $r->headers->header($_)
+                } $r->headers->header_field_names
+            },
             'Body Content' => $r->body_parameters->as_hashref_mixed,
             ($r->env->{'psgix.session'} 
                 ? ('Session' => $r->env->{'psgix.session'})
