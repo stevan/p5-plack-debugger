@@ -44,6 +44,7 @@ sub new {
     $args{'static_url'}       ||= '/static';
     $args{'js_init_url'}      ||= '/js/plack-debugger.js';
     $args{'static_asset_dir'} ||= try { File::ShareDir::dist_dir('Plack-Debugger') } || 'share';
+    $args{'is_enabled'}       ||= 1;
 
     die "You must pass a reference to a 'Plack::Debugger' instance"
         unless blessed $args{'debugger'} 
@@ -66,6 +67,10 @@ sub base_url         { (shift)->{'base_url'}         } # the base URL the debugg
 sub static_url       { (shift)->{'static_url'}       } # the URL root from where the debugger can load static resources
 sub js_init_url      { (shift)->{'js_init_url'}      } # the JS application initializer URL
 sub static_asset_dir { (shift)->{'static_asset_dir'} } # the directory that the static assets are served from (optional)
+sub is_enabled       { (shift)->{'is_enabled'}       } # the status of the debugger
+
+sub disable { (shift)->{'is_enabled'} = 0 }
+sub enable  { (shift)->{'is_enabled'} = 1 }
 
 # create an injector middleware for this debugger application
 
@@ -119,6 +124,16 @@ sub validate_and_prepare_request {
     # this only supports GET requests    
     return (undef, $self->_create_error_response( 405 => 'Method Not Allowed' ))
             if $r->method ne 'GET';
+
+    if ((index $r->path_info, 'controls/off') != -1) {
+        $self->disable;
+        return $req;
+    }
+
+    if ((index $r->path_info, 'controls/on') != -1) {
+        $self->enable;
+        return $req;
+    }
 
     my ($request_uid, $get_subrequests, $get_specific_subrequest) = grep { $_ } split '/' => $r->path_info;
 
