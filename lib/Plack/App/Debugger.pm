@@ -125,16 +125,6 @@ sub validate_and_prepare_request {
     return (undef, $self->_create_error_response( 405 => 'Method Not Allowed' ))
             if $r->method ne 'GET';
 
-    if ((index $r->path_info, 'controls/off') != -1) {
-        $self->disable;
-        return $req;
-    }
-
-    if ((index $r->path_info, 'controls/on') != -1) {
-        $self->enable;
-        return $req;
-    }
-
     my ($request_uid, $get_subrequests, $get_specific_subrequest) = grep { $_ } split '/' => $r->path_info;
 
     # we need to have a request-id at a minimum
@@ -159,6 +149,13 @@ sub validate_and_prepare_request {
     # handle any special headers 
     if ( my $epoch = $r->header('X-Plack-Debugger-SubRequests-Modified-Since') ) {
         $req->{'all_subrequests'}->{'modified_since'} = $epoch;
+    }
+
+    if ((index $r->path_info, 'controls/off') != -1) {
+        $self->disable;
+    }
+    elsif ((index $r->path_info, 'controls/on') != -1) {
+        $self->enable;
     }
 
     return ($req, undef);
